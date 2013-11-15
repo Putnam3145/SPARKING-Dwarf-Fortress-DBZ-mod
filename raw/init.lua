@@ -125,7 +125,6 @@ end
 
 function monthlyCheck()
     applySuperSaiyanGodSyndrome()
-    checkForMegabeastAttack()
     dfhack.timeout(1,'months',monthlyCheck)
 end
 
@@ -365,6 +364,17 @@ function claimSite(reaction,unit,input_items,input_reagents,output_items,call_na
     call_native.value=false
 end
 events.registerReaction("LUA_HOOK_MAKE_SITE3x3",claimSite)
+
+function getTotalZenkai(unit)
+    for k,v in ipairs(unit.status.souls) do
+        if soul.name.first_name='zenkai' then return soul.unk2 end
+    end
+    local newSoul=df.unit_soul:new()
+    newSoul.name.first_name='zenkai'
+    soul.unk2=0
+    unit.status.souls:insert('#',newSoul)
+    return newSoul.unk2
+end
 
 plug=require"plugins.dfusion.friendship"
 plug.Friendship:install{"SAIYAN","SAIYAN","SAIBAMEN_DB","FRIEZA","MAJIN_BOO","ANDROID_DB","HUMAN","DWARF","ELF","NAMEK"}
