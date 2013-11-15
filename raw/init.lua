@@ -396,7 +396,7 @@ function checkIfUnitStillGravelyInjuredForZenkai(unit)
         dfhack.timeout(50,'ticks',checkIfUnitStillGravelyInjuredForZenkai(unit))
     end
 end
-
+--event seems a bit flagrant but whatever
 dbEvents.onUnitGravelyInjured.zenkai=function(unit)
     if df.creature_raw.find(unit.race).creature_id~="SAIYAN" or unit.body.blood_count>1000 or dbEvents.unitHasZenkaiAlready[unit.id] then return false end
     local zenkaiMultiplier=math.log(((unit.body.blood_max/10>1000 and 1000 or unit.body.blood_max/10)/unit.body.blood_count)*math.exp(1))
@@ -418,7 +418,6 @@ function checkEveryUnitRegularlyForEvents()
     end
     dfhack.timeout(120,'ticks',checkEveryUnitRegularlyForEvents)
 end
-
 dfhack.timeout(2,'ticks',checkEveryUnitRegularlyForEvents)
 
 plug=require"plugins.dfusion.friendship"
