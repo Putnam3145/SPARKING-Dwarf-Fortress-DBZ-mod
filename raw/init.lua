@@ -100,7 +100,7 @@ local function applySuperSaiyanGodSyndrome()
         local superSaiyanGod = unitWithHighestPowerLevel()
         if superSaiyanGod and getPowerLevel(superSaiyanGod) > 1000000 and superSaiyanCount > 5 then assignSyndrome(superSaiyanGod,superSaiyanGodSyndrome()) end
     elseif df.global.gamemode==1 then
-        assignSyndrome(df.global.world.units.active[0],superSaiyanGodSyndrome())
+        dfhack.timeout(3,'ticks',function()assignSyndrome(df.global.world.units.active[0],superSaiyanGodSyndrome())end)
     end
 end
 
@@ -125,7 +125,6 @@ end
 
 function monthlyCheck()
     applySuperSaiyanGodSyndrome()
-    checkForMegabeastAttack()
     dfhack.timeout(1,'months',monthlyCheck)
 end
 
@@ -234,8 +233,8 @@ local function combineBody(unit1,unit2)
         if attribute.value < 0 or attribute.value > 2^31-1 then attribute.value = 2^30 end
         if attribute.max_value < 0 or attribute.max_value > 2^31-1 then attribute.max_value = 2^31-1 end
     end
-    for k,tissue in ipairs(firstBody.physical_attr_tissues) do
-        tissue = tissue + secondBody.physical_attr_tissues[k]
+    for k,tissue in ipairs(firstBody.size_info) do
+        tissue = tissue + secondBody.size_info[k]
     end
     for k,modifier in ipairs(firstAppearance.body_modifiers) do
         if #secondAppearance.body_modifiers>k+1 then modifier = math.floor((modifier+secondAppearance.body_modifiers[k])/2) end
@@ -365,6 +364,62 @@ function claimSite(reaction,unit,input_items,input_reagents,output_items,call_na
     call_native.value=false
 end
 events.registerReaction("LUA_HOOK_MAKE_SITE3x3",claimSite)
+
+local dbEvents={
+    onUnitGravelyInjured=dfhack.event.new()
+}
+    --this part commented out because, tbh, it's a bit hard to do and I need to get something out soon.
+--[[individualUnitsToPerformChecksOn={}
+    initiateChecks=function()
+        local delayTicks=1
+        for k,v in ipairs(df.global.world.units.active) do
+            if not individualUnitsToPerformChecksOn[unit.id] then
+                individualUnitsToPerformChecksOn[unit.id]={}
+                individualUnitsToPerformChecksOn[unit.id].id=unit.id --oy
+                individualUnitsToPerformChecksOn[unit.id]=function(self)
+                    local unit=df.unit.find(self.id)
+                    dbEvents.onUnitGravelyInjured(unit)
+                end
+            end
+        end
+    end]]
+
+dbEvents.unitHasZenkaiAlready={}
+	
+function dbRound(num)
+    return num%1<.5 and math.floor(num) or math.ceil(num)
+end
+
+function checkIfUnitStillGravelyInjuredForZenkai(unit)
+    if unit.body.blood_count>unit.body.blood_max/10 or unit.body.blood_count>1000 then
+        dbEvents.unitHasZenkaiAlready[unit.id]=false
+    else
+        dfhack.timeout(50,'ticks',checkIfUnitStillGravelyInjuredForZenkai(unit))
+    end
+end
+--event seems a bit flagrant but whatever
+dbEvents.onUnitGravelyInjured.zenkai=function(unit)
+    if df.creature_raw.find(unit.race).creature_id~="SAIYAN" or unit.body.blood_count>1000 or dbEvents.unitHasZenkaiAlready[unit.id] then return false end
+    local zenkaiMultiplier=math.log(((unit.body.blood_max/10>1000 and 1000 or unit.body.blood_max/10)/unit.body.blood_count)*math.exp(1))
+    unit.body.blood_max=dbRound(unit.body.blood_max*zenkaiMultiplier)
+    for k,v in ipairs(unit.body.size_info) do
+        v=dbRound(v*zenkaiMultiplier)
+    end
+    for k,v in ipairs(unit.physical_attrs) do
+        v.value=dbRound(v*zenkaiMultiplier)
+        v.max_value=dbRound(v*zenkaiMultiplier)
+    end
+    dbEvents.unitHasZenkaiAlready[unit.id]=true
+    dfhack.timeout(50,'ticks',function() checkIfUnitStillGravelyInjuredForZenkai(unit) end)
+end
+
+function checkEveryUnitRegularlyForEvents()
+    for k,v in ipairs(df.global.world.units.active) do
+        if v.body.blood_count<v.body.blood_max/10 then dbEvents.onUnitGravelyInjured(unit) end
+    end
+    dfhack.timeout(120,'ticks',checkEveryUnitRegularlyForEvents)
+end
+dfhack.timeout(2,'ticks',checkEveryUnitRegularlyForEvents)
 
 plug=require"plugins.dfusion.friendship"
 plug.Friendship:install{"SAIYAN","SAIYAN","SAIBAMEN_DB","FRIEZA","MAJIN_BOO","ANDROID_DB","HUMAN","DWARF","ELF","NAMEK"}
