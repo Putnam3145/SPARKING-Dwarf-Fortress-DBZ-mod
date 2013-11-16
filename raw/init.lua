@@ -100,7 +100,7 @@ local function applySuperSaiyanGodSyndrome()
         local superSaiyanGod = unitWithHighestPowerLevel()
         if superSaiyanGod and getPowerLevel(superSaiyanGod) > 1000000 and superSaiyanCount > 5 then assignSyndrome(superSaiyanGod,superSaiyanGodSyndrome()) end
     elseif df.global.gamemode==1 then
-        assignSyndrome(df.global.world.units.active[0],superSaiyanGodSyndrome())
+        dfhack.timeout(3,'ticks',function()assignSyndrome(df.global.world.units.active[0],superSaiyanGodSyndrome())end)
     end
 end
 
@@ -367,6 +367,7 @@ events.registerReaction("LUA_HOOK_MAKE_SITE3x3",claimSite)
 
 local dbEvents={
     onUnitGravelyInjured=dfhack.event.new()
+}
     --this part commented out because, tbh, it's a bit hard to do and I need to get something out soon.
 --[[individualUnitsToPerformChecksOn={}
     initiateChecks=function()
@@ -382,9 +383,9 @@ local dbEvents={
             end
         end
     end]]
-    unitHasZenkaiAlready={}
-}
 
+dbEvents.unitHasZenkaiAlready={}
+	
 function dbRound(num)
     return num%1<.5 and math.floor(num) or math.ceil(num)
 end
@@ -414,7 +415,7 @@ end
 
 function checkEveryUnitRegularlyForEvents()
     for k,v in ipairs(df.global.world.units.active) do
-        if v.blood_count<v.blood_max/10 then dbEvents.onUnitGravelyInjured(unit) end
+        if v.body.blood_count<v.body.blood_max/10 then dbEvents.onUnitGravelyInjured(unit) end
     end
     dfhack.timeout(120,'ticks',checkEveryUnitRegularlyForEvents)
 end

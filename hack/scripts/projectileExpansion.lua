@@ -205,7 +205,7 @@ events.onProjItemCheckImpact.expansion=function(projectile)
                 end
             if projectileExpansionFlags.matCausesSyndrome then assignSyndrome(unit,syndrome) end
         end
-        if projectileExpansionFlags.matDisappearsOnHit then dfhack.items.remove(projectile) end
+--        if projectileExpansionFlags.matDisappearsOnHit then dfhack.items.remove(projectile) end
     end
     return true
 end
