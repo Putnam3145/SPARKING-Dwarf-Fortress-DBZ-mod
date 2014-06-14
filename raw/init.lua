@@ -30,7 +30,7 @@ local function getPowerLevel(unit)
     local kinestheticsense = unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value*1.1
     local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value/1.5
     local agility = unit.body.physical_attrs.AGILITY.value*2
-    local bodysize = (unit.body.blood_max/75)^2
+    local bodysize = (unit.body.size_info.size_cur/75)^2
     local powerlevel = bodysize+agility+strength+endurance+toughness+spatialsense+kinestheticsense+willpower
     powerlevel=powerlevel+getCombatSkills(unit)
     local superSaiyanLevel=getSuperSaiyanLevel(unit)
@@ -73,15 +73,15 @@ local function combinedSaiyanPowerLevel()
     return totalPowerLevel
 end
 
-local function assignSyndrome(target,syn_id) --taken straight from here, but edited so I can understand it better: https://gist.github.com/warmist/4061959/
+local function assignSyndrome(target,syn_id) --taken straight from here, but edited so I can understand it better: https://gist.github.com/warmist/4061959/. Also implemented expwnent's changes for compatibility with syndromeTrigger.
     if target==nil then
-        qerror("Not a valid target") --this probably won't happen :V
+        return nil
     end
     local newSyndrome=df.unit_syndrome:new()
     local target_syndrome=df.syndrome.find(syn_id)
     newSyndrome.type=target_syndrome.id
-    --newSyndrome.year=
-    --newSyndrome.year_time=
+    newSyndrome.year=df.global.cur_year
+    newSyndrome.year_time=df.global.cur_year_tick
     newSyndrome.ticks=1
     newSyndrome.unk1=1
     for k,v in ipairs(target_syndrome.ce) do
@@ -91,16 +91,16 @@ local function assignSyndrome(target,syn_id) --taken straight from here, but edi
         newSyndrome.symptoms:insert("#",sympt)
     end
     target.syndromes.active:insert("#",newSyndrome)
+    return true
 end
 
 local function applySuperSaiyanGodSyndrome()
     if df.global.gamemode==0 then
-        local superSaiyanCount = getSuperSaiyanCount()
-        if superSaiyanCount==0 then return nil end
+        if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
-        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 1000000 and superSaiyanCount > 5 then assignSyndrome(superSaiyanGod,superSaiyanGodSyndrome()) end
+        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 1000000 then assignSyndrome(superSaiyanGod,superSaiyanGodSyndrome()) end
     elseif df.global.gamemode==1 then
-        dfhack.timeout(3,'ticks',function()assignSyndrome(df.global.world.units.active[0],superSaiyanGodSyndrome())end)
+        dfhack.timeout(3,'ticks',function() assignSyndrome(df.global.world.units.active[0],superSaiyanGodSyndrome()) end)
     end
 end
 
@@ -392,7 +392,7 @@ end
 
 function checkIfUnitStillGravelyInjuredForZenkai(unit)
     if unit.body.blood_count>unit.body.blood_max/10 or unit.body.blood_count>1000 then
-        dbEvents.unitHasZenkaiAlready[unit.id]=false
+        dbEvents.unitHasZenkaiAlready[unit.id]=nil
     else
         dfhack.timeout(50,'ticks',checkIfUnitStillGravelyInjuredForZenkai(unit))
     end
