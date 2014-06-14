@@ -145,7 +145,8 @@ tweak military-color-assigned
 # remove inverse dependency of squad training speed on unit list size and use more sparring
 tweak military-training
 
-cls
+syndromeTrigger 1
+enable autoSyndrome
 
 ###########
 # Scripts #
@@ -157,7 +158,7 @@ soundsense-season
 # patch the material objects in memory to fix cloth stockpiles
 fix/cloth-stockpile enable
 
-#allow Beers/Birus (and others) to have better ki blasts
+#allow Beers (and others) to have better ki blasts
 projectileExpansion
 
 #######################################################
@@ -167,18 +168,20 @@ projectileExpansion
 #######################################################
 
 # Bug 5994 - items teleported when removing a construction
-#binpatch apply deconstruct-teleport
-#binpatch apply deconstruct-heapfall
+binpatch apply deconstruct-teleport
+binpatch apply deconstruct-heapfall
 
 # Bug 4406 - hospital overstocking on all items
-#binpatch apply hospital-overstocking
+binpatch apply hospital-overstocking
 
 # Bug 808 - custom reactions completely using up all of their reagents
-#binpatch apply custom-reagent-size
+binpatch apply custom-reagent-size
 
 # Bug 4530 - marksdwarves not training when quiver full of combat-only ammo
-#binpatch apply training-ammo
+binpatch apply training-ammo
 
 # Bug 1445 - weapon racks broken, armor stand capacity too low
-#binpatch apply weaponrack-unassign
-#binpatch apply armorstand-capacity
+binpatch apply weaponrack-unassign
+binpatch apply armorstand-capacity
+
+cls
