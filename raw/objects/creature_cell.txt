@@ -5,7 +5,7 @@ creature_cell
 		[DESCRIPTION:A bionic android, called "Cell" by some. It contains the DNA and abilities of the universe's greatest fighters. It can only be killed through the destruction of its nucleus.]'
 		[MEGABEAST][ITEMCORPSE:TOOL:DRAGONBALL:NONE:NONE]
 		[DIFFICULTY:15]
-		[ATTACK_TRIGGER:20:0:0] Why so low? Spoilers.
+		[ATTACK_TRIGGER:100:5000:50000] Why so low? Spoilers.
 		[CREATURE_TILE:'C']
 		[COLOR:2:0:1]
 		[CASTE_NAME:bionic android:bionic androids:android]
@@ -71,6 +71,7 @@ creature_cell
 			[ATTACK_VERB:sting:stings]
 			[ATTACK_CONTACT_PERC:5]
 			[ATTACK_PENETRATION_PERC:100]
+			[ATTACK_PREPARE_AND_RECOVER:6:5]
 			[ATTACK_FLAG_EDGE]
 			[ATTACK_PRIORITY:SECOND]
 			[SPECIALATTACK_SUCK_BLOOD:80:100]
@@ -80,7 +81,7 @@ creature_cell
 		[LAIR_HUNTER_SPEECH:cell.txt]
 		[HOMEOTHERM:10067]
 		[SWIMS_LEARNED]
-		[SWIM_SPEED:2500]
+		[SWIM_SPEED:2500] not sure if still a token in 2014
 		[CASTE:DEFAULT_ONE]
 			[NO_GENDER]
 			[CAN_DO_INTERACTION:NAMEK_REGENERATE]
@@ -144,7 +145,6 @@ creature_cell
 			[CDI:TARGET_RANGE:A:1]
 			[CDI:MAX_TARGET_NUMBER:A:1]
 			[CDI:WAIT_PERIOD:200]
-				
 [CREATURE:CELL_CORPSE_EXPLODE_DBZ] narhiril's. i've edited it a bit.
 	[DESCRIPTION:This corpse is being absorbed!]
 	[NAME:partially absorbed corpse:partially absorbed corpses:partially absorbed]
