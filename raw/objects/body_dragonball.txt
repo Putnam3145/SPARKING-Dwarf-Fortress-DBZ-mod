@@ -13,6 +13,8 @@ body_dragonball
 			[CON:UB]
 			[CATEGORY:BODY_LOWER]
 			[DEFAULT_RELSIZE:1000]
+		[BP:NK:neck:STP][CON:UB][CATEGORY:NECK]
+			[DEFAULT_RELSIZE:150]
 		[BP:RUA:right upper arm:STP]
 			[CON:UB]
 			[LIMB]

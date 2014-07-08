@@ -81,7 +81,7 @@ creature_cell
 		[LAIR_HUNTER_SPEECH:cell.txt]
 		[HOMEOTHERM:10067]
 		[SWIMS_LEARNED]
-		[SWIM_SPEED:2500] not sure if still a token in 2014
+
 		[CASTE:DEFAULT_ONE]
 			[NO_GENDER]
 			[CAN_DO_INTERACTION:NAMEK_REGENERATE]
