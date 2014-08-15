@@ -145,9 +145,6 @@ tweak military-color-assigned
 # remove inverse dependency of squad training speed on unit list size and use more sparring
 tweak military-training
 
-syndromeTrigger 1
-enable autoSyndrome
-
 ###########
 # Scripts #
 ###########
@@ -159,30 +156,11 @@ soundsense-season
 fix/cloth-stockpile enable
 
 #allow Beers (and others) to have better ki blasts
-modtools/projectile-trigger -material KI_POWERFUL -command [ -spawn-flow -material KI -location [\LOCATION] -flowtype MaterialDust ]
-modtools/projectile-trigger -material KI_EXTREME -command [ -spawn-flow -location [\LOCATION] -flowtype Dragonfire ]
 
 #######################################################
 # Apply binary patches at runtime                     #
 #                                                     #
 # Commented out by default; enable the ones you want. #
 #######################################################
-
-# Bug 5994 - items teleported when removing a construction
-binpatch apply deconstruct-teleport
-binpatch apply deconstruct-heapfall
-
-# Bug 4406 - hospital overstocking on all items
-binpatch apply hospital-overstocking
-
-# Bug 808 - custom reactions completely using up all of their reagents
-binpatch apply custom-reagent-size
-
-# Bug 4530 - marksdwarves not training when quiver full of combat-only ammo
-binpatch apply training-ammo
-
-# Bug 1445 - weapon racks broken, armor stand capacity too low
-binpatch apply weaponrack-unassign
-binpatch apply armorstand-capacity
 
 cls
