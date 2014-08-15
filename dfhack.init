@@ -159,7 +159,8 @@ soundsense-season
 fix/cloth-stockpile enable
 
 #allow Beers (and others) to have better ki blasts
-projectileExpansion
+modtools/projectile-trigger -material KI_POWERFUL -command [ -spawn-flow -material KI -location [\LOCATION] -flowtype MaterialDust ]
+modtools/projectile-trigger -material KI_EXTREME -command [ -spawn-flow -location [\LOCATION] -flowtype Dragonfire ]
 
 #######################################################
 # Apply binary patches at runtime                     #
