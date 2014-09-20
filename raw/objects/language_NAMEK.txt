@@ -2167,7 +2167,7 @@ language_NAMEK
 		[T_WORD:YEARLING:biopran]
 		[T_WORD:YELL:hulcint]
 		[T_WORD:YELLOW:rerina]
-		[T_WORD:YOR:armoral]
+		T_WORD:YOR:armoral
 		[T_WORD:YOUNG:coni]
 		[T_WORD:YOUTH:conicon]
 		[T_WORD:ZEAL:bulucco]

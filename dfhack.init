@@ -155,7 +155,7 @@ soundsense-season
 # patch the material objects in memory to fix cloth stockpiles
 fix/cloth-stockpile enable
 
-#allow Beers (and others) to have better ki blasts
+modtools/interaction-trigger -suppressAttack -onAttackStr "test for super saiyan" -command [ dragonball/super_saiyan_trigger -unit \\ATTACKER_ID]
 
 #######################################################
 # Apply binary patches at runtime                     #

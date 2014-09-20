@@ -2167,7 +2167,7 @@ language_SAIYAN
 		[T_WORD:YEARLING:scourdo]
 		[T_WORD:YELL:fendish]
 		[T_WORD:YELLOW:soybea]
-		[T_WORD:YOR:planth]
+		T_WORD:YOR:planth
 		[T_WORD:YOUNG:pergi]
 		[T_WORD:YOUTH:ogi]
 		[T_WORD:ZEAL:horzon]
