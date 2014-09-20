@@ -2167,7 +2167,7 @@ language_FRIEZA
 		[T_WORD:YEARLING:yotin]
 		[T_WORD:YELL:hay]
 		[T_WORD:YELLOW:yotian]
-		[T_WORD:YOR:rollla]
+		T_WORD:YOR:rollla
 		[T_WORD:YOUNG:shipop]
 		[T_WORD:YOUTH:shipod]
 		[T_WORD:ZEAL:ilimey]

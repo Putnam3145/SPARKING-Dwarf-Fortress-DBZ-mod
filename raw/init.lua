@@ -1,10 +1,3 @@
-local function getSuperSaiyanLevel(saiyan)
-    --15 is combathardness
-    if df.creature_raw.find(saiyan.race).creature_id~="SAIYAN" then return 0 end
-    local combatHardness=dfhack.units.getMiscTrait(saiyan,15,true).value --creates the misc trait if the saiyan doesn't have it yet
-    return (combatHardness>99) and 3 or (combatHardness>64) and 2 or (combatHardness>31) and 1 or 0 --return (x>y) and x or y is syntactically equivalent to, say, z = (x>y) : x ? y; return z; in C++.
-end
-
 local function superSaiyanGodSyndrome()
     for syn_id,syndrome in ipairs(df.global.world.raws.syndromes.all) do
         if syndrome.syn_name == "Super Saiyan God" then return syn_id end
@@ -12,38 +5,20 @@ local function superSaiyanGodSyndrome()
     qerror("Super saiyan god syndrome not found.")
 end
 
-local function getCombatSkills(unit)
-    local totalSkill=0
-    for skill=99,104 do --fighting, wrestling, striking etc.
-        totalSkill=(dfhack.units.getNominalSkill(unit,skill)*100)+totalSkill
-    end
-    totalSkill=(dfhack.units.getNominalSkill(unit,df.job_skill.DODGING)*245)+totalSkill
-    totalSkill=(dfhack.units.getNominalSkill(unit,df.job_skill.SITUATIONAL_AWARENESS)*150)+totalSkill
-    return totalSkill
+local function getPowerLevel(saiyan)
+	local strength = saiyan.body.physical_attrs.STRENGTH.value/3550
+	local endurance = saiyan.body.physical_attrs.ENDURANCE.value/1000
+	local toughness = saiyan.body.physical_attrs.TOUGHNESS.value/2250
+	local spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1500
+	local kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
+	local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
+	return (strength+endurance+toughness+spatialsense+kinestheticsense+willpower)
 end
 
-local function getPowerLevel(unit)
-    local strength = unit.body.physical_attrs.STRENGTH.value*1.5
-    local endurance = unit.body.physical_attrs.ENDURANCE.value*1.2
-    local toughness = unit.body.physical_attrs.TOUGHNESS.value*1.5
-    local spatialsense = unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value
-    local kinestheticsense = unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value*1.1
-    local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value/1.5
-    local agility = unit.body.physical_attrs.AGILITY.value*2
-    local bodysize = (unit.body.size_info.size_cur/75)^2
-    local powerlevel = bodysize+agility+strength+endurance+toughness+spatialsense+kinestheticsense+willpower
-    powerlevel=powerlevel+getCombatSkills(unit)
-    local superSaiyanLevel=getSuperSaiyanLevel(unit)
-    if superSaiyanLevel>0 then
-        powerlevel=powerlevel*50
-        if superSaiyanLevel>1 then
-            powerlevel=powerlevel*2
-            if superSaiyanLevel>2 then
-                powerlevel=powerlevel*4
-            end
-        end
-    end
-    return powerlevel
+local function getSuperSaiyanLevel(saiyan)
+    if df.creature_raw.find(saiyan.race).creature_id~="SAIYAN" then return 0 end
+	local saiyanPowerLevel=getPowerLevel(saiyan)
+    return (saiyanPowerLevel>200) and 3 or (saiyanPowerLevel>100) and 2 or (saiyanPowerLevel>20) and 1 or 0
 end
 
 local function getSuperSaiyanCount()
@@ -60,7 +35,11 @@ local function unitWithHighestPowerLevel()
     local highestUnit = nil
     local highestPowerLevel = 0
     for _,unit in ipairs(df.global.world.units.active) do
-        if dfhack.units.isCitizen(unit) and dfhack.units.isDwarf(unit) and getPowerLevel(unit) > highestPowerLevel then highestUnit = unit end
+		local unitPowerLevel=getPowerLevel(unit)
+        if dfhack.units.isCitizen(unit) and dfhack.units.isDwarf(unit) and unitPowerLevel > highestPowerLevel then
+			highestUnit = unit
+			highestPowerLevel=unitPowerLevel
+		end
     end
     return highestUnit
 end
@@ -73,34 +52,14 @@ local function combinedSaiyanPowerLevel()
     return totalPowerLevel
 end
 
-local function assignSyndrome(target,syn_id) --taken straight from here, but edited so I can understand it better: https://gist.github.com/warmist/4061959/. Also implemented expwnent's changes for compatibility with syndromeTrigger.
-    if target==nil then
-        return nil
-    end
-    local newSyndrome=df.unit_syndrome:new()
-    local target_syndrome=df.syndrome.find(syn_id)
-    newSyndrome.type=target_syndrome.id
-    newSyndrome.year=df.global.cur_year
-    newSyndrome.year_time=df.global.cur_year_tick
-    newSyndrome.ticks=1
-    newSyndrome.unk1=1
-    for k,v in ipairs(target_syndrome.ce) do
-        local sympt=df.unit_syndrome.T_symptoms:new()
-        sympt.ticks=1
-        sympt.flags=2
-        newSyndrome.symptoms:insert("#",sympt)
-    end
-    target.syndromes.active:insert("#",newSyndrome)
-    return true
-end
-
 local function applySuperSaiyanGodSyndrome()
+	local syndromeUtil = require 'syndrome-util'
     if df.global.gamemode==0 then
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
-        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 1000000 then assignSyndrome(superSaiyanGod,superSaiyanGodSyndrome()) end
+        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 400 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
     elseif df.global.gamemode==1 then
-        dfhack.timeout(3,'ticks',function() assignSyndrome(df.global.world.units.active[0],superSaiyanGodSyndrome()) end)
+        dfhack.timeout(3,'ticks',function() syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end)
     end
 end
 
@@ -287,13 +246,13 @@ local function fusion(reaction,unit,input_items,input_reagents,output_items,call
         local unitsToFuse={}
         repeat
             for i=1,2 do
-                local ok, name, C = script.showListPrompt("Unit Selection","Choose " ..(i==1 and "first" or "second").. " Saiyan to fuse (by power level)",COLOR_WHITE,tbl)
+                local ok, name, C = script.showListPrompt("Unit Selection","Choose " ..(i==1 and "first" or "second").. " Saiyan to fuse (sorted by power level)",COLOR_WHITE,tbl)
                 if ok then table.insert(unitsToFuse,C[3]) end
             end
             if unitsToFuse[1]==unitsToFuse[2] then unitsToFuse[1]=nil unitsToFuse[2]=nil unitsToFuse={} end
         until unitsToFuse[1] and unitsToFuse[2] and unitsToFuse[1]~=unitsToFuse[2]
         fuseUnits(unitsToFuse[1],unitsToFuse[2])
-        assignSyndrome(unitsToFuse[1],tailClipSyndrome())
+        syndromeUtil.infectWithSyndrome(unitsToFuse[1],tailClipSyndrome(),syndromeUtil.ResetPolicy.DoNothing)
     end)
     call_native.value=false
 end
@@ -301,20 +260,20 @@ end
 events.registerReaction("LUA_HOOK_FUSION_DB",fusion)
 
 local function fixOverflow(a)
-    a=(a<0) and 2^30-1 or a
+    return (a<0) and 2^30-1 or a
 end
 
 local function checkOverflows(unit)
     for _,attribute in ipairs(unit.body.physical_attrs) do
-        fixOverflow(attribute.value)
+        attribute.value=fixOverflow(attribute.value)
     end
     for _,soul in ipairs(unit.status.souls) do --soul[0] is a pointer to the current soul
         for _,attribute in ipairs(soul.mental_attrs) do
-            fixOverflow(attribute.value)
+            attribute.value=fixOverflow(attribute.value)
         end
     end
-    fixOverflow(unit.body.blood_max)
-    fixOverflow(unit.body.blood_count)
+    unit.body.blood_max=fixOverflow(unit.body.blood_max)
+    unit.body_blood_count=fixOverflow(unit.body.blood_count)
 end
 
 local function fixAllOverflows()

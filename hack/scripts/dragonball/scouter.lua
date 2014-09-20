@@ -57,7 +57,6 @@ if not selectedUnit then
 end
 
 --blood_max appears to be the creature's body size divided by 10; the power level calculation relies on body size divided by 1000, so divided by 100 it is. blood_count refers to current blood amount, and it, when full, is equal to blood_max.
-local speed = 1000/dfhack.units.computeMovementSpeed(selectedUnit)
 if selectedUnit.curse.attr_change then
 	strength = ((selectedUnit.body.physical_attrs.STRENGTH.value+selectedUnit.curse.attr_change.phys_att_add.STRENGTH)/3550)*(selectedUnit.curse.attr_change.phys_att_perc.STRENGTH/100)
 	endurance = ((selectedUnit.body.physical_attrs.ENDURANCE.value+selectedUnit.curse.attr_change.phys_att_add.ENDURANCE)/1000)*(selectedUnit.curse.attr_change.phys_att_perc.ENDURANCE/100)
@@ -78,12 +77,10 @@ local exhaustion = getExhaustion(selectedUnit)
 
 if accurate == true
 then
-    local bodysize = selectedUnit.body.blood_count*10
-    powerlevel = bodysize*speed*((strength*endurance*toughness*spatialsense*kinestheticsense*willpower)^(1/6))*exhaustion
-    powerlevel = powerlevel * 300
+    powerlevel = strength+endurance+toughness+spatialsense+kinestheticsense+willpower
 else
     local bodysize = (selectedUnit.body.blood_count/100)^2
-    powerlevel = bodysize*speed*((strength*endurance*toughness*spatialsense*kinestheticsense*willpower)^(1/6))*exhaustion
+    powerlevel = bodysize*((strength*endurance*toughness*spatialsense*kinestheticsense*willpower)^(1/6))*exhaustion
 end
 if isWinded(selectedUnit) then powerlevel=powerlevel/1.2 end
 if isStunned(selectedUnit) then powerlevel=powerlevel/1.5 end
@@ -91,7 +88,7 @@ if isParalyzed(selectedUnit) then powerlevel=powerlevel/5 end
 if isUnconscious(selectedUnit) then powerlevel=powerlevel/10 end
 
 if powerlevel == 1/0 or unitIsGod(selectedUnit) then
-    dfhack.gui.showPopupAnnouncement("The scouter broke at this incredible power. Either the power belongs to a god... or it's immeasurable.")
+    dfhack.gui.showPopupAnnouncement("The scouter broke at this incredible power. Either the power belongs to a god... or it's immeasurable.",1)
     qerror("Scouter broke! Oh well, there are more.",11)
 end
 
