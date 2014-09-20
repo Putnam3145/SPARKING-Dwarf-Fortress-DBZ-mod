@@ -333,7 +333,7 @@ function dbRound(num)
 end
 
 function checkIfUnitStillGravelyInjuredForZenkai(unit)
-    if unit.body.blood_count>unit.body.blood_max/10 or unit.body.blood_count>1000 then
+    if unit.body.blood_count>unit.body.blood_max*.75 then
         dfhack.persistent.save({key='ZENKAI_'..unit.id,value='false'})
     end
 end
@@ -350,23 +350,26 @@ function unitHasZenkaiAlready(unit,set)
 end
 
 dbEvents.onUnitGravelyInjured.zenkai=function(unit)
-    if df.creature_raw.find(unit.race).creature_id~="SAIYAN" or unit.body.blood_count>1000 or unitHasZenkaiAlready(unit) then return false end
-    local zenkaiMultiplier=math.log(((unit.body.blood_max/10>1000 and 1000 or unit.body.blood_max/10)/unit.body.blood_count)*math.exp(1)) --the hell is this
+    if df.creature_raw.find(unit.race).creature_id~="SAIYAN" or unitHasZenkaiAlready(unit) then return false end
+    local zenkaiMultiplier=math.log(((unit.body.blood_max*.75)/unit.body.blood_count)*math.exp(1)) --yeah, don't want too much of a bonus
     unit.body.blood_max=dbRound(unit.body.blood_max*zenkaiMultiplier)
-    for k,v in ipairs(unit.body.size_info) do
-        v=dbRound(v*zenkaiMultiplier)
-    end
-    for k,v in ipairs(unit.physical_attrs) do
+    for k,v in ipairs(unit.body.physical_attrs) do
         v.value=dbRound(v*zenkaiMultiplier)
         v.max_value=dbRound(v*zenkaiMultiplier)
     end
     unitHasZenkaiAlready(unit,true)
 end
 
+dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
+	if df.creature_raw.find(unit.race).creature_id=='SAIYAN' then
+		dfhack.run_script('dragonball/super_saiyan_trigger','-unit',unit.id)
+	end
+end
+
 function checkEveryUnitRegularlyForEvents()
     local delayTicks=1
     for k,v in ipairs(df.global.world.units.active) do
-        dfhack.timeout(delayTicks,'ticks',function() if v.body.blood_count<v.body.blood_max/10 then dbEvents.onUnitGravelyInjured(v) end end)
+        dfhack.timeout(delayTicks,'ticks',function() if v.body.blood_count<v.body.blood_max*.75 then dbEvents.onUnitGravelyInjured(v) end end)
         delayTicks=delayTicks+1
     end
     dfhack.timeout(120,'ticks',checkEveryUnitRegularlyForEvents)
