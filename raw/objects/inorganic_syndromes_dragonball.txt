@@ -66,6 +66,7 @@ inorganic_syndromes_dragonball
 		[SYN_NAME:can super saiyan 2]
 		[CE_CAN_DO_INTERACTION:START:0]
 			[CDI:INTERACTION:SUPER_SAIYAN_2]
+			[CDI:ADV_NAME:Transform into a super saiyan 2!]
 			[CDI:TARGET:A:SELF_ONLY]
 			[CDI:USAGE_HINT:FLEEING]
 			[CDI:TARGET_RANGE:A:1]
