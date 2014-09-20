@@ -17,10 +17,10 @@ local args = utils.processArgs({...}, validArgs)
 
 local powerLevel=getPowerLevel(df.unit.find(args.unit))
 
-if powerLevel>200 then
-	dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan 3','-resetPolicy','DoNothing','-target',args.unit)
-elseif powerLevel>100 then
-	dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan 2','-resetPolicy','DoNothing','-target',args.unit)
+if powerLevel>100 then
+	dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan 3','-resetPolicy','DoNothing','-target',args.unit,'-skipImmunities')
+elseif powerLevel>50 then
+	dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan 2','-resetPolicy','DoNothing','-target',args.unit,'-skipImmunities')
 elseif powerLevel>20 then
-	dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan','-resetPolicy','DoNothing','-target',args.unit)
+	dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan','-resetPolicy','DoNothing','-target',args.unit,'-skipImmunities')
 end
