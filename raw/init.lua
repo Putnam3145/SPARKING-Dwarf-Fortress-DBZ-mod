@@ -263,6 +263,11 @@ local function fixOverflow(a)
     return (a<0) and 2^30-1 or a
 end
 
+local function fixStrengthBug(unit) -- http://www.bay12games.com/dwarves/mantisbt/view.php?id=8333
+	local strength = unit.body.physical_attrs.STRENGTH
+	strength.value=strength.value>2512195 and 2512195 or strength.value
+end
+
 local function checkOverflows(unit)
     for _,attribute in ipairs(unit.body.physical_attrs) do
         attribute.value=fixOverflow(attribute.value)
@@ -274,6 +279,7 @@ local function checkOverflows(unit)
     end
     unit.body.blood_max=fixOverflow(unit.body.blood_max)
     unit.body_blood_count=fixOverflow(unit.body.blood_count)
+	fixStrengthBug(unit)
 end
 
 local function fixAllOverflows()
@@ -373,6 +379,7 @@ function checkEveryUnitRegularlyForEvents()
 				dbEvents.onUnitGravelyInjured(v)
 			end
 			checkIfUnitStillGravelyInjuredForZenkai(v)
+			checkOverflows(v)
 		end)
         delayTicks=delayTicks+1
     end

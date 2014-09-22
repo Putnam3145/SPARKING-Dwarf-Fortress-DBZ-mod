@@ -1,11 +1,13 @@
-local function fixOverflow(a)
-	return a < 0 and 2^30-1 or a
+local function fixOverflow(a,max)
+	max=max or 400000000
+	return a < 0 and max or a
 end
 
 local function checkOverflows(unit)
 	for _,attribute in ipairs(unit.body.physical_attrs) do
 		attribute.value=fixOverflow(attribute.value)
 	end
+	unit.body.physical_attrs.STRENGTH.value=fixOverflow(unit.body.physical_attrs.STRENGTH.value,2512195) --http://www.bay12games.com/dwarves/mantisbt/view.php?id=8333
 	for _,soul in ipairs(unit.status.souls) do --soul[0] is a pointer to the current soul
 		for _,attribute in ipairs(soul.mental_attrs) do
 			attribute.value=fixOverflow(attribute.value)
