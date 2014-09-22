@@ -27,13 +27,15 @@ local powerLevel=getPowerLevel(unit)
 
 if powerLevel>100 then
     dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan 3','-resetPolicy','DoNothing','-target',args.unit,'-skipImmunities')
-elseif powerLevel>50 then
+end
+if powerLevel>50 then
     if not unitHasSyndrome(unit,'can super saiyan 2') then
         dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan 2','-resetPolicy','DoNothing','-target',args.unit,'-skipImmunities')
         dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has transformed into a Super Saiyan 2 in a bout of extreme emotion!',11)
     end
     dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan 2','-resetPolicy','DoNothing','-target',args.unit,'-skipImmunities')
-elseif powerLevel>20 then
+end
+if powerLevel>20 then
     if not unitHasSyndrome(unit,'can super saiyan') then
         dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan','-resetPolicy','DoNothing','-target',args.unit,'-skipImmunities')
         dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has transformed into a Super Saiyan in a bout of extreme emotion!',11)

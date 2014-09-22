@@ -1,6 +1,6 @@
 local function superSaiyanGodSyndrome()
     for syn_id,syndrome in ipairs(df.global.world.raws.syndromes.all) do
-        if syndrome.syn_name == "Super Saiyan God" then return syn_id end
+        if syndrome.syn_name == "Super Saiyan God" then return syndrome end
     end
     qerror("Super saiyan god syndrome not found.")
 end
@@ -59,7 +59,7 @@ local function applySuperSaiyanGodSyndrome()
         local superSaiyanGod = unitWithHighestPowerLevel()
         if superSaiyanGod and getPowerLevel(superSaiyanGod) > 400 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
     elseif df.global.gamemode==1 then
-        dfhack.timeout(3,'ticks',function() syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end)
+        dfhack.timeout(3,'ticks',function() syndromeUtil.infectWithSyndromeIfValidTarget(df.global.world.units.active[0],superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end)
     end
 end
 
@@ -368,9 +368,20 @@ end
 function checkEveryUnitRegularlyForEvents()
     local delayTicks=1
     for k,v in ipairs(df.global.world.units.active) do
-        dfhack.timeout(delayTicks,'ticks',function() if v.body.blood_count<v.body.blood_max*.75 then dbEvents.onUnitGravelyInjured(v) end end)
+        dfhack.timeout(delayTicks,'ticks',function()
+			if v.body.blood_count<v.body.blood_max*.75 then 
+				dbEvents.onUnitGravelyInjured(v)
+			end
+			checkIfUnitStillGravelyInjuredForZenkai(v)
+		end)
         delayTicks=delayTicks+1
     end
     dfhack.timeout(120,'ticks',checkEveryUnitRegularlyForEvents)
 end
 dfhack.timeout(2,'ticks',checkEveryUnitRegularlyForEvents)
+
+function onStateChange(op)
+	if op==SC_MAP_LOADED then
+		dfhack.timeout(1,'ticks',checkEveryUnitRegularlyForEvents)
+	end
+end

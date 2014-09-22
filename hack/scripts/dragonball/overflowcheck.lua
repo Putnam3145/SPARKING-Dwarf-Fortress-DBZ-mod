@@ -1,18 +1,18 @@
 local function fixOverflow(a)
-	if a < 0 then a = 2^30-1 end
+	return a < 0 and 2^30-1 or a
 end
 
 local function checkOverflows(unit)
 	for _,attribute in ipairs(unit.body.physical_attrs) do
-		fixOverflow(attribute.value)
+		attribute.value=fixOverflow(attribute.value)
 	end
 	for _,soul in ipairs(unit.status.souls) do --soul[0] is a pointer to the current soul
 		for _,attribute in ipairs(soul.mental_attrs) do
-			fixOverflow(attribute.value)
+			attribute.value=fixOverflow(attribute.value)
 		end
 	end
-	fixOverflow(unit.body.blood_max)
-	fixOverflow(unit.body.blood_count)
+	unit.body.blood_max=fixOverflow(unit.body.blood_max)
+	unit.body.blood_count=fixOverflow(unit.body.blood_count)
 end
 
 local function fixAllOverflows()
