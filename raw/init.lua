@@ -352,10 +352,9 @@ end
 dbEvents.onUnitGravelyInjured.zenkai=function(unit)
     if df.creature_raw.find(unit.race).creature_id~="SAIYAN" or unitHasZenkaiAlready(unit) then return false end
     local zenkaiMultiplier=math.log(((unit.body.blood_max*.75)/unit.body.blood_count)*math.exp(1)) --yeah, don't want too much of a bonus
-    unit.body.blood_max=dbRound(unit.body.blood_max*zenkaiMultiplier)
     for k,v in ipairs(unit.body.physical_attrs) do
-        v.value=dbRound(v*zenkaiMultiplier)
-        v.max_value=dbRound(v*zenkaiMultiplier)
+        v.value=dbRound(v.value*zenkaiMultiplier)
+        v.max_value=dbRound(v.max_value*zenkaiMultiplier)
     end
     unitHasZenkaiAlready(unit,true)
 end
