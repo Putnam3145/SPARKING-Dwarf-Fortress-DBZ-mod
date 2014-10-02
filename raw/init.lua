@@ -278,7 +278,7 @@ local function checkOverflows(unit)
         end
     end
     unit.body.blood_max=fixOverflow(unit.body.blood_max)
-    unit.body_blood_count=fixOverflow(unit.body.blood_count)
+    unit.body.blood_count=fixOverflow(unit.body.blood_count)
 	fixStrengthBug(unit)
 end
 
