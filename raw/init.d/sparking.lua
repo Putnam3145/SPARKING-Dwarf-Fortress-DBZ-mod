@@ -35,10 +35,12 @@ local function unitWithHighestPowerLevel()
     local highestUnit = nil
     local highestPowerLevel = 0
     for _,unit in ipairs(df.global.world.units.active) do
-		local unitPowerLevel=getPowerLevel(unit)
-        if dfhack.units.isCitizen(unit) and dfhack.units.isDwarf(unit) and unitPowerLevel > highestPowerLevel then
-			highestUnit = unit
-			highestPowerLevel=unitPowerLevel
+        if dfhack.units.isCitizen(unit) and dfhack.units.isDwarf(unit) then
+            local unitPowerLevel=getPowerLevel(unit)
+            if unitPowerLevel>highestPowerLevel then
+                highestUnit = unit
+                highestPowerLevel = unitPowerLevel
+            end
 		end
     end
     return highestUnit
@@ -58,8 +60,6 @@ local function applySuperSaiyanGodSyndrome()
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
         if superSaiyanGod and getPowerLevel(superSaiyanGod) > 400 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
-    elseif df.global.gamemode==1 then
-        dfhack.timeout(3,'ticks',function() syndromeUtil.infectWithSyndromeIfValidTarget(df.global.world.units.active[0],superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end)
     end
 end
 
@@ -84,10 +84,7 @@ end
 
 function monthlyCheck()
     applySuperSaiyanGodSyndrome()
-    dfhack.timeout(1,'months',monthlyCheck)
 end
-
-monthlyCheck()
 
 local function getInorganic(item)
     return dfhack.matinfo.decode(item).inorganic
@@ -383,12 +380,19 @@ function checkEveryUnitRegularlyForEvents()
 		end)
         delayTicks=delayTicks+1
     end
-    dfhack.timeout(120,'ticks',checkEveryUnitRegularlyForEvents)
 end
-dfhack.timeout(2,'ticks',checkEveryUnitRegularlyForEvents)
+
+
+local repeat_util=require('repeat-util')
+
+repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
+repeat_util.scheduleUnlessAlreadyScheduled('DBZ Monthly Check',1,'months',monthlyCheck)
 
 function onStateChange(op)
 	if op==SC_MAP_LOADED then
-		dfhack.timeout(1,'ticks',checkEveryUnitRegularlyForEvents)
-	end
+        repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
+        repeat_util.scheduleUnlessAlreadyScheduled('DBZ Monthly Check',1,'months',monthlyCheck)
+    end
 end
+
+dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
