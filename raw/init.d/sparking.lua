@@ -1,49 +1,24 @@
-local function getSuperSaiyanLevel(saiyan)
-    --15 is combathardness
-    if df.creature_raw.find(saiyan.race).creature_id~="SAIYAN" then return 0 end
-    local combatHardness=dfhack.units.getMiscTrait(saiyan,15,true).value --creates the misc trait if the saiyan doesn't have it yet
-    return (combatHardness>99) and 3 or (combatHardness>64) and 2 or (combatHardness>31) and 1 or 0 --return (x>y) and x or y is syntactically equivalent to, say, z = (x>y) : x ? y; return z; in C++.
-end
-
 local function superSaiyanGodSyndrome()
     for syn_id,syndrome in ipairs(df.global.world.raws.syndromes.all) do
-        if syndrome.syn_name == "Super Saiyan God" then return syn_id end
+        if syndrome.syn_name == "Super Saiyan God" then return syndrome end
     end
     qerror("Super saiyan god syndrome not found.")
 end
 
-local function getCombatSkills(unit)
-    local totalSkill=0
-    for skill=99,104 do --fighting, wrestling, striking etc.
-        totalSkill=(dfhack.units.getNominalSkill(unit,skill)*100)+totalSkill
-    end
-    totalSkill=(dfhack.units.getNominalSkill(unit,df.job_skill.DODGING)*245)+totalSkill
-    totalSkill=(dfhack.units.getNominalSkill(unit,df.job_skill.SITUATIONAL_AWARENESS)*150)+totalSkill
-    return totalSkill
+local function getPowerLevel(saiyan)
+	local strength = saiyan.body.physical_attrs.STRENGTH.value/3550
+	local endurance = saiyan.body.physical_attrs.ENDURANCE.value/1000
+	local toughness = saiyan.body.physical_attrs.TOUGHNESS.value/2250
+	local spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1500
+	local kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
+	local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
+	return (strength+endurance+toughness+spatialsense+kinestheticsense+willpower)
 end
 
-local function getPowerLevel(unit)
-    local strength = unit.body.physical_attrs.STRENGTH.value*1.5
-    local endurance = unit.body.physical_attrs.ENDURANCE.value*1.2
-    local toughness = unit.body.physical_attrs.TOUGHNESS.value*1.5
-    local spatialsense = unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value
-    local kinestheticsense = unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value*1.1
-    local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value/1.5
-    local agility = unit.body.physical_attrs.AGILITY.value*2
-    local bodysize = (unit.body.size_info.size_cur/75)^2
-    local powerlevel = bodysize+agility+strength+endurance+toughness+spatialsense+kinestheticsense+willpower
-    powerlevel=powerlevel+getCombatSkills(unit)
-    local superSaiyanLevel=getSuperSaiyanLevel(unit)
-    if superSaiyanLevel>0 then
-        powerlevel=powerlevel*50
-        if superSaiyanLevel>1 then
-            powerlevel=powerlevel*2
-            if superSaiyanLevel>2 then
-                powerlevel=powerlevel*4
-            end
-        end
-    end
-    return powerlevel
+local function getSuperSaiyanLevel(saiyan)
+    if df.creature_raw.find(saiyan.race).creature_id~="SAIYAN" then return 0 end
+	local saiyanPowerLevel=getPowerLevel(saiyan)
+    return (saiyanPowerLevel>200) and 3 or (saiyanPowerLevel>100) and 2 or (saiyanPowerLevel>20) and 1 or 0
 end
 
 local function getSuperSaiyanCount()
@@ -60,7 +35,13 @@ local function unitWithHighestPowerLevel()
     local highestUnit = nil
     local highestPowerLevel = 0
     for _,unit in ipairs(df.global.world.units.active) do
-        if dfhack.units.isCitizen(unit) and dfhack.units.isDwarf(unit) and getPowerLevel(unit) > highestPowerLevel then highestUnit = unit end
+        if dfhack.units.isCitizen(unit) and dfhack.units.isDwarf(unit) then
+            local unitPowerLevel=getPowerLevel(unit)
+            if unitPowerLevel>highestPowerLevel then
+                highestUnit = unit
+                highestPowerLevel = unitPowerLevel
+            end
+		end
     end
     return highestUnit
 end
@@ -73,34 +54,12 @@ local function combinedSaiyanPowerLevel()
     return totalPowerLevel
 end
 
-local function assignSyndrome(target,syn_id) --taken straight from here, but edited so I can understand it better: https://gist.github.com/warmist/4061959/. Also implemented expwnent's changes for compatibility with syndromeTrigger.
-    if target==nil then
-        return nil
-    end
-    local newSyndrome=df.unit_syndrome:new()
-    local target_syndrome=df.syndrome.find(syn_id)
-    newSyndrome.type=target_syndrome.id
-    newSyndrome.year=df.global.cur_year
-    newSyndrome.year_time=df.global.cur_year_tick
-    newSyndrome.ticks=1
-    newSyndrome.unk1=1
-    for k,v in ipairs(target_syndrome.ce) do
-        local sympt=df.unit_syndrome.T_symptoms:new()
-        sympt.ticks=1
-        sympt.flags=2
-        newSyndrome.symptoms:insert("#",sympt)
-    end
-    target.syndromes.active:insert("#",newSyndrome)
-    return true
-end
-
 local function applySuperSaiyanGodSyndrome()
+	local syndromeUtil = require 'syndrome-util'
     if df.global.gamemode==0 then
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
-        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 1000000 then assignSyndrome(superSaiyanGod,superSaiyanGodSyndrome()) end
-    elseif df.global.gamemode==1 then
-        dfhack.timeout(3,'ticks',function() assignSyndrome(df.global.world.units.active[0],superSaiyanGodSyndrome()) end)
+        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 400 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
     end
 end
 
@@ -125,10 +84,7 @@ end
 
 function monthlyCheck()
     applySuperSaiyanGodSyndrome()
-    dfhack.timeout(1,'months',monthlyCheck)
 end
-
-monthlyCheck()
 
 local function getInorganic(item)
     return dfhack.matinfo.decode(item).inorganic
@@ -287,13 +243,13 @@ local function fusion(reaction,unit,input_items,input_reagents,output_items,call
         local unitsToFuse={}
         repeat
             for i=1,2 do
-                local ok, name, C = script.showListPrompt("Unit Selection","Choose " ..(i==1 and "first" or "second").. " Saiyan to fuse (by power level)",COLOR_WHITE,tbl)
+                local ok, name, C = script.showListPrompt("Unit Selection","Choose " ..(i==1 and "first" or "second").. " Saiyan to fuse (sorted by power level)",COLOR_WHITE,tbl)
                 if ok then table.insert(unitsToFuse,C[3]) end
             end
             if unitsToFuse[1]==unitsToFuse[2] then unitsToFuse[1]=nil unitsToFuse[2]=nil unitsToFuse={} end
         until unitsToFuse[1] and unitsToFuse[2] and unitsToFuse[1]~=unitsToFuse[2]
         fuseUnits(unitsToFuse[1],unitsToFuse[2])
-        assignSyndrome(unitsToFuse[1],tailClipSyndrome())
+        syndromeUtil.infectWithSyndrome(unitsToFuse[1],tailClipSyndrome(),syndromeUtil.ResetPolicy.DoNothing)
     end)
     call_native.value=false
 end
@@ -301,20 +257,26 @@ end
 events.registerReaction("LUA_HOOK_FUSION_DB",fusion)
 
 local function fixOverflow(a)
-    a=(a<0) and 2^30-1 or a
+    return (a<0) and 2^30-1 or a
+end
+
+local function fixStrengthBug(unit) -- http://www.bay12games.com/dwarves/mantisbt/view.php?id=8333
+	local strength = unit.body.physical_attrs.STRENGTH
+	strength.value=strength.value>2512195 and 2512195 or strength.value
 end
 
 local function checkOverflows(unit)
     for _,attribute in ipairs(unit.body.physical_attrs) do
-        fixOverflow(attribute.value)
+        attribute.value=fixOverflow(attribute.value)
     end
     for _,soul in ipairs(unit.status.souls) do --soul[0] is a pointer to the current soul
         for _,attribute in ipairs(soul.mental_attrs) do
-            fixOverflow(attribute.value)
+            attribute.value=fixOverflow(attribute.value)
         end
     end
-    fixOverflow(unit.body.blood_max)
-    fixOverflow(unit.body.blood_count)
+    unit.body.blood_max=fixOverflow(unit.body.blood_max)
+    unit.body.blood_count=fixOverflow(unit.body.blood_count)
+	fixStrengthBug(unit)
 end
 
 local function fixAllOverflows()
@@ -368,58 +330,69 @@ events.registerReaction("LUA_HOOK_MAKE_SITE3x3",claimSite)
 local dbEvents={
     onUnitGravelyInjured=dfhack.event.new()
 }
-    --this part commented out because, tbh, it's a bit hard to do and I need to get something out soon.
---[[individualUnitsToPerformChecksOn={}
-    initiateChecks=function()
-        local delayTicks=1
-        for k,v in ipairs(df.global.world.units.active) do
-            if not individualUnitsToPerformChecksOn[unit.id] then
-                individualUnitsToPerformChecksOn[unit.id]={}
-                individualUnitsToPerformChecksOn[unit.id].id=unit.id --oy
-                individualUnitsToPerformChecksOn[unit.id]=function(self)
-                    local unit=df.unit.find(self.id)
-                    dbEvents.onUnitGravelyInjured(unit)
-                end
-            end
-        end
-    end]]
-
-dbEvents.unitHasZenkaiAlready={}
-	
+    
 function dbRound(num)
     return num%1<.5 and math.floor(num) or math.ceil(num)
 end
 
 function checkIfUnitStillGravelyInjuredForZenkai(unit)
-    if unit.body.blood_count>unit.body.blood_max/10 or unit.body.blood_count>1000 then
-        dbEvents.unitHasZenkaiAlready[unit.id]=nil
-    else
-        dfhack.timeout(50,'ticks',checkIfUnitStillGravelyInjuredForZenkai(unit))
+    if unit.body.blood_count>unit.body.blood_max*.75 then
+        dfhack.persistent.save({key='ZENKAI_'..unit.id,value='false'})
     end
 end
---event seems a bit flagrant but whatever
+
+function unitHasZenkaiAlready(unit,set)
+    if set then 
+        dfhack.persistent.save({key='ZENKAI_'..unit.id,value='true'})
+    else
+        if dfhack.persistent.get('ZENKAI_'..unit.id) and dfhack.persistent.get('ZENKAI_'..unit.id).value=='true' then
+            checkIfUnitStillGravelyInjuredForZenkai(unit)
+            return true
+        end
+    end
+end
+
 dbEvents.onUnitGravelyInjured.zenkai=function(unit)
-    if df.creature_raw.find(unit.race).creature_id~="SAIYAN" or unit.body.blood_count>1000 or dbEvents.unitHasZenkaiAlready[unit.id] then return false end
-    local zenkaiMultiplier=math.log(((unit.body.blood_max/10>1000 and 1000 or unit.body.blood_max/10)/unit.body.blood_count)*math.exp(1))
-    unit.body.blood_max=dbRound(unit.body.blood_max*zenkaiMultiplier)
-    for k,v in ipairs(unit.body.size_info) do
-        v=dbRound(v*zenkaiMultiplier)
+    if df.creature_raw.find(unit.race).creature_id~="SAIYAN" or unitHasZenkaiAlready(unit) then return false end
+    local zenkaiMultiplier=math.log(((unit.body.blood_max*.75)/unit.body.blood_count)*math.exp(1)) --yeah, don't want too much of a bonus
+    for k,v in ipairs(unit.body.physical_attrs) do
+        v.value=dbRound(v.value*zenkaiMultiplier)
+        v.max_value=dbRound(v.max_value*zenkaiMultiplier)
     end
-    for k,v in ipairs(unit.physical_attrs) do
-        v.value=dbRound(v*zenkaiMultiplier)
-        v.max_value=dbRound(v*zenkaiMultiplier)
-    end
-    dbEvents.unitHasZenkaiAlready[unit.id]=true
-    dfhack.timeout(50,'ticks',function() checkIfUnitStillGravelyInjuredForZenkai(unit) end)
+    unitHasZenkaiAlready(unit,true)
+end
+
+dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
+	if df.creature_raw.find(unit.race).creature_id=='SAIYAN' then
+		dfhack.run_script('dragonball/super_saiyan_trigger','-unit',unit.id)
+	end
 end
 
 function checkEveryUnitRegularlyForEvents()
+    local delayTicks=1
     for k,v in ipairs(df.global.world.units.active) do
-        if v.body.blood_count<v.body.blood_max/10 then dbEvents.onUnitGravelyInjured(unit) end
+        dfhack.timeout(delayTicks,'ticks',function()
+			if v.body.blood_count<v.body.blood_max*.75 then 
+				dbEvents.onUnitGravelyInjured(v)
+			end
+			checkIfUnitStillGravelyInjuredForZenkai(v)
+			checkOverflows(v)
+		end)
+        delayTicks=delayTicks+1
     end
-    dfhack.timeout(120,'ticks',checkEveryUnitRegularlyForEvents)
 end
-dfhack.timeout(2,'ticks',checkEveryUnitRegularlyForEvents)
 
-plug=require"plugins.dfusion.friendship"
-plug.Friendship:install{"SAIYAN","SAIYAN","SAIBAMEN_DB","FRIEZA","MAJIN_BOO","ANDROID_DB","HUMAN","DWARF","ELF","NAMEK"}
+
+local repeat_util=require('repeat-util')
+
+repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
+repeat_util.scheduleUnlessAlreadyScheduled('DBZ Monthly Check',1,'months',monthlyCheck)
+
+function onStateChange(op)
+	if op==SC_MAP_LOADED then
+        repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
+        repeat_util.scheduleUnlessAlreadyScheduled('DBZ Monthly Check',1,'months',monthlyCheck)
+    end
+end
+
+dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
