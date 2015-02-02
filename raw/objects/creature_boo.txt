@@ -23,7 +23,7 @@ creature_boo
 	[LAIR_HUNTER]
 	[NATURAL_SKILL:DISCIPLINE:20]
 	[PRONE_TO_RAGE:500]
-	[LIKES_FIGHTING]
+	[PERSONALITY:VIOLENT:25:80:100]
 	[TRANCES]
 	[SWIMS_INNATE]
 	[GOBBLE_VERMIN_CLASS:CANDY] he does not eat it like he should, just kinda punches it, but oh well

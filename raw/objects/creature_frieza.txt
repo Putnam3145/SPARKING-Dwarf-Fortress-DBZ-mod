@@ -4,7 +4,7 @@ creature_frieza
 		[NAME:planet trade organization member:Planet Trade Organization:planet trade]
 		[INTELLIGENT]
 		[CANOPENDOORS]
-		[LIKES_FIGHTING]
+		[PERSONALITY:VIOLENT:25:80:100]
 		[NATURAL_SKILL:DISCIPLINE:20]
 		[TRANCES]
 		[PREFSTRING:strength]
