@@ -2,7 +2,7 @@ creature_cell
 [OBJECT:CREATURE]
 	[CREATURE:CELL]
 		[NAME:bionic android:bionic androids:android]
-		[DESCRIPTION:A bionic android, called "Cell" by some. It contains the DNA and abilities of the universe's greatest fighters. It can only be killed through the destruction of its nucleus.]'
+		[DESCRIPTION:A bionic android, called "Cell" by some. It contains the DNA and abilities of the universe's greatest fighters. It can only be killed through the destruction of its nucleus.]
 		[MEGABEAST][ITEMCORPSE:TOOL:DRAGONBALL:NONE:NONE]
 		[DIFFICULTY:15]
 		[ATTACK_TRIGGER:100:5000:50000] Why so low? Spoilers.

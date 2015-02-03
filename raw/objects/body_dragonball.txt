@@ -136,16 +136,16 @@ body_dragonball
 		[BP:TONGUE:tongue:STP][CON:MOUTH][CATEGORY:TONGUE][SMALL]
 			[DEFAULT_RELSIZE:20]
 [BODY:CELL_BRAIN]
-	[BP:BRAIN:brain:STP][CON:HD][THOUGHT][INTERNAL][SMALL][CATEGORY:BRAIN]
-		[DEFAULT_RELSIZE:200]
+	[BP:BRAIN:nucleus:STP][CON:HD][THOUGHT][INTERNAL][SMALL][CATEGORY:BRAIN]
+		[DEFAULT_RELSIZE:1]
 	[BP:SKULL:skull:STP]
 		[CON:HD]
 		[INTERNAL]
 		[SMALL]
 		[CATEGORY:SKULL]
-		[DEFAULT_RELSIZE:20]
+		[DEFAULT_RELSIZE:200]
 		[TOTEMABLE]
-	[BP:NOSE:nose:STP][CON:HD][SMELL][SMALL][CATEGORY:NOSE] only buu and cell use the cell parts, and only cell has a nose, so...
+	[BP:NOSE:nose:STP][CON:HD][SMELL][SMALL][CATEGORY:NOSE] only buu and cell use the cell parts, and only cell has a nose, so... (so what? friggin past me was awful at comments)
 		[DEFAULT_RELSIZE:10]
 		
 	[BODY:HUMANOID_WITH_NO_DEATH_DB]
