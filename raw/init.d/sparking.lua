@@ -6,18 +6,18 @@ local function superSaiyanGodSyndrome()
 end
 
 local function getPowerLevel(saiyan)
-	local strength = saiyan.body.physical_attrs.STRENGTH.value/3550
-	local endurance = saiyan.body.physical_attrs.ENDURANCE.value/1000
-	local toughness = saiyan.body.physical_attrs.TOUGHNESS.value/2250
-	local spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1500
-	local kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
-	local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
-	return (strength+endurance+toughness+spatialsense+kinestheticsense+willpower)
+    local strength = saiyan.body.physical_attrs.STRENGTH.value/3550
+    local endurance = saiyan.body.physical_attrs.ENDURANCE.value/1000
+    local toughness = saiyan.body.physical_attrs.TOUGHNESS.value/2250
+    local spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1500
+    local kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
+    local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
+    return (strength+endurance+toughness+spatialsense+kinestheticsense+willpower)
 end
 
 local function getSuperSaiyanLevel(saiyan)
     if df.creature_raw.find(saiyan.race).creature_id~="SAIYAN" then return 0 end
-	local saiyanPowerLevel=getPowerLevel(saiyan)
+    local saiyanPowerLevel=getPowerLevel(saiyan)
     return (saiyanPowerLevel>200) and 3 or (saiyanPowerLevel>100) and 2 or (saiyanPowerLevel>20) and 1 or 0
 end
 
@@ -41,7 +41,7 @@ local function unitWithHighestPowerLevel()
                 highestUnit = unit
                 highestPowerLevel = unitPowerLevel
             end
-		end
+        end
     end
     return highestUnit
 end
@@ -55,7 +55,7 @@ local function combinedSaiyanPowerLevel()
 end
 
 local function applySuperSaiyanGodSyndrome()
-	local syndromeUtil = require 'syndrome-util'
+    local syndromeUtil = require 'syndrome-util'
     if df.global.gamemode==0 then
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
@@ -261,8 +261,8 @@ local function fixOverflow(a)
 end
 
 local function fixStrengthBug(unit) -- http://www.bay12games.com/dwarves/mantisbt/view.php?id=8333
-	local strength = unit.body.physical_attrs.STRENGTH
-	strength.value=strength.value>2512195 and 2512195 or strength.value
+    local strength = unit.body.physical_attrs.STRENGTH
+    strength.value=strength.value>2000000 and 2000000 or strength.value
 end
 
 local function checkOverflows(unit)
@@ -276,7 +276,7 @@ local function checkOverflows(unit)
     end
     unit.body.blood_max=fixOverflow(unit.body.blood_max)
     unit.body.blood_count=fixOverflow(unit.body.blood_count)
-	fixStrengthBug(unit)
+    fixStrengthBug(unit)
 end
 
 local function fixAllOverflows()
@@ -363,22 +363,20 @@ dbEvents.onUnitGravelyInjured.zenkai=function(unit)
 end
 
 dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
-	if df.creature_raw.find(unit.race).creature_id=='SAIYAN' then
-		dfhack.run_script('dragonball/super_saiyan_trigger','-unit',unit.id)
-	end
+    if df.creature_raw.find(unit.race).creature_id=='SAIYAN' then
+        dfhack.run_script('dragonball/super_saiyan_trigger','-unit',unit.id)
+    end
 end
 
 function checkEveryUnitRegularlyForEvents()
     local delayTicks=1
     for k,v in ipairs(df.global.world.units.active) do
-        dfhack.timeout(delayTicks,'ticks',function()
-			if v.body.blood_count<v.body.blood_max*.75 then 
-				dbEvents.onUnitGravelyInjured(v)
-			end
-			checkIfUnitStillGravelyInjuredForZenkai(v)
-			checkOverflows(v)
-		end)
-        delayTicks=delayTicks+1
+        if v.body.blood_count<v.body.blood_max*.75 then 
+            dbEvents.onUnitGravelyInjured(v)
+        end
+        checkIfUnitStillGravelyInjuredForZenkai(v)
+        checkOverflows(v)
+        print(k)
     end
 end
 
@@ -389,7 +387,7 @@ repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEv
 repeat_util.scheduleUnlessAlreadyScheduled('DBZ Monthly Check',1,'months',monthlyCheck)
 
 function onStateChange(op)
-	if op==SC_MAP_LOADED then
+    if op==SC_MAP_LOADED then
         repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
         repeat_util.scheduleUnlessAlreadyScheduled('DBZ Monthly Check',1,'months',monthlyCheck)
     end
