@@ -82,10 +82,6 @@ local function checkForMegabeastAttack()
     if combinedSaiyanPowerLevel() > 4000000 and stopMegabeastAttacks() then causeMegaBeastAttack() end
 end
 
-function monthlyCheck()
-    applySuperSaiyanGodSyndrome()
-end
-
 local function getInorganic(item)
     return dfhack.matinfo.decode(item).inorganic
 end
@@ -365,6 +361,7 @@ end
 dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
     if df.creature_raw.find(unit.race).creature_id=='SAIYAN' then
         dfhack.run_script('dragonball/super_saiyan_trigger','-unit',unit.id)
+        applySuperSaiyanGodSyndrome()
     end
 end
 
@@ -376,7 +373,6 @@ function checkEveryUnitRegularlyForEvents()
         end
         checkIfUnitStillGravelyInjuredForZenkai(v)
         checkOverflows(v)
-        print(k)
     end
 end
 
@@ -384,7 +380,6 @@ end
 local repeat_util=require('repeat-util')
 
 repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
-repeat_util.scheduleUnlessAlreadyScheduled('DBZ Monthly Check',1,'months',monthlyCheck)
 
 function onStateChange(op)
     if op==SC_MAP_LOADED then
