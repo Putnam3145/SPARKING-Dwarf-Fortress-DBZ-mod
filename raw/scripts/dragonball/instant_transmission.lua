@@ -13,17 +13,35 @@ function getTileType(x,y,z)
     end
 end
 
-function getPowerLevel(unit)
-	local speed = 1000/dfhack.units.computeMovementSpeed(unit)
-	local strength = unit.body.physical_attrs.STRENGTH.value/3550
-	local endurance = unit.body.physical_attrs.ENDURANCE.value/1000
-	local toughness = unit.body.physical_attrs.TOUGHNESS.value/2250
-	local spatialsense = unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1500
-	local kinestheticsense = unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
-	local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value/1000
-	local bodysize = (unit.body.blood_count/100)^2
-	local powerlevel = bodysize*speed*((strength*endurance*toughness*spatialsense*kinestheticsense*willpower)^(1/6))
-	return powerlevel
+function getPowerLevel(saiyan)
+    local strength,endurance,toughness,spatialsense,kinestheticsense,willpower
+	if saiyan.curse.attr_change then
+		strength = ((saiyan.body.physical_attrs.STRENGTH.value+saiyan.curse.attr_change.phys_att_add.STRENGTH)/3550)*(saiyan.curse.attr_change.phys_att_perc.STRENGTH/100)
+		endurance = ((saiyan.body.physical_attrs.ENDURANCE.value+saiyan.curse.attr_change.phys_att_add.ENDURANCE)/1000)*(saiyan.curse.attr_change.phys_att_perc.ENDURANCE/100)
+		toughness = ((saiyan.body.physical_attrs.TOUGHNESS.value+saiyan.curse.attr_change.phys_att_add.TOUGHNESS)/2250)*(saiyan.curse.attr_change.phys_att_perc.TOUGHNESS/100)
+		spatialsense = ((saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value+saiyan.curse.attr_change.ment_att_add.SPATIAL_SENSE)/1500)*(saiyan.curse.attr_change.ment_att_perc.SPATIAL_SENSE/100)
+		kinestheticsense = ((saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+saiyan.curse.attr_change.ment_att_add.KINESTHETIC_SENSE)/1000)*(saiyan.curse.attr_change.ment_att_perc.KINESTHETIC_SENSE/100)
+		willpower = ((saiyan.status.current_soul.mental_attrs.WILLPOWER.value+saiyan.curse.attr_change.ment_att_add.WILLPOWER)/1000)*(saiyan.curse.attr_change.ment_att_perc.WILLPOWER/100)
+	else
+        strength = saiyan.body.physical_attrs.STRENGTH.value/3550
+		endurance = saiyan.body.physical_attrs.ENDURANCE.value/1000
+		toughness = saiyan.body.physical_attrs.TOUGHNESS.value/2250
+		spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1500
+		kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
+		willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
+	end
+	local exhaustion = getExhaustion(saiyan)
+	local bodysize = (saiyan.body.blood_count/100)^2
+	powerlevel = bodysize*((strength*endurance*toughness*spatialsense*kinestheticsense*willpower)^(1/6))*exhaustion
+	if isWinded(saiyan) then powerlevel=powerlevel/1.2 end
+	if isStunned(saiyan) then powerlevel=powerlevel/1.5 end
+	if isParalyzed(saiyan) then powerlevel=powerlevel/5 end
+	if isUnconscious(saiyan) then powerlevel=powerlevel/10 end
+	if powerlevel == 1/0 or unitIsGod(saiyan) then
+		return "immeasurable"
+	else
+		return math.floor(powerlevel)
+	end
 end
 
 local function positionIsValid(x,y,z)
