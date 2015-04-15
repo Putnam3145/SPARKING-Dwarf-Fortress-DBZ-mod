@@ -2,3 +2,4 @@ modtools/interaction-trigger -suppressAttack -onAttackStr "test for super saiyan
 keybinding add Ctrl-X@dungeonmode/Default gui/advfort
 keybinding add Ctrl-X@dungeonmode/Look gui/advfort
 keybinding add Ctrl-T@dungeonmode dragonball/instant_transmission
+modtools/interaction-trigger -suppressAttack -suppressDefend -onDefendStr "lssj" -command [ dragonball/legendary_super_saiyan -unit \\DEFENDER_ID ]
