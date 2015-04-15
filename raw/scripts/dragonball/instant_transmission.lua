@@ -13,6 +13,44 @@ function getTileType(x,y,z)
     end
 end
 
+local function isGod(unit)
+    local unitraws = df.creature_raw.find(unit.race)
+    local casteraws = unitraws.caste[unit.caste]
+    local unitclasses = casteraws.creature_class
+    for _,class in ipairs(unitclasses) do
+        if class.value == "GOD" then return true end
+    end
+    for _,u_syndrome in ipairs(unit.syndromes.active) do
+        local syndrome = df.global.world.raws.syndromes.all[u_syndrome.type]
+        for _,synclass in ipairs(syndrome.syn_class) do
+            if synclass.value == "GOD" then return true end
+        end
+    end
+    return false
+end
+
+--power levels should account for disabilities and such
+local function isWinded(unit)
+    return unit.counters.winded > 0
+end
+local function isStunned(unit)
+    return unit.counters.stunned > 0
+end
+local function isUnconscious(unit)
+    return unit.counters.unconscious > 0
+end
+local function isParalyzed(unit)
+    return unit.counters2.paralysis > 0
+end
+local function getExhaustion(unit)
+    local exhaustion = 1
+    if unit.counters2.exhaustion~=0 then
+        exhaustion = 1000/unit.counters2.exhaustion
+        return exhaustion
+    end
+    return 1
+end
+
 function getPowerLevel(saiyan)
     local strength,endurance,toughness,spatialsense,kinestheticsense,willpower
 	if saiyan.curse.attr_change then
@@ -30,18 +68,18 @@ function getPowerLevel(saiyan)
 		kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
 		willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
 	end
-	local exhaustion = getExhaustion(saiyan)
-	local bodysize = (saiyan.body.blood_count/100)^2
-	powerlevel = bodysize*((strength*endurance*toughness*spatialsense*kinestheticsense*willpower)^(1/6))*exhaustion
-	if isWinded(saiyan) then powerlevel=powerlevel/1.2 end
-	if isStunned(saiyan) then powerlevel=powerlevel/1.5 end
-	if isParalyzed(saiyan) then powerlevel=powerlevel/5 end
-	if isUnconscious(saiyan) then powerlevel=powerlevel/10 end
-	if powerlevel == 1/0 or unitIsGod(saiyan) then
-		return "immeasurable"
-	else
-		return math.floor(powerlevel)
-	end
+		local exhaustion = getExhaustion(saiyan)
+		local bodysize = (saiyan.body.blood_count/100)^2
+		powerlevel = bodysize*((strength*endurance*toughness*spatialsense*kinestheticsense*willpower)^(1/6))*exhaustion
+		if isWinded(saiyan) then powerlevel=powerlevel/1.2 end
+		if isStunned(saiyan) then powerlevel=powerlevel/1.5 end
+		if isParalyzed(saiyan) then powerlevel=powerlevel/5 end
+		if isUnconscious(saiyan) then powerlevel=powerlevel/10 end
+        if isGod(saiyan) or powerlevel==1/0 then
+            return "immeasurable"
+        else
+            return math.floor(powerlevel+0.5)
+        end
 end
 
 local function positionIsValid(x,y,z)
