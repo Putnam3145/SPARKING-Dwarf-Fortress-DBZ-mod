@@ -384,7 +384,6 @@ repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEv
 function onStateChange(op)
     if op==SC_MAP_LOADED then
         repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
-        repeat_util.scheduleUnlessAlreadyScheduled('DBZ Monthly Check',1,'months',monthlyCheck)
     end
 end
 
