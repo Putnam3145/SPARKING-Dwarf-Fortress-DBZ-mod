@@ -436,7 +436,7 @@ creature_movies_db
 			[GENERAL_MATERIAL_FORCE_MULTIPLIER:1:6]
 			[CASTE_NAME:legendary super saiyan:legendary super saiyan:super saiyan]
 			[DESCRIPTION:Run!]
-			[CAN_DO_INTERACTION:DONOTHING_INTERACTION:]
+			[CAN_DO_INTERACTION:DO_NOTHING_INTERACTION_DB:START:0]
 				[CDI:ADV_NAME:Do this to yourself]
 				[CDI:TARGET:A:SELF_ONLY]
 				[CDI:TARGET_RANGE:A:1]
