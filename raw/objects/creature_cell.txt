@@ -29,6 +29,7 @@ creature_cell
 		[NO_DRINK]
 		[TRAPAVOID]
 		[CREATURE_CLASS:ANDROID]
+        [CREATURE_CLASS:ZENKAI]
 		[SELECT_MATERIAL:ARMOR] mithril from LFR, with permission
 		 [PLUS_MATERIAL:NAIL]
 			[IMPACT_YIELD:1505000]

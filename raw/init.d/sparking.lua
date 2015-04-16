@@ -1,3 +1,10 @@
+local function unitHasCreatureClass(unit,class)
+    for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
+        if class.value == class then return true end
+    end
+    return false
+end
+
 local function superSaiyanGodSyndrome()
     for syn_id,syndrome in ipairs(df.global.world.raws.syndromes.all) do
         if syndrome.syn_name == "Super Saiyan God" then return syndrome end
@@ -349,8 +356,8 @@ function unitHasZenkaiAlready(unit,set)
 end
 
 dbEvents.onUnitGravelyInjured.zenkai=function(unit)
-    if df.creature_raw.find(unit.race).creature_id~="SAIYAN" or unitHasZenkaiAlready(unit) then return false end
-    local zenkaiMultiplier=math.log(((unit.body.blood_max*.75)/unit.body.blood_count)*math.exp(1)) --yeah, don't want too much of a bonus
+    if not unitHasCreatureClass('ZENKAI') or unitHasZenkaiAlready(unit) then return false end
+    local zenkaiMultiplier=math.sqrt((unit.body.blood_max*.75)/unit.body.blood_count)
     for k,v in ipairs(unit.body.physical_attrs) do
         v.value=dbRound(v.value*zenkaiMultiplier)
         v.max_value=dbRound(v.max_value*zenkaiMultiplier)
