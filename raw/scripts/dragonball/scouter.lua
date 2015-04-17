@@ -17,9 +17,8 @@ local function unitIsGod(unit)
     for _,class in ipairs(unitclasses) do
         if class.value == "GOD" then return true end
     end
-    for _,u_syndrome in ipairs(unit.syndromes.active) do
-        local syndrome = df.global.world.raws.syndromes.all[u_syndrome.type]
-        for _,synclass in ipairs(syndrome.syn_class) do
+    for _,syndrome in ipairs(unit.syndromes.active) do
+        for _,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
             if synclass.value == "GOD" then return true end
         end
     end

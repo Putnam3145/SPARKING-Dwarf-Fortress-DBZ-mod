@@ -1,3 +1,16 @@
+local function unitCanUseKi(unit)
+    for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
+        if class.value == 'NATURAL_KI' then return true end
+    end
+    for _,syndrome in ipairs(unit.syndromes.active) do
+        for _,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
+            if synclass.value == "KI" then return true end
+        end
+    end
+    return false
+end
+
+
 function calculate_max_ki(unit)
     local strength,endurance,toughness,spatialsense,kinestheticsense,willpower,agility
 	if unit.curse.attr_change then
@@ -22,26 +35,47 @@ function calculate_max_ki(unit)
 end
 
 function init_ki(unit)
+    if not unitCanUseKi() then
+        return false
+    end
     local unitKi=dfhack.persistent.save({key='DBZ_KI_'..unit.id})
+    if unitKi.ints[2]>0 then
+        return unitKi.ints[2]
+    end
     local maxKi=calculate_max_ki(unit)
     unitKi.ints[2]=maxKi
     unitKi.ints[1]=maxKi
     unitKi:save()
+    return unitKi.ints[2]
+end
+
+function get_unit_ki_persist(unit)
+    if not init_ki(unit) then
+        local notActuallyAKiTable={ints={0,0}}
+        notActuallyAKiTable.save=function(self)
+            return false
+        end
+        return notActuallyAKiTable
+    end
+    return dfhack.persistent.save({key='DBZ_KI_'..unit.id})
 end
 
 function get_ki(unit)
+    if not init_ki(unit) then
+        return 0
+    end
     return dfhack.persistent.get({key='DBZ_KI'..unit.id}).ints[1]
 end
 
 function adjust_max_ki(unit,amount)
-    local unitKi=dfhack.persistent.save({key='DBZ_KI_'..unit.id})
+    local unitKi=get_unit_ki_persist(unit)
     unitKi.ints[2]=unitKi.ints[2]+amount
     unitKi:save()
     return unitKi.ints[2]
 end
 
 function adjust_ki(unit,amount,force)
-    local unitKi=dfhack.persistent.save({key='DBZ_KI_'..unit.id})
+    local unitKi=get_unit_ki_persist(unit)
     if unitKi.ints[1]+amount<0 then
         if not force then
             return false
