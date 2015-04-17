@@ -335,7 +335,7 @@ local dbEvents={
 }
     
 function dbRound(num)
-    return num%1<.5 and math.floor(num) or math.ceil(num)
+    return math.floor(num+0.5)
 end
 
 function checkIfUnitStillGravelyInjuredForZenkai(unit)
@@ -376,14 +376,19 @@ dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
     end
 end
 
+function chargeKi(unit)
+    local ki=dfhack.script_environment('dragonball/ki')
+    ki.adjust_ki(unit,math.ceil(ki.get_ki(unit)/36))
+end
+
 function checkEveryUnitRegularlyForEvents()
-    local delayTicks=1
     for k,v in ipairs(df.global.world.units.active) do
         if v.body.blood_count<v.body.blood_max*.75 then 
             dbEvents.onUnitGravelyInjured(v)
         end
         checkIfUnitStillGravelyInjuredForZenkai(v)
         checkOverflows(v)
+        chargeKi(v)
     end
 end
 
