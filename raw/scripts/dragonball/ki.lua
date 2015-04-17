@@ -12,26 +12,14 @@ end
 
 
 function calculate_max_ki(unit)
-    local strength,endurance,toughness,spatialsense,kinestheticsense,willpower,agility
-	if unit.curse.attr_change then
-		strength = ((unit.body.physical_attrs.STRENGTH.value+unit.curse.attr_change.phys_att_add.STRENGTH))*(unit.curse.attr_change.phys_att_perc.STRENGTH/100)
-		endurance = ((unit.body.physical_attrs.ENDURANCE.value+unit.curse.attr_change.phys_att_add.ENDURANCE))*(unit.curse.attr_change.phys_att_perc.ENDURANCE/100)
-		toughness = ((unit.body.physical_attrs.TOUGHNESS.value+unit.curse.attr_change.phys_att_add.TOUGHNESS))*(unit.curse.attr_change.phys_att_perc.TOUGHNESS/100)
-		spatialsense = ((unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value+unit.curse.attr_change.ment_att_add.SPATIAL_SENSE))*(unit.curse.attr_change.ment_att_perc.SPATIAL_SENSE/100)
-		kinestheticsense = ((unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+unit.curse.attr_change.ment_att_add.KINESTHETIC_SENSE))*(unit.curse.attr_change.ment_att_perc.KINESTHETIC_SENSE/100)
-		willpower = ((unit.status.current_soul.mental_attrs.WILLPOWER.value+unit.curse.attr_change.ment_att_add.WILLPOWER))*(unit.curse.attr_change.ment_att_perc.WILLPOWER/100)
-        agility = (unit.body.physical_attrs.AGILITY.value+unit.curse.attr_change.phys_att_add.AGILITY)*(unit.curse.attr_change.phys_att_perc.AGILITY/100)
-	else
-		strength = unit.body.physical_attrs.STRENGTH.value
-		endurance = unit.body.physical_attrs.ENDURANCE.value
-		toughness = unit.body.physical_attrs.TOUGHNESS.value
-        agility = unit.body.physical_attrs.AGILITY.value
-		spatialsense = unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value
-		kinestheticsense = unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value
-		willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
-	end
-	local bodysize = unit.body.blood_count
-	return math.floor(bodysize+strength+endurance+agility+toughness+spatialsense+kinestheticsense+willpower) -- Because hard work should matter as much as natural ability, eh?
+    local strength = unit.body.physical_attrs.STRENGTH.value/1000
+    local endurance = unit.body.physical_attrs.ENDURANCE.value/1000
+    local toughness = unit.body.physical_attrs.TOUGHNESS.value/1000
+    local spatialsense = unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1000
+    local kinestheticsense = unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
+    local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value/1000
+    local focus = unit.status.current_soul.mental_attrs.FOCUS.value/1000
+    return math.floor(((strength+endurance+agility+toughness+spatialsense+kinestheticsense+willpower+focus)*(1000/7))+.5) -- Because hard work should matter as much as natural ability, eh?
 end
 
 function init_ki(unit)
