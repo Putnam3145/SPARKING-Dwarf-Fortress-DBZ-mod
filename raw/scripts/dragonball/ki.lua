@@ -37,7 +37,7 @@ function init_ki(unit_id)
     local maxKi=calculate_max_ki(unit_id)
     unitKi.ints[2]=maxKi
     unitKi.ints[1]=maxKi
-    unitKi.ints[3]=100
+    unitKi.ints[3]=1000
     unitKi:save()
     return unitKi.ints[2]
 end

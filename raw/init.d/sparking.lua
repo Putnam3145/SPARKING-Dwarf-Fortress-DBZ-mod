@@ -94,7 +94,7 @@ local function getInorganic(item)
 end
 
 local function tailClipSyndrome()
-    return df.global.world.raws.inorganics[dfhack.matinfo.find("DB_DFHACK_SYNDROME_HOLDER").index].material.syndrome[0].id --that's a doozy, hehe
+    return df.global.world.raws.inorganics[dfhack.matinfo.find("DB_DFHACK_SYNDROME_HOLDER").index].material.syndrome[0].id
 end
 
 local function giveName(unit,nameCopy)
@@ -230,7 +230,7 @@ local function fuseUnits(unit1,unit2)
     end)
 end
 
-events=require 'plugins.eventful'
+eventful=require 'plugins.eventful'
 dialog=require 'gui.dialogs'
 script=require 'gui.script'
 
@@ -257,7 +257,7 @@ local function fusion(reaction,unit,input_items,input_reagents,output_items,call
     call_native.value=false
 end
 
-events.registerReaction("LUA_HOOK_FUSION_DB",fusion)
+eventful.registerReaction("LUA_HOOK_FUSION_DB",fusion)
 
 local function fixOverflow(a)
     return (a<0) and 2^30-1 or a
@@ -290,7 +290,7 @@ end
 
 kamehamehaMat=dfhack.matinfo.find("KAMEHAMEHA_DB")
 
-events.onProjItemCheckMovement.dragonball=function(projectile)
+eventful.onProjItemCheckMovement.dragonball=function(projectile)
     if dfhack.matinfo.decode(projectile.item)==kamehamehaMat then 
         dfhack.maps.spawnFlow(projectile.cur_pos,3,0,kamehamehaMat.index,400)
     end
@@ -328,7 +328,7 @@ function claimSite(reaction,unit,input_items,input_reagents,output_items,call_na
     dialog.showInputPrompt("Site name", "Select a name for a new site:", nil,nil, dfhack.curry(add_site,1,unit.civ_id,0))
     call_native.value=false
 end
-events.registerReaction("LUA_HOOK_MAKE_SITE3x3",claimSite)
+eventful.registerReaction("LUA_HOOK_MAKE_SITE3x3",claimSite)
 
 local dbEvents={
     onUnitGravelyInjured=dfhack.event.new()
@@ -379,7 +379,7 @@ end
 
 function chargeKi(unit_id)
     local ki=dfhack.script_environment('dragonball/ki')
-    ki.adjust_ki(unit_id,math.ceil(ki.get_ki(unit_id)/36))
+    ki.adjust_ki(unit_id,math.ceil(ki.get_ki(unit_id)/20))
 end
 
 function checkEveryUnitRegularlyForEvents()
@@ -430,6 +430,30 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
         ki.adjust_max_ki(unit_id,math.floor((prepareCost+recoverCost+kiInvestment)/100))
     end
 end
+
+function getSyndromeKiBoost(syndrome)
+    local kiBoost,investmentFraction,kiBoostTime=false,100,5000
+    for k,v in ipairs(syndrome.syn_class) do
+        if v.value:find('KI_BOOST_') then
+            kiBoost=tonumber(v.value:sub(10))
+        elseif v.value:find('KI_INVEST_FRACTION_') then
+            investmentFraction=tonumber(v.value:sub(20))
+        elseif v.value:find('KI_TIME_') then
+            kiBoostTime=tonumber(v.value:sub(9))
+        end
+    end
+    return kiBoost,investmentFraction,kiBoostTime
+end
+
+eventful.onSyndrome.ki_boost=function(unit_id,syndrome_id)
+    local syndrome=df.syndrome.find(syndrome_id)
+    local kiBoost,investmentFraction,kiBoostTime=getSyndromeKiBoost(syndrome)
+    if kiBoost then
+        dfhack.run_script('dragonball/ki_boost','-unit',unit_id,'-boost',kiBoost,'-fraction',investmentFraction,'-time',kiBoostTime)
+    end
+end
+
+eventful.enableEvent(eventful.eventType.SYNDROME,5)
 
 function onStateChange(op)
     if op==SC_MAP_LOADED then
