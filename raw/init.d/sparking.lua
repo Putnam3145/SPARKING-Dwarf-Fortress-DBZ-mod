@@ -94,7 +94,7 @@ local function getInorganic(item)
 end
 
 local function tailClipSyndrome()
-    return df.global.world.raws.inorganics[dfhack.matinfo.find("DB_DFHACK_SYNDROME_HOLDER").index].material.syndrome[0].id --that's a doozy, hehe
+    return df.global.world.raws.inorganics[dfhack.matinfo.find("DB_DFHACK_SYNDROME_HOLDER").index].material.syndrome[0].id
 end
 
 local function giveName(unit,nameCopy)
@@ -230,7 +230,7 @@ local function fuseUnits(unit1,unit2)
     end)
 end
 
-events=require 'plugins.eventful'
+eventful=require 'plugins.eventful'
 dialog=require 'gui.dialogs'
 script=require 'gui.script'
 
@@ -257,7 +257,7 @@ local function fusion(reaction,unit,input_items,input_reagents,output_items,call
     call_native.value=false
 end
 
-events.registerReaction("LUA_HOOK_FUSION_DB",fusion)
+eventful.registerReaction("LUA_HOOK_FUSION_DB",fusion)
 
 local function fixOverflow(a)
     return (a<0) and 2^30-1 or a
@@ -290,7 +290,7 @@ end
 
 kamehamehaMat=dfhack.matinfo.find("KAMEHAMEHA_DB")
 
-events.onProjItemCheckMovement.dragonball=function(projectile)
+eventful.onProjItemCheckMovement.dragonball=function(projectile)
     if dfhack.matinfo.decode(projectile.item)==kamehamehaMat then 
         dfhack.maps.spawnFlow(projectile.cur_pos,3,0,kamehamehaMat.index,400)
     end
@@ -328,14 +328,14 @@ function claimSite(reaction,unit,input_items,input_reagents,output_items,call_na
     dialog.showInputPrompt("Site name", "Select a name for a new site:", nil,nil, dfhack.curry(add_site,1,unit.civ_id,0))
     call_native.value=false
 end
-events.registerReaction("LUA_HOOK_MAKE_SITE3x3",claimSite)
+eventful.registerReaction("LUA_HOOK_MAKE_SITE3x3",claimSite)
 
 local dbEvents={
     onUnitGravelyInjured=dfhack.event.new()
 }
     
 function dbRound(num)
-    return num%1<.5 and math.floor(num) or math.ceil(num)
+    return math.floor(num+0.5)
 end
 
 function checkIfUnitStillGravelyInjuredForZenkai(unit)
@@ -366,6 +366,7 @@ dbEvents.onUnitGravelyInjured.zenkai=function(unit)
         v.value=dbRound(v.value*zenkaiMultiplier)
         v.max_value=dbRound(v.max_value*zenkaiMultiplier)
     end
+    dfhack.script_environment('dragonball/ki').adjust_ki(math.floor(1000*zenkaiMultiplier))
     unitHasZenkaiAlready(unit,true)
 end
 
@@ -376,25 +377,88 @@ dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
     end
 end
 
+function chargeKi(unit_id)
+    local ki=dfhack.script_environment('dragonball/ki')
+    ki.adjust_ki(unit_id,math.ceil(ki.get_ki(unit_id)/20))
+end
+
 function checkEveryUnitRegularlyForEvents()
-    local delayTicks=1
     for k,v in ipairs(df.global.world.units.active) do
         if v.body.blood_count<v.body.blood_max*.75 then 
             dbEvents.onUnitGravelyInjured(v)
         end
         checkIfUnitStillGravelyInjuredForZenkai(v)
         checkOverflows(v)
+        chargeKi(v.id)
     end
 end
 
 
-local repeat_util=require('repeat-util')
+dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_actions=function(unit_id,action)
+    if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
+    if action.type==df.unit_action_type.Move then
+        local ki=dfhack.script_environment('dragonball/ki')
+        local kiInvestment=ki.get_ki_investment(unit_id)
+        local amountOfKiLost=(action.data.move.timer-1)*10
+        if amountOfKiLost>kiInvestment then
+            local timerInit=action.data.move.timer --won't use the actual timer_init value since that may not be equal to current timer on check
+            action.data.move.timer=action.data.move.timer-math.floor(kiInvestment/10)
+            ki.adjust_ki(unit_id,(timerInit-action.data.move.timer)*-10)
+        else
+            ki.adjust_ki(unit_id,(action.data.move.timer-1)*-10)
+            kiInvestment=kiInvestment+((action.data.move.timer-1)*-10)
+            action.data.move.timer=1
+            local curFatigue=action.data.move.fatigue
+            action.data.move.fatigue=math.max(action.data.move.fatigue-(math.floor(kiInvestment/5)),0)
+            ki.adjust_ki(unit_id,(action.data.move.fatigue-curFatigue)*5)
+            ki.adjust_max_ki(unit_id,math.floor(dfhack.random.new():drandom()+.1))
+        end
+    elseif action.type==df.unit_action_type.Attack then
+        local ki=dfhack.script_environment('dragonball/ki')
+        local kiInvestment=ki.get_ki_investment(unit_id)
+        local prepare,recover=action.data.attack.timer1,action.data.attack.timer2
+        action.data.attack.timer1=math.max(prepare-(math.floor(kiInvestment/50)),1)
+        local prepareCost=(prepare-action.data.attack.timer1)*-50
+        ki.adjust_ki(unit_id,prepareCost)
+        kiInvestment=kiInvestment-prepareCost
+        action.data.attack.timer2=math.max(recover-(math.floor(kiInvestment/50)),0)
+        local recoverCost=(recover-action.data.attack.timer2)*-50
+        ki.adjust_ki(unit_id,recoverCost)
+        kiInvestment=kiInvestment-recoverCost
+        action.data.attack.unk_30=action.data.attack.unk_30+kiInvestment --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
+        ki.adjust_ki(unit_id,-kiInvestment)
+        ki.adjust_max_ki(unit_id,math.floor((prepareCost+recoverCost+kiInvestment)/100))
+    end
+end
 
-repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
+function getSyndromeKiBoost(syndrome)
+    local kiBoost,investmentFraction,kiBoostTime=false,100,5000
+    for k,v in ipairs(syndrome.syn_class) do
+        if v.value:find('KI_BOOST_') then
+            kiBoost=tonumber(v.value:sub(10))
+        elseif v.value:find('KI_INVEST_FRACTION_') then
+            investmentFraction=tonumber(v.value:sub(20))
+        elseif v.value:find('KI_TIME_') then
+            kiBoostTime=tonumber(v.value:sub(9))
+        end
+    end
+    return kiBoost,investmentFraction,kiBoostTime
+end
+
+eventful.onSyndrome.ki_boost=function(unit_id,syndrome_id)
+    local syndrome=df.syndrome.find(syndrome_id)
+    local kiBoost,investmentFraction,kiBoostTime=getSyndromeKiBoost(syndrome)
+    if kiBoost then
+        dfhack.run_script('dragonball/ki_boost','-unit',unit_id,'-boost',kiBoost,'-fraction',investmentFraction,'-time',kiBoostTime)
+    end
+end
+
+eventful.enableEvent(eventful.eventType.SYNDROME,5)
 
 function onStateChange(op)
     if op==SC_MAP_LOADED then
-        repeat_util.scheduleUnlessAlreadyScheduled('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
+        dfhack.script_environment('dragonball/unit_action_check').enableEvent()
+        require('repeat-util').scheduleEvery('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
     end
 end
 
