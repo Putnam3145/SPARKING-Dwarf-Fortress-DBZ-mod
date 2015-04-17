@@ -3,3 +3,12 @@ keybinding add Ctrl-X@dungeonmode/Default gui/advfort
 keybinding add Ctrl-X@dungeonmode/Look gui/advfort
 keybinding add Ctrl-T@dungeonmode dragonball/instant_transmission
 modtools/interaction-trigger -suppressAttack -suppressDefend -onDefendStr "lssj" -command [ dragonball/legendary_super_saiyan -unit \\DEFENDER_ID ]
+modtools/syndrome-trigger -syndrome "Kaioken x2" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 2 -time 5000 -fraction 50 ]
+modtools/syndrome-trigger -syndrome "Kaioken x5" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 5 -time 5000 -fraction 40 ]
+modtools/syndrome-trigger -syndrome "Kaioken x10" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 10 -time 5000 -fraction 20 ]
+modtools/syndrome-trigger -syndrome "Kaioken x20" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 20 -time 5000 -fraction 10 ]
+modtools/syndrome-trigger -syndrome "Super Saiyan" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 50 -time 5000 -fraction 70 ]
+modtools/syndrome-trigger -syndrome "Super Saiyan 2" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 100 -time 5000 -fraction 50 ]
+modtools/syndrome-trigger -syndrome "Super Saiyan 3" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 400 -time 5000 -fraction 30 ]
+modtools/syndrome-trigger -syndrome "super saiyan god" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 4000 -time 2000 -fraction 20 ]
+modtools/syndrome-trigger -syndrome "beerus god" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 4000 -time 0 ]
