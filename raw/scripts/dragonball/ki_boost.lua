@@ -23,6 +23,8 @@ local old_ki=ki.get_ki(unit)
 
 ki.adjust_ki(unit,ki.(old_ki*args.boost)-old_ki)
 
+ki.set_ki_investment(unit,args.fraction)
+
 dfhack.timeout(args.time,'ticks',function() ki.adjust_max_ki(unit,-old_max*args.boost) ki.adjust_ki(unit,-old_ki*args.boost) end)
 
 dfhack.persistent.save({key='KI_BOOST/'..unit,ints={args.unit,args.old_max}))

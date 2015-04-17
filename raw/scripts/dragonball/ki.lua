@@ -1,5 +1,6 @@
 local function unitCanUseKi(unit_id)
     local unit = df.unit.find(unit_id)
+    if not unit then return false end
     for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
         if class.value == 'NATURAL_KI' then return true end
     end
@@ -15,6 +16,7 @@ end
 function calculate_max_ki(unit_id)
     local unit = df.unit.find(unit_id)
     local strength = unit.body.physical_attrs.STRENGTH.value/1000
+    local agility = unit.body.physical_attrs.AGILITY.value/1000
     local endurance = unit.body.physical_attrs.ENDURANCE.value/1000
     local toughness = unit.body.physical_attrs.TOUGHNESS.value/1000
     local spatialsense = unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1000
@@ -35,14 +37,14 @@ function init_ki(unit_id)
     local maxKi=calculate_max_ki(unit_id)
     unitKi.ints[2]=maxKi
     unitKi.ints[1]=maxKi
-    unitKi.ints[3]=1/100
+    unitKi.ints[3]=100
     unitKi:save()
     return unitKi.ints[2]
 end
 
 function get_unit_ki_persist_entry(unit_id)
     if not init_ki(unit_id) then
-        local notActuallyAKiTable={ints={0,0}}
+        local notActuallyAKiTable={ints={0,0,1}}
         notActuallyAKiTable.save=function(self)
             return false
         end
@@ -53,12 +55,12 @@ end
 
 function get_ki_investment(unit_id)
     local unitKi = get_unit_ki_persist_entry(unit_id)
-    return math.min(math.ceil(unitKi.ints[2]*unitKi.ints[3]),unitKi.ints[1])
+    return math.min(math.ceil(unitKi.ints[2]/unitKi.ints[3]),unitKi.ints[1])
 end
 
-function set_ki_investment(unit_id,percentage)
+function set_ki_investment(unit_id,fraction)
     local unitKi = get_unit_ki_persist_entry(unit_id)
-    unitKi.ints[3]=percentage
+    unitKi.ints[3]=fraction
     unitKi:save()
     return unitKi.ints[3]
 end
@@ -67,14 +69,14 @@ function get_ki(unit_id)
     if not init_ki(unit_id) then
         return 0
     end
-    return get_unit_ki_persist_entry.ints[1]
+    return get_unit_ki_persist_entry(unit_id).ints[1]
 end
 
 function get_max_ki(unit_id)
     if not init_ki(unit_id) then
         return 0
     end
-    return get_unit_ki_persist_entry.ints[2]
+    return get_unit_ki_persist_entry(unit_id).ints[2]
 end
 
 function adjust_max_ki(unit_id,amount,set)

@@ -13,7 +13,7 @@ local function checkForActions()
     for k,unit in ipairs(df.global.world.units.active) do
         for _,action in ipairs(unit.actions) do
             if not action_already_checked(unit.id,action.id) then
-                onUnitAction(unit,action)
+                onUnitAction(unit.id,action)
                 actions_already_checked[unit.id]=actions_already_checked[unit.id] or {}
                 actions_already_checked[unit.id][action.id]=true
             end

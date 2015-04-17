@@ -366,6 +366,7 @@ dbEvents.onUnitGravelyInjured.zenkai=function(unit)
         v.value=dbRound(v.value*zenkaiMultiplier)
         v.max_value=dbRound(v.max_value*zenkaiMultiplier)
     end
+    dfhack.script_environment('dragonball/ki').adjust_ki(math.floor(1000*zenkaiMultiplier))
     unitHasZenkaiAlready(unit,true)
 end
 
@@ -376,9 +377,9 @@ dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
     end
 end
 
-function chargeKi(unit)
+function chargeKi(unit_id)
     local ki=dfhack.script_environment('dragonball/ki')
-    ki.adjust_ki(unit,math.ceil(ki.get_ki(unit)/36))
+    ki.adjust_ki(unit_id,math.ceil(ki.get_ki(unit_id)/36))
 end
 
 function checkEveryUnitRegularlyForEvents()
@@ -388,44 +389,45 @@ function checkEveryUnitRegularlyForEvents()
         end
         checkIfUnitStillGravelyInjuredForZenkai(v)
         checkOverflows(v)
-        chargeKi(v)
+        chargeKi(v.id)
     end
 end
 
 
-dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_actions=function(unit,action)
+dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_actions=function(unit_id,action)
+    if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
     if action.type==df.unit_action_type.Move then
         local ki=dfhack.script_environment('dragonball/ki')
-        local kiInvestment=ki.get_ki_investment(unit)
+        local kiInvestment=ki.get_ki_investment(unit_id)
         local amountOfKiLost=(action.data.move.timer-1)*10
         if amountOfKiLost>kiInvestment then
             local timerInit=action.data.move.timer --won't use the actual timer_init value since that may not be equal to current timer on check
             action.data.move.timer=action.data.move.timer-math.floor(kiInvestment/10)
-            ki.adjust_ki(unit,(timerInit-action.data.move.timer)*-10)
+            ki.adjust_ki(unit_id,(timerInit-action.data.move.timer)*-10)
         else
-            ki.adjust_ki(unit,(action.data.move.timer-1)*-10)
+            ki.adjust_ki(unit_id,(action.data.move.timer-1)*-10)
             kiInvestment=kiInvestment+((action.data.move.timer-1)*-10)
             action.data.move.timer=1
             local curFatigue=action.data.move.fatigue
             action.data.move.fatigue=math.max(action.data.move.fatigue-(math.floor(kiInvestment/5)),0)
-            ki.adjust_ki(unit,(action.data.move.fatigue-curFatigue)*5)
-            ki.adjust_max_ki(unit,math.floor(dfhack.random.new():drandom()+.1))
+            ki.adjust_ki(unit_id,(action.data.move.fatigue-curFatigue)*5)
+            ki.adjust_max_ki(unit_id,math.floor(dfhack.random.new():drandom()+.1))
         end
     elseif action.type==df.unit_action_type.Attack then
         local ki=dfhack.script_environment('dragonball/ki')
-        local kiInvestment=ki.get_ki_investment(unit)
+        local kiInvestment=ki.get_ki_investment(unit_id)
         local prepare,recover=action.data.attack.timer1,action.data.attack.timer2
         action.data.attack.timer1=math.max(prepare-(math.floor(kiInvestment/50)),1)
         local prepareCost=(prepare-action.data.attack.timer1)*-50
-        ki.adjust_ki(unit,prepareCost)
+        ki.adjust_ki(unit_id,prepareCost)
         kiInvestment=kiInvestment-prepareCost
         action.data.attack.timer2=math.max(recover-(math.floor(kiInvestment/50)),0)
         local recoverCost=(recover-action.data.attack.timer2)*-50
-        ki.adjust_ki(unit,recoverCost)
+        ki.adjust_ki(unit_id,recoverCost)
         kiInvestment=kiInvestment-recoverCost
         action.data.attack.unk_30=action.data.attack.unk_30+kiInvestment --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
-        ki.adjust_ki(unit,-kiInvestment)
-        ki.adjust_max_ki(math.floor((prepareCost+recoverCost+kiInvestment)/100))
+        ki.adjust_ki(unit_id,-kiInvestment)
+        ki.adjust_max_ki(unit_id,math.floor((prepareCost+recoverCost+kiInvestment)/100))
     end
 end
 

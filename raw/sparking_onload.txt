@@ -6,7 +6,6 @@ modtools/interaction-trigger -suppressAttack -suppressDefend -onDefendStr "lssj"
 modtools/syndrome-trigger -syndrome "Kaioken x2" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 2 -time 5000 -fraction 50 ]
 modtools/syndrome-trigger -syndrome "Kaioken x5" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 5 -time 5000 -fraction 40 ]
 modtools/syndrome-trigger -syndrome "Kaioken x10" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 10 -time 5000 -fraction 20 ]
-modtools/syndrome-trigger -syndrome "Kaioken x20" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 20 -time 5000 -fraction 10 ]
 modtools/syndrome-trigger -syndrome "Super Saiyan" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 50 -time 5000 -fraction 70 ]
 modtools/syndrome-trigger -syndrome "Super Saiyan 2" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 100 -time 5000 -fraction 50 ]
 modtools/syndrome-trigger -syndrome "Super Saiyan 3" -command [ dragonball/ki_boost -unit \\UNIT_ID -boost 400 -time 5000 -fraction 30 ]
