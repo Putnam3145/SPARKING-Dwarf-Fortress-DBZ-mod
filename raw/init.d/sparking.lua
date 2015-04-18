@@ -411,7 +411,6 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
             local curFatigue=action.data.move.fatigue
             action.data.move.fatigue=math.max(action.data.move.fatigue-(math.floor(kiInvestment/5)),0)
             ki.adjust_ki(unit_id,(action.data.move.fatigue-curFatigue)*5)
-            ki.adjust_max_ki(unit_id,math.floor(dfhack.random.new():drandom()+.1))
         end
     elseif action.type==df.unit_action_type.Attack then
         local ki=dfhack.script_environment('dragonball/ki')
@@ -427,7 +426,6 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
         kiInvestment=kiInvestment-recoverCost
         action.data.attack.unk_30=action.data.attack.unk_30+kiInvestment --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
         ki.adjust_ki(unit_id,-kiInvestment)
-        ki.adjust_max_ki(unit_id,math.floor((prepareCost+recoverCost+kiInvestment)/100))
     end
 end
 

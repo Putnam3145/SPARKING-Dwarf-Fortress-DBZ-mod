@@ -15,15 +15,10 @@ end
 
 function calculate_max_ki(unit_id)
     local unit = df.unit.find(unit_id)
-    local strength = unit.body.physical_attrs.STRENGTH.value/1000
-    local agility = unit.body.physical_attrs.AGILITY.value/1000
-    local endurance = unit.body.physical_attrs.ENDURANCE.value/1000
-    local toughness = unit.body.physical_attrs.TOUGHNESS.value/1000
-    local spatialsense = unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1000
-    local kinestheticsense = unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
-    local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value/1000
-    local focus = unit.status.current_soul.mental_attrs.FOCUS.value/1000
-    return math.floor(((strength+endurance+agility+toughness+spatialsense+kinestheticsense+willpower+focus)*(1000/7))+.5) -- Because hard work should matter as much as natural ability, eh?
+    local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
+    local focus = unit.status.current_soul.mental_attrs.FOCUS.value
+    local endurance = unit.body.physical_attrs.ENDURANCE.value
+    return willpower+focus+endurance
 end
 
 function init_ki(unit_id)
@@ -32,9 +27,21 @@ function init_ki(unit_id)
     end
     local unitKi=dfhack.persistent.save({key='DBZ_KI/'..unit_id})
     if unitKi.ints[2]>0 then
+        local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
+        local focus = unit.status.current_soul.mental_attrs.FOCUS.value
+        local endurance = unit.body.physical_attrs.ENDURANCE.value
+        adjust_max_ki(unit_id,(willpower-unitKi.ints[4])+(focus-unitKi.ints[5])+(endurance-unitKi.ints[6]))
+        unitKi.ints[4]=unit.status.current_soul.mental_attrs.WILLPOWER.value
+        unitKi.ints[5]=unit.status.current_soul.mental_attrs.FOCUS.value
+        unitKi.ints[6]=unit.body.physical_attrs.ENDURANCE.value
+        unitKi:save()
         return unitKi.ints[2]
     end
     local maxKi=calculate_max_ki(unit_id)
+    local unit=df.unit.find(unit_id)
+    unitKi.ints[4]=unit.status.current_soul.mental_attrs.WILLPOWER.value
+    unitKi.ints[5]=unit.status.current_soul.mental_attrs.FOCUS.value
+    unitKi.ints[6]=unit.body.physical_attrs.ENDURANCE.value
     unitKi.ints[2]=maxKi
     unitKi.ints[1]=maxKi
     unitKi.ints[3]=1000
