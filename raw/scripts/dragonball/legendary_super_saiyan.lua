@@ -19,5 +19,4 @@ unit.body.physical_attrs.TOUGHNESS.value=round(unit.body.physical_attrs.TOUGHNES
 unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value=round(unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value*1.01)
 unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value=round(unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value*1.01)
 unit.status.current_soul.mental_attrs.WILLPOWER.value=round(unit.status.current_soul.mental_attrs.WILLPOWER.value*1.01)
-local ki = dfhack.script_environment('dragonball/ki')
-ki.adjust_max_ki(unit.id,ki.get_max_ki(unit.id)*1.01,true)
+unit.status.current_soul.mental_attrs.FOCUS.value=round(unit.status.current_soul.mental_attrs.FOCUS.value*1.01)
