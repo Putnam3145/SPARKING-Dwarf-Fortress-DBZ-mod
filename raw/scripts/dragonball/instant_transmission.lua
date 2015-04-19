@@ -135,7 +135,7 @@ function selectUnit() --taken straight from here, but edited so I can understand
     local tbl={}
     local tunit=df.global.world.units.active[0]
     for k,creature in ipairs(creatures) do
-		local plevel=math.ceil(getPowerLevel(creature))
+		local plevel=pcall(function() math.ceil(getPowerLevel(creature)) end) and math.ceil(getPowerLevel(creature)) or "immeasurable"
 		local racename=df.creature_raw.find(creature.race).caste[creature.caste].caste_name[0]
 		table.insert(tbl,{racename.." "..plevel.." ".. (creature==tunit and "(You!)" or ""),nil,k})
     end
