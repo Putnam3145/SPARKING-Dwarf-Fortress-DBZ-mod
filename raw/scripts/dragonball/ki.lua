@@ -26,6 +26,7 @@ function init_ki(unit_id)
         return false
     end
     local unitKi=dfhack.persistent.save({key='DBZ_KI/'..unit_id})
+    local unit=df.unit.find(unit_id)
     if unitKi.ints[2]>0 then
         local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
         local focus = unit.status.current_soul.mental_attrs.FOCUS.value
@@ -38,7 +39,6 @@ function init_ki(unit_id)
         return unitKi.ints[2]
     end
     local maxKi=calculate_max_ki(unit_id)
-    local unit=df.unit.find(unit_id)
     unitKi.ints[4]=unit.status.current_soul.mental_attrs.WILLPOWER.value
     unitKi.ints[5]=unit.status.current_soul.mental_attrs.FOCUS.value
     unitKi.ints[6]=unit.body.physical_attrs.ENDURANCE.value

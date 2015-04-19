@@ -415,16 +415,17 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
     elseif action.type==df.unit_action_type.Attack then
         local ki=dfhack.script_environment('dragonball/ki')
         local kiInvestment=ki.get_ki_investment(unit_id)
+        local curKiInvestment=kiInvestment
         local prepare,recover=action.data.attack.timer1,action.data.attack.timer2
-        action.data.attack.timer1=math.max(prepare-(math.floor(kiInvestment/50)),1)
-        local prepareCost=(prepare-action.data.attack.timer1)*-50
-        ki.adjust_ki(unit_id,prepareCost)
-        kiInvestment=kiInvestment-prepareCost
-        action.data.attack.timer2=math.max(recover-(math.floor(kiInvestment/50)),0)
-        local recoverCost=(recover-action.data.attack.timer2)*-50
-        ki.adjust_ki(unit_id,recoverCost)
-        kiInvestment=kiInvestment-recoverCost
-        action.data.attack.unk_30=action.data.attack.unk_30+kiInvestment --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
+        action.data.attack.timer1=math.max(prepare-(math.floor(curKiInvestment/50)),1)
+        local prepareCost=(action.data.attack.timer1-prepare)*-50
+        curKiInvestment=curKiInvestment-prepareCost
+        action.data.attack.timer2=math.max(recover-(math.floor(curKiInvestment/50)),0)
+        local recoverCost=(action.data.attack.timer2-recover)*-50
+        curKiInvestment=curKiInvestment-recoverCost
+        action.data.attack.unk_30=action.data.attack.unk_30+curKiInvestment --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
+        local ki_mat=dfhack.matinfo.find('KI')
+        dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.materialGas,ki_mat.type,ki_mat.index,curKiInvestment)
         ki.adjust_ki(unit_id,-kiInvestment)
     end
 end
