@@ -360,7 +360,7 @@ function averageTo1(num)
 end
 
 dbEvents.onUnitGravelyInjured.zenkai=function(unit)
-    if not unitHasCreatureClass('ZENKAI') or unitHasZenkaiAlready(unit) then return false end
+    if not unitHasCreatureClass(unit,'ZENKAI') or unitHasZenkaiAlready(unit) then return false end
     local zenkaiMultiplier=averageTo1(averageTo1(math.sqrt((unit.body.blood_max*.75)/unit.body.blood_count)))
     for k,v in ipairs(unit.body.physical_attrs) do
         v.value=dbRound(v.value*zenkaiMultiplier)

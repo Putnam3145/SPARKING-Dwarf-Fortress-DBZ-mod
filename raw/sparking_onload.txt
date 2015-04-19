@@ -1,4 +1,4 @@
-modtools/interaction-trigger -suppressAttack -onAttackStr "test for super saiyan" -command [ dragonball/super_saiyan_trigger -unit \\ATTACKER_ID]
+modtools/interaction-trigger -suppressAttack -onAttackStr "test for super saiyan" -command [ dragonball/super_saiyan_trigger -unit \\ATTACKER_ID ]
 keybinding add Ctrl-X@dungeonmode/Default gui/advfort
 keybinding add Ctrl-X@dungeonmode/Look gui/advfort
 keybinding add Ctrl-T@dungeonmode dragonball/instant_transmission
