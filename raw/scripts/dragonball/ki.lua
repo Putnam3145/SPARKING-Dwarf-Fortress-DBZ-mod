@@ -31,7 +31,7 @@ function init_ki(unit_id)
         local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
         local focus = unit.status.current_soul.mental_attrs.FOCUS.value
         local endurance = unit.body.physical_attrs.ENDURANCE.value
-        adjust_max_ki(unit_id,(willpower-unitKi.ints[4])+(focus-unitKi.ints[5])+(endurance-unitKi.ints[6]))
+        adjust_max_ki(unit_id,(willpower-unitKi.ints[4])+(focus-unitKi.ints[5])+(endurance-unitKi.ints[6]),false,true)
         unitKi.ints[4]=unit.status.current_soul.mental_attrs.WILLPOWER.value
         unitKi.ints[5]=unit.status.current_soul.mental_attrs.FOCUS.value
         unitKi.ints[6]=unit.body.physical_attrs.ENDURANCE.value
@@ -86,8 +86,8 @@ function get_max_ki(unit_id)
     return get_unit_ki_persist_entry(unit_id).ints[2]
 end
 
-function adjust_max_ki(unit_id,amount,set)
-    local unitKi=get_unit_ki_persist_entry(unit_id)
+function adjust_max_ki(unit_id,amount,set,no_check)
+    local unitKi=no_check and dfhack.persistent.save({key='DBZ_KI/'..unit_id}) or get_unit_ki_persist_entry(unit_id)
     if set then
         unitKi.ints[2]=amount
     else
