@@ -412,6 +412,7 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
             action.data.move.fatigue=math.max(action.data.move.fatigue-(math.floor(kiInvestment/5)),0)
             ki.adjust_ki(unit_id,(action.data.move.fatigue-curFatigue)*5)
         end
+        dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,kiInvestment)
     elseif action.type==df.unit_action_type.Attack then
         local ki=dfhack.script_environment('dragonball/ki')
         local kiInvestment=ki.get_ki_investment(unit_id)
@@ -425,7 +426,7 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
         curKiInvestment=curKiInvestment-recoverCost
         action.data.attack.unk_30=action.data.attack.unk_30+curKiInvestment --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
         local ki_mat=dfhack.matinfo.find('KI')
-        dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.materialGas,ki_mat.type,ki_mat.index,curKiInvestment)
+        dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,kiInvestment)
         ki.adjust_ki(unit_id,-kiInvestment)
     end
 end
