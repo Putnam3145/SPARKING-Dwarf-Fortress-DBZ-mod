@@ -2,7 +2,7 @@ local function unitCanUseKi(unit_id)
     local unit = df.unit.find(unit_id)
     if not unit then return false end
     for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
-        if class.value == 'NATURAL_KI' then return true end
+        if class.value=='NATURAL_KI' then return true end
     end
     for _,syndrome in ipairs(unit.syndromes.active) do
         for _,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
@@ -12,13 +12,22 @@ local function unitCanUseKi(unit_id)
     return false
 end
 
+local function get_ki_multiplier(unit)
+    for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
+        if class.value:find('KI_MULTIPLIER_') then 
+            return tonumber(class.value:sub(15)) or 1
+        end
+    end
+    return 1
+end
 
 function calculate_max_ki(unit_id)
     local unit = df.unit.find(unit_id)
     local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
     local focus = unit.status.current_soul.mental_attrs.FOCUS.value
     local endurance = unit.body.physical_attrs.ENDURANCE.value
-    return willpower+focus+endurance
+    local multiplier=get_ki_multiplier(unit)
+    return (willpower+focus+endurance)*multiplier
 end
 
 function init_ki(unit_id)
@@ -31,7 +40,7 @@ function init_ki(unit_id)
         local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
         local focus = unit.status.current_soul.mental_attrs.FOCUS.value
         local endurance = unit.body.physical_attrs.ENDURANCE.value
-        adjust_max_ki(unit_id,(willpower-unitKi.ints[4])+(focus-unitKi.ints[5])+(endurance-unitKi.ints[6]),false,true)
+        adjust_max_ki(unit_id,((willpower-unitKi.ints[4])+(focus-unitKi.ints[5])+(endurance-unitKi.ints[6]))*unitKi.ints[7],false,true)
         unitKi.ints[4]=unit.status.current_soul.mental_attrs.WILLPOWER.value
         unitKi.ints[5]=unit.status.current_soul.mental_attrs.FOCUS.value
         unitKi.ints[6]=unit.body.physical_attrs.ENDURANCE.value
@@ -42,6 +51,7 @@ function init_ki(unit_id)
     unitKi.ints[4]=unit.status.current_soul.mental_attrs.WILLPOWER.value
     unitKi.ints[5]=unit.status.current_soul.mental_attrs.FOCUS.value
     unitKi.ints[6]=unit.body.physical_attrs.ENDURANCE.value
+    unitKi.ints[7]=get_ki_multiplier(unit)
     unitKi.ints[2]=maxKi
     unitKi.ints[1]=maxKi
     unitKi.ints[3]=1000

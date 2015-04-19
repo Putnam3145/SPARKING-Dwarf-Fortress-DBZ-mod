@@ -5,7 +5,7 @@ creature_cell
 		[DESCRIPTION:A bionic android, called "Cell" by some. It contains the DNA and abilities of the universe's greatest fighters. It can only be killed through the destruction of its nucleus.]
 		[MEGABEAST][ITEMCORPSE:TOOL:DRAGONBALL:NONE:NONE]
 		[DIFFICULTY:15]
-		[ATTACK_TRIGGER:100:5000:50000] Why so low? Spoilers.
+		[ATTACK_TRIGGER:100:5000:50000]
 		[CREATURE_TILE:'C']
 		[COLOR:2:0:1]
 		[CASTE_NAME:bionic android:bionic androids:android]
@@ -25,6 +25,8 @@ creature_cell
 		[USE_TISSUE_TEMPLATE:NAIL:SYNTHARMOR_TEMPLATE]
 		[TISSUE_LAYER:BY_CATEGORY:FINGER:NAIL:FRONT]
 		[TISSUE_LAYER:BY_CATEGORY:TOE:NAIL:FRONT]
+        [CREATURE_CLASS:NATURAL_KI]
+        [CREATURE_CLASS:KI_MULTIPLIER_75] Between SSJ and SSJ2 tier
 		[NO_EAT]
 		[NO_DRINK]
 		[TRAPAVOID]
@@ -62,7 +64,7 @@ creature_cell
 		[NATURAL_SKILL:RANGED_COMBAT:20]
 		[NATURAL_SKILL:MELEE_COMBAT:20]
 		[NATURAL_SKILL:PROSE:20]
-		[BODY_SIZE:0:0:5000000] Between SSJ and SSJ2 tier
+		[BODY_SIZE:0:0:70000]
 		[BIOME:NOT_FREEZING]
 		[APPLY_CREATURE_VARIATION:HUMANOID_MARTIAL_ARTS_MOVES_DRAGONBALL]
 		[APPLY_CURRENT_CREATURE_VARIATION]
@@ -185,8 +187,8 @@ creature_cell
 			[SYN_INGESTED]
 			[SYN_INHALED]
 			[SYN_CONTACT]
-			[SYN_CLASS:CELL_ABSORB_BUFF] not sure why this is here...
-			[SYN_CLASS:\COMMAND][SYN_CLASS:dragonball/cell_absorb][SYN_CLASS:\UNIT_ID] Oh, that's why.
+			[SYN_CLASS:CELL_ABSORB_BUFF]
+			[SYN_CLASS:\COMMAND][SYN_CLASS:dragonball/cell_absorb][SYN_CLASS:\UNIT_ID]
 	[TISSUE:FLESH]
 		[TISSUE_NAME:flesh:NP]
 		[STRUCTURAL]
