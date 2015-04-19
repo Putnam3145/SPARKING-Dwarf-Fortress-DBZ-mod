@@ -52,6 +52,7 @@ creature_saiyan
 				[CE_CAN_DO_INTERACTION:START:0:END:500]
 					[CDI:ADV_NAME:scream]
 					[CDI:INTERACTION:DO_NOTHING_INTERACTION_DB]
+                    [CDI:TARGET:SELF_ONLY]
 					[CDI:VERB:test for super saiyan:test for super saiyan]
                     [CDI:TARGET_VERB:scream:screams:NA]
 					[CDI:VERBAL]
