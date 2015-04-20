@@ -13,19 +13,20 @@ local function superSaiyanGodSyndrome()
 end
 
 local function getPowerLevel(saiyan)
-    local strength = saiyan.body.physical_attrs.STRENGTH.value/3550
+    local strength = saiyan.body.physical_attrs.STRENGTH.value/1000
+    local agility = saiyan.body.physical_attrs.AGILITY.value/1000
     local endurance = saiyan.body.physical_attrs.ENDURANCE.value/1000
-    local toughness = saiyan.body.physical_attrs.TOUGHNESS.value/2250
-    local spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1500
+    local toughness = saiyan.body.physical_attrs.TOUGHNESS.value/1000
+    local spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1000
     local kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
     local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
-    return (strength+endurance+toughness+spatialsense+kinestheticsense+willpower)
+    return (strength+agility+endurance+toughness+spatialsense+kinestheticsense+willpower)/13.85
 end
 
 local function getSuperSaiyanLevel(saiyan)
     if df.creature_raw.find(saiyan.race).creature_id~="SAIYAN" then return 0 end
     local saiyanPowerLevel=getPowerLevel(saiyan)
-    return (saiyanPowerLevel>200) and 3 or (saiyanPowerLevel>100) and 2 or (saiyanPowerLevel>20) and 1 or 0
+    return (saiyanPowerLevel>20) and 3 or (saiyanPowerLevel>10) and 2 or (saiyanPowerLevel>4) and 1 or 0
 end
 
 local function getSuperSaiyanCount()
@@ -66,7 +67,7 @@ local function applySuperSaiyanGodSyndrome()
     if df.global.gamemode==0 then
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
-        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 400 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
+        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 40 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
     end
 end
 
@@ -192,9 +193,6 @@ local function combineBody(unit1,unit2)
         if attribute.value < 0 or attribute.value > 2^31-1 then attribute.value = 2^30 end
         if attribute.max_value < 0 or attribute.max_value > 2^31-1 then attribute.max_value = 2^31-1 end
     end
-    for k,tissue in ipairs(firstBody.size_info) do
-        tissue = tissue + secondBody.size_info[k]
-    end
     for k,modifier in ipairs(firstAppearance.body_modifiers) do
         if #secondAppearance.body_modifiers>k+1 then modifier = math.floor((modifier+secondAppearance.body_modifiers[k])/2) end
     end
@@ -211,7 +209,13 @@ local function combineCounters(unit1,unit2)
     local trait1 = dfhack.units.getMiscTrait(unit1,15,true)
     local trait2 = dfhack.units.getMiscTrait(unit2,15,true)
     local totalValue = trait1.value+trait2.value
-    trait1.value=(totalValue>100) and 100 or totalValue
+    trait1.value=math.min(totalValue,100)
+end
+
+local function combineKi(unit1,unit2)
+    local ki = dfhack.script_environment('dragonball/ki')
+    ki.adjust_max_ki(unit1.id,ki.get_max_ki(unit2.id)*5+ki.get_max_ki(unit1.id)*4)
+    ki.adjust_ki(ki.get_max_ki(unit1.id))
 end
 
 local function fuseUnits(unit1,unit2)
@@ -222,12 +226,7 @@ local function fuseUnits(unit1,unit2)
     combineSoul(unit1,unit2)
     combineBody(unit1,unit2)
     combineCounters(unit1,unit2)
-    unit2.flags1.dead=true
-    dfhack.timeout(1,'ticks',function()
-    unit2.pos.x=-30000
-    unit2.pos.y=-30000
-    unit2.pos.z=-30000
-    end)
+    unit2.animal.vanish_countdown=2
 end
 
 eventful=require 'plugins.eventful'
@@ -263,9 +262,9 @@ local function fixOverflow(a)
     return (a<0) and 2^30-1 or a
 end
 
-local function fixStrengthBug(unit) -- http://www.bay12games.com/dwarves/mantisbt/view.php?id=8333
+local function fixStrengthBug(unit)
     local strength = unit.body.physical_attrs.STRENGTH
-    strength.value=strength.value>2000000 and 2000000 or strength.value
+    strength.value=strength.value>1000000 and 1000000 or strength.value
 end
 
 local function checkOverflows(unit)
