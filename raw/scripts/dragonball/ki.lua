@@ -40,7 +40,7 @@ function init_ki(unit_id)
         local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
         local focus = unit.status.current_soul.mental_attrs.FOCUS.value
         local endurance = unit.body.physical_attrs.ENDURANCE.value
-        adjust_max_ki(unit_id,((willpower-unitKi.ints[4])+(focus-unitKi.ints[5])+(endurance-unitKi.ints[6]))*unitKi.ints[7],false,true)
+        unitKi.ints[2]=unitKi.ints[2]+(((willpower-unitKi.ints[4])+(focus-unitKi.ints[5])+(endurance-unitKi.ints[6]))*unitKi.ints[7])
         unitKi.ints[4]=unit.status.current_soul.mental_attrs.WILLPOWER.value
         unitKi.ints[5]=unit.status.current_soul.mental_attrs.FOCUS.value
         unitKi.ints[6]=unit.body.physical_attrs.ENDURANCE.value
