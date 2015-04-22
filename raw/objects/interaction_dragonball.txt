@@ -326,6 +326,7 @@ interaction_dragonball
                 [CE_CAN_DO_INTERACTION:START:0]
                     [CDI:ADV_NAME:Transform into a super saiyan god super saiyan!]
                     [CDI:INTERACTION:SUPER_SAIYAN]
+                    [CDI:TARGET:A:LINE_OF_SIGHT]
                     [CDI:TARGET:B:SELF_ONLY]
                     [CDI:USAGE_HINT:ATTACK]
                     [CDI:TARGET_RANGE:B:1]
