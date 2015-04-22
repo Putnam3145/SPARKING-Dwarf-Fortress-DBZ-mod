@@ -57,7 +57,6 @@ inorganic_syndromes_dragonball
             [CDI:TARGET:A:LINE_OF_SIGHT]
 			[CDI:TARGET:B:SELF_ONLY]
 			[CDI:USAGE_HINT:ATTACK]
-			[CDI:MAX_TARGET_NUMBER:B:1]
 			[CDI:VERBAL_SPEECH:supersaiyan.txt]
 			[CDI:VERB:have transformed into a Super Saiyan:has transformed into a Super Saiyan:NA]
 			[CDI:WAIT_PERIOD:10000]

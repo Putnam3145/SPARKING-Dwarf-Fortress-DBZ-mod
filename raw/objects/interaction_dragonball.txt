@@ -331,9 +331,8 @@ interaction_dragonball
                     [CDI:USAGE_HINT:ATTACK]
                     [CDI:TARGET_RANGE:B:1]
                     [CDI:MAX_TARGET_NUMBER:B:1]
-                    [CDI:VERBAL_SPEECH:supersaiyan.txt]
-                    [CDI:VERB:feel an incredible power flowing through you, as your hair and eyes turn cyan and rocks slowly start flying from the ground:suddenly has cyan hair, cyan eyes and incredible power]
-                    [CDI:TARGET_VERB:have transformed into a Super Saiyan God Super Saiyan:has transformed into a Super Saiyan God Super Saiyan]
+                    [CDI:VERBAL_SPEECH:supersaiyangod.txt]
+                    [CDI:VERB:have transformed into a Super Saiyan God Super Saiyan:has transformed into a Super Saiyan God Super Saiyan:NA]
                     [CDI:WAIT_PERIOD:10000]
 				
 [INTERACTION:SUPER_SAIYAN_GOD_SUPER_SAIYAN]
