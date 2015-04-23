@@ -53,18 +53,31 @@ function runSuperSaiyanChecksExtremeEmotion(unit_id)
     end
 end
 
-function runSuperSaiyanChecks(unit)
+function runSuperSaiyanChecks(unit_id)
+    local unit=df.unit.find(unit_id)
     local powerLevel=getPowerLevel(unit)
     if powerLevel>30 then
+        if not unitHasSyndrome(unit,'can super saiyan 3') then
+            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a super saiyan!',11)
+        end
         dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan 3','-resetPolicy','DoNothing','-target',unit_id,'-skipImmunities')
     end
     if powerLevel>15 then
+        if not unitHasSyndrome(unit,'can super saiyan 2') then
+            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a super saiyan!',11)
+        end
         dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan 2','-resetPolicy','DoNothing','-target',unit_id,'-skipImmunities')
     end
     if powerLevel>10 and unit.status.current_soul.personality.traits.ANGER_PROPENSITY>90 and unit.status.current_soul.personality.traits.HATE_PROPENSITY>60 then
+        if not unitHasSyndrome(unit,'can legendary super saiyan') then
+            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into the legendary super saiyan!',11)            
+        end
         dfhack.run_script('modtools/add-syndrome','-syndrome','can legendary super saiyan','-resetPolicy','DoNothing','-target',unit_id,'-skipImmunities')
     end
     if powerLevel>6 then
+        if not unitHasSyndrome(unit,'can super saiyan') then
+            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a super saiyan!',11)
+        end
         dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan','-resetPolicy','DoNothing','-target',unit_id,'-skipImmunities')
     end
 end
