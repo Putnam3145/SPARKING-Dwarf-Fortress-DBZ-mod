@@ -99,9 +99,9 @@ end
 function adjust_max_ki(unit_id,amount,set,no_check)
     local unitKi=no_check and dfhack.persistent.save({key='DBZ_KI/'..unit_id}) or get_unit_ki_persist_entry(unit_id)
     if set then
-        unitKi.ints[2]=math.min(amount,2000000000)
+        unitKi.ints[2]=amount
     else
-        unitKi.ints[2]=math.min(unitKi.ints[2]+amount,2000000000)
+        unitKi.ints[2]=unitKi.ints[2]+amount
     end
     unitKi:save()
     return unitKi.ints[2]
