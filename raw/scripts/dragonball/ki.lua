@@ -54,7 +54,7 @@ function init_ki(unit_id)
     unitKi.ints[7]=get_ki_multiplier(unit)
     unitKi.ints[2]=maxKi
     unitKi.ints[1]=maxKi
-    unitKi.ints[3]=1000
+    unitKi.ints[3]=500
     unitKi:save()
     return unitKi.ints[2]
 end
@@ -83,27 +83,22 @@ function set_ki_investment(unit_id,fraction)
 end
 
 function get_ki(unit_id)
-    if not init_ki(unit_id) then
-        return 0
-    end
     return get_unit_ki_persist_entry(unit_id).ints[1]
 end
 
 function get_max_ki(unit_id)
-    if not init_ki(unit_id) then
-        return 0
-    end
     return get_unit_ki_persist_entry(unit_id).ints[2]
 end
 
-function adjust_max_ki(unit_id,amount,set,no_check)
-    local unitKi=no_check and dfhack.persistent.save({key='DBZ_KI/'..unit_id}) or get_unit_ki_persist_entry(unit_id)
+function adjust_max_ki(unit_id,amount,set)
+    local unitKi=get_unit_ki_persist_entry(unit_id)
     if set then
         unitKi.ints[2]=amount
+        unitKi:save()
     else
         unitKi.ints[2]=unitKi.ints[2]+amount
+        unitKi:save()
     end
-    unitKi:save()
     return unitKi.ints[2]
 end
 
