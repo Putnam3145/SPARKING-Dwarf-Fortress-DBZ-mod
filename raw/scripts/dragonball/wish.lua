@@ -1,3 +1,14 @@
+local function getPowerLevel(saiyan)
+    local strength = saiyan.body.physical_attrs.STRENGTH.value/1000
+    local agility = saiyan.body.physical_attrs.AGILITY.value/1000
+    local endurance = saiyan.body.physical_attrs.ENDURANCE.value/1000
+    local toughness = saiyan.body.physical_attrs.TOUGHNESS.value/1000
+    local spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1000
+    local kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
+    local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
+    return (strength+agility+endurance+toughness+spatialsense+kinestheticsense+willpower)/13.85
+end
+
 local function getGenderString(gender)
  local genderStr
  if gender==0 then
@@ -202,7 +213,6 @@ local function immortalityWish()
             table.insert(citizen_list,{dfhack.TranslateName(dfhack.units.getVisibleName(v)),nil,v.id})
         end
     end
-    local getPowerLevel=dfhack.script_environment('dragonball/scouter').getPowerLevel
     table.sort(citizen_list,function(a,b) return getPowerLevel(df.unit.find(a[3]))>getPowerLevel(df.unit.find(b[3])) end)
     local citizen_okay,_,citizen_table=script.showListPrompt('Wish','Which citizen do you wish to make immortal?',COLOR_LIGHTGREEN,citizen_list)
     if citizen_okay then
@@ -219,14 +229,13 @@ local function ressurectionWish(pos)
             table.insert(dead_people_list,{dfhack.TranslateName(dfhack.units.getVisibleName(v))..', '..df.creature_raw.find(v.id).caste[v.caste].caste_name[0],nil,v.id})
         end
     end
-    local getPowerLevel=dfhack.script_environment('dragonball/scouter').getPowerLevel
-    table.sort(dead_people_list,function(a,b) return getPowerLevel(df.unit.find(a[3]))>getPowerLevel(df.unit.find(b[3])) end)
+    table.sort(dead_people_list,function(a,b) return (a and b) and getPowerLevel(df.unit.find(a[3]))>getPowerLevel(df.unit.find(b[3])) or false end)
     local dead_okay,_,dead_table=script.showListPrompt('Wish','Who do you wish to revive?',COLOR_LIGHTGREEN,dead_people_list)
     if dead_okay then
         dfhack.run_script('full-heal','-r','-unit',dead_table[3])
         local unit=df.unit.find(dead_table[3])
         if unit.pos.x==-30000 then
-            dfhack.run_script('teleport','-unit',dead_table[3],'-x',pos.x-1,'-y',pos.y,'-z',.pos.z)
+            dfhack.run_script('teleport','-unit',dead_table[3],'-x',pos.x-1,'-y',pos.y,'-z',pos.z)
         end
         return true
     end
