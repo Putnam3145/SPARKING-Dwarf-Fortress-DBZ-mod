@@ -81,5 +81,6 @@ function runSuperSaiyanChecks(unit_id)
         dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan','-resetPolicy','DoNothing','-target',unit_id,'-skipImmunities')
     end
 end
-
-runSuperSaiyanChecksExtremeEmotion(args.unit)
+if args.unit then
+    runSuperSaiyanChecksExtremeEmotion(args.unit)
+end
