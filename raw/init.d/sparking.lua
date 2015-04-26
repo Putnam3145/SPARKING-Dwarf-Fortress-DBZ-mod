@@ -571,7 +571,6 @@ function onStateChange(op)
     if op==SC_MAP_LOADED then
         dfhack.script_environment('dragonball/unit_action_check').enableEvent()
         require('repeat-util').scheduleEvery('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
+        dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
     end
 end
-
-dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
