@@ -174,10 +174,14 @@ local function getCreatureRaceAndCaste(caste)
  return df.global.world.raws.creatures.list_creature[caste.index],df.global.world.raws.creatures.list_caste[caste.index]
 end
 
+local function db_filter(itype,subtype,def)
+    return not(df.item_type[itype]=='CORPSE' or df.item_type[itype]=='FOOD' or (def and def.id=='DRAGONBALL'))
+end
+
 local function hackWish(unit) --I HAD TO INCLUDE THE WHOLE THING SORRY
   local amountok, amount
   local matok,mattype,matindex,matFilter
-  local itemok,itemtype,itemsubtype=showItemPrompt('What item do you want?',function(itype) return df.item_type[itype]~='CORPSE' and df.item_type[itype]~='FOOD' end ,true)
+  local itemok,itemtype,itemsubtype=showItemPrompt('What item do you want?',db_filter,true)
   matFilter=getMatFilter(itemtype)
   if not usesCreature(itemtype) then
    matok,mattype,matindex=showMaterialPrompt('Wish','And what material should it be made of?',matFilter)
@@ -206,20 +210,25 @@ local function hackWish(unit) --I HAD TO INCLUDE THE WHOLE THING SORRY
   return false
 end
 
-local function immortalityWish()
-    local citizen_list={}
-    for k,v in ipairs(df.global.world.units.active) do
-        if dfhack.units.isCitizen(v) and dfhack.units.isAlive(v) and not dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..v.id) then
-            table.insert(citizen_list,{dfhack.TranslateName(dfhack.units.getVisibleName(v)),nil,v.id})
+local function immortalityWish(adventure)
+    if not adventure then
+        local citizen_list={}
+        for k,v in ipairs(df.global.world.units.active) do
+            if dfhack.units.isCitizen(v) and dfhack.units.isAlive(v) and not dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..v.id) then
+                table.insert(citizen_list,{dfhack.TranslateName(dfhack.units.getVisibleName(v)),nil,v.id})
+            end
         end
-    end
-    table.sort(citizen_list,function(a,b) return getPowerLevel(df.unit.find(a[3]))>getPowerLevel(df.unit.find(b[3])) end)
-    local citizen_okay,_,citizen_table=script.showListPrompt('Wish','Which citizen do you wish to make immortal?',COLOR_LIGHTGREEN,citizen_list)
-    if citizen_okay then
-        dfhack.persistent.save({key='DRAGONBALL_IMMORTAL/'..citizen_table[3]})
+        table.sort(citizen_list,function(a,b) return getPowerLevel(df.unit.find(a[3]))>getPowerLevel(df.unit.find(b[3])) end)
+        local citizen_okay,_,citizen_table=script.showListPrompt('Wish','Which citizen do you wish to make immortal?',COLOR_LIGHTGREEN,citizen_list)
+        if citizen_okay then
+            dfhack.persistent.save({key='DRAGONBALL_IMMORTAL/'..citizen_table[3]})
+            return true
+        end
+        return false
+    else
+        dfhack.persistent.save({key='DRAGONBALL_IMMORTAL/'..df.global.world.units.active[0].id})
         return true
     end
-    return false
 end
 
 local function ressurectionWish(pos)
@@ -242,7 +251,8 @@ local function ressurectionWish(pos)
     return false
 end
 
-function makeAWish(unit)
+function makeAWish(unit,adventure)
+    if not unit then error('Something weird happened! No unit found!') end
     local script=require('gui.script')
     script.start(function()
     local okay=true
@@ -251,7 +261,7 @@ function makeAWish(unit)
         if selection==1 then
             okay=hackWish(unit)
         elseif selection==2 then
-            okay=immortalityWish()
+            okay=immortalityWish(adventure)
         else
             okay=ressurectionWish(unit.pos)
         end
@@ -263,8 +273,9 @@ utils = require('utils')
 
 validArgs = validArgs or utils.invert({
  'unit',
+ 'adventure'
 })
 
 local args = utils.processArgs({...}, validArgs)
 
-makeAWish(df.unit.find(args.unit))
+makeAWish(args.unit and df.unit.find(args.unit) or args.adventure and df.global.world.units.active[0],args.adventure)
