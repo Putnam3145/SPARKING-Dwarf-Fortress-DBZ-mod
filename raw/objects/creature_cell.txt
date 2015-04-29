@@ -184,7 +184,6 @@ creature_cell
 		[SYNDROME]
             [SYN_NAME:cell absorbed]
 			[SYN_AFFECTED_CREATURE:CELL:ALL]
-			[SYN_NAME:absorption]
 			[SYN_INGESTED]
 			[SYN_INHALED]
 			[SYN_CONTACT]

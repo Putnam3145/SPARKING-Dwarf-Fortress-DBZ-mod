@@ -570,8 +570,7 @@ eventful.enableEvent(eventful.eventType.UNIT_DEATH,5)
 function onStateChange(op)
     if op==SC_MAP_LOADED then
         dfhack.script_environment('dragonball/unit_action_check').enableEvent()
+		dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
         require('repeat-util').scheduleEvery('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
     end
 end
-
-dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')

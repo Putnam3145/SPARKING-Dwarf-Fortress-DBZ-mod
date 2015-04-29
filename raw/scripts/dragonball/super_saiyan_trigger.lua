@@ -19,7 +19,7 @@ end
 
 local function unitHasSyndromeClass(u,s_class)
     for k,syn in ipairs(u.syndromes.active) do
-        for _,syn_class in ipairs(df.syndrome.find(syn.type).syn_class)
+        for _,syn_class in ipairs(df.syndrome.find(syn.type).syn_class) do
             if syn_class.value==s_class then return true end
         end
     end
@@ -65,7 +65,7 @@ end
 function runSuperSaiyanChecks(unit_id)
     local unit=df.unit.find(unit_id)
     local powerLevel=getPowerLevel(unit)
-    if unitHasSyndromeClass('SUPER_SAIYAN_GOD') and unitHasSyndromeClass('HAS_GONE_SUPER_SAIYAN_4') then
+    if unitHasSyndromeClass(unit,'SUPER_SAIYAN_GOD') and unitHasSyndromeClass(unit,'HAS_GONE_SUPER_SAIYAN_4') then
         if not unitHasSyndrome(unit,'can super saiyan god super saiyan 4') then
             dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a super saiyan god super saiyan 4!',11)
         end
