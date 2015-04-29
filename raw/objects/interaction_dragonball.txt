@@ -394,7 +394,7 @@ interaction_dragonball
                 [CDI:VERBAL_SPEECH:supersaiyan.txt]
                 [CDI:VERB:have transformed into a Super Saiyan 4:has transformed into a Super Saiyan 4:NA]
                 [CDI:WAIT_PERIOD:5000]
-            [CE_BODY_APPEARANCE_MODIFIER:HEIGHT:9100:START:0:END:5000]
+            [CE_BODY_APPEARANCE_MODIFIER:APPEARANCE_MODIFIER:HEIGHT:4497:APPEARANCE_MODIFIER:LENGTH:4497:APPEARANCE_MODIFIER:BROADNESS:4497:START:0:END:10000]
                 [CE:PERIODIC:MOON_PHASE:27:0]
             [CE_DISPLAY_NAME:NAME:(Golden Great Ape):(Golden Great Apes):Golden Great Ape:START:0:END:5000]
                 [CE:PERIODIC:MOON_PHASE:27:0]
