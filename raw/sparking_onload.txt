@@ -6,5 +6,5 @@ modtools/interaction-trigger -suppressAttack -suppressDefend -onDefendStr "lssj"
 modtools/syndrome-trigger -syndrome "namek regenerate" -command [ full-heal -unit \\UNIT_ID ]
 modtools/syndrome-trigger -syndrome "cell absorbed" -command [ dragonball/cell_absorb \\UNIT_ID ]
 modtools/reaction-trigger -reactionName WISH_DB -command [ dragonball/wish -unit \\WORKER_ID ]
-modtools/reaction-trigger -reactionName WISH_DB_ADV -command [ dragonball/wish -unit \\WORKER_ID ]
+modtools/reaction-trigger -reactionName WISH_DB_ADV -command [ dragonball/wish -adventure ]
 dragonball/projectile_expansion

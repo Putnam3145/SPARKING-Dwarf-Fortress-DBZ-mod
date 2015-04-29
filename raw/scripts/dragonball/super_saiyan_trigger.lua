@@ -17,6 +17,15 @@ local function unitHasSyndrome(u,s_name)
     return false
 end
 
+local function unitHasSyndromeClass(u,s_class)
+    for k,syn in ipairs(u.syndromes.active) do
+        for _,syn_class in ipairs(df.syndrome.find(syn.type).syn_class) do
+            if syn_class.value==s_class then return true end
+        end
+    end
+    return false
+end
+
 validArgs = validArgs or utils.invert({
  'unit'
 })
@@ -56,6 +65,12 @@ end
 function runSuperSaiyanChecks(unit_id)
     local unit=df.unit.find(unit_id)
     local powerLevel=getPowerLevel(unit)
+    if unitHasSyndromeClass(unit,'SUPER_SAIYAN_GOD') and unitHasSyndromeClass(unit,'HAS_GONE_SUPER_SAIYAN_4') then
+        if not unitHasSyndrome(unit,'can super saiyan god super saiyan 4') then
+            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a super saiyan god super saiyan 4!',11)
+        end
+        dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan god super saiyan 4','-resetPolicy','DoNothing','-target',unit_id,'-skipImmunities')
+    end
     if powerLevel>30 then
         if not unitHasSyndrome(unit,'can super saiyan 3') then
             dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a super saiyan!',11)
