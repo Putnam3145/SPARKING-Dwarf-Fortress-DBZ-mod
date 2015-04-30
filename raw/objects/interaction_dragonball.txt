@@ -565,7 +565,7 @@ interaction_dragonball
         [CE_DISPLAY_NAME:NAME:(Legendary Super Saiyan):(Legendary Super Saiyans):Legendary Super Saiyan:START:0:END:5000]
 
 
-[INTERACTION:BIRUS_INCREASE_POWER]
+[INTERACTION:BEERUS_INCREASE_POWER]
         [I_SOURCE:CREATURE_ACTION]
         [I_TARGET:A:CREATURE]
             [IT_LOCATION:CONTEXT_CREATURE]
