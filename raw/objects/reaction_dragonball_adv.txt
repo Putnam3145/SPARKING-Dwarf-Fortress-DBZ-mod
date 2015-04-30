@@ -1,8 +1,13 @@
 reaction_dragonball_adv
 
 [OBJECT:REACTION]
+
+[REACTION:INSTRUCTION_INSTRUCTIONS_1]
+    [NAME:+-Instructions-+]
+    [ADVENTURE_MODE_ENABLED]
+    
 [REACTION:ADV_FORT_INSTRUCTIONS_1]
-	[NAME:Ctrl+X to open advfort (by Warmist) menu]
+	[NAME:Ctrl+x to open advfort (by Warmist) menu]
 	[ADVENTURE_MODE_ENABLED]
 	
 [REACTION:ADV_FORT_INSTRUCTIONS_2]
@@ -14,9 +19,17 @@ reaction_dragonball_adv
 	[ADVENTURE_MODE_ENABLED]
 	
 [REACTION:INSTANT_TRANSMISSION_INSTRUCTIONS_1]
-	[NAME:Ctrl+T for instant transmission]
+	[NAME:Ctrl+t for instant transmission]
 	[ADVENTURE_MODE_ENABLED]
 
+[REACTION:KI_ADJUST_INSTRUCTIONS_1]
+    [NAME:Ctrl+k for ki information]
+    [ADVENTURE_MODE_ENABLED]
+    
+[REACTION:ADV_FORT_INSTRUCTIONS_4]
+    [NAME:+-Advfort-related reactions-+]
+    [ADVENTURE_MODE_ENABLED]
+    
 [REACTION:ANVIL_SMELTING]
 	[NAME:cast an iron anvil]
 	[ADVENTURE_MODE_ENABLED]
