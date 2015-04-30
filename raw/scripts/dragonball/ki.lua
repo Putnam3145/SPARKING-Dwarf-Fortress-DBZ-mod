@@ -20,9 +20,9 @@ local function get_ki_multiplier(unit)
         end
     end
     for _,syndrome in ipairs(unit.syndromes.active) do
-        for __,synclass in ipairs(syndrome.syn_class) do
+        for __,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
             if synclass.value:find('KI_BOOST_') then
-                multiplier=multiplier*(tonumber(v.value:sub(10)) or 1)
+                multiplier=multiplier*(tonumber(synclass.value:sub(10)) or 1)
             end
         end
     end
@@ -39,9 +39,9 @@ end
 
 local function get_new_fraction(unit)
     for _,syndrome in ipairs(unit.syndromes.active) do
-        for __,synclass in ipairs(syndrome.syn_class) do
+        for __,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
             if synclass.value:find('KI_INVEST_FRACTION_') then
-                return tonumber(v.value:sub(20))
+                return tonumber(synclass.value:sub(20))
             end
         end
     end
