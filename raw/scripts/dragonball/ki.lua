@@ -13,21 +13,39 @@ local function unitCanUseKi(unit_id)
 end
 
 local function get_ki_multiplier(unit)
+    local multiplier=1
     for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
         if class.value:find('KI_MULTIPLIER_') then 
-            return tonumber(class.value:sub(15)) or 1
+            multiplier=multiplier*(tonumber(class.value:sub(15)) or 1)
         end
     end
-    return 1
+    for _,syndrome in ipairs(unit.syndromes.active) do
+        for __,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
+            if synclass.value:find('KI_BOOST_') then
+                multiplier=multiplier*(tonumber(synclass.value:sub(10)) or 1)
+            end
+        end
+    end
+    return multiplier
 end
 
-function calculate_max_ki(unit_id)
-    local unit = df.unit.find(unit_id)
+local function calculate_max_ki(unit)
     local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
     local focus = unit.status.current_soul.mental_attrs.FOCUS.value
     local endurance = unit.body.physical_attrs.ENDURANCE.value
     local multiplier=get_ki_multiplier(unit)
     return (willpower+focus+endurance)*multiplier
+end
+
+local function get_new_fraction(unit)
+    for _,syndrome in ipairs(unit.syndromes.active) do
+        for __,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
+            if synclass.value:find('KI_INVEST_FRACTION_') then
+                return tonumber(synclass.value:sub(20))
+            end
+        end
+    end
+    return nil
 end
 
 function init_ki(unit_id)
@@ -37,21 +55,14 @@ function init_ki(unit_id)
     local unitKi=dfhack.persistent.save({key='DBZ_KI/'..unit_id})
     local unit=df.unit.find(unit_id)
     if unitKi.ints[2]>0 then
-        local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
-        local focus = unit.status.current_soul.mental_attrs.FOCUS.value
-        local endurance = unit.body.physical_attrs.ENDURANCE.value
-        unitKi.ints[2]=unitKi.ints[2]+(((willpower-unitKi.ints[4])+(focus-unitKi.ints[5])+(endurance-unitKi.ints[6]))*unitKi.ints[7])
-        unitKi.ints[4]=unit.status.current_soul.mental_attrs.WILLPOWER.value
-        unitKi.ints[5]=unit.status.current_soul.mental_attrs.FOCUS.value
-        unitKi.ints[6]=unit.body.physical_attrs.ENDURANCE.value
+        unitKi.ints[2]=calculate_max_ki(unit)
+        local new_fraction=get_new_fraction(unit)
+        unitKi.ints[3]=get_new_fraction(unit) or unitKi.ints[4]==1 and 500 or unitKi.ints[3]
+        unitKi.ints[4]=new_fraction and 1 or 0
         unitKi:save()
         return unitKi.ints[2]
     end
-    local maxKi=calculate_max_ki(unit_id)
-    unitKi.ints[4]=unit.status.current_soul.mental_attrs.WILLPOWER.value
-    unitKi.ints[5]=unit.status.current_soul.mental_attrs.FOCUS.value
-    unitKi.ints[6]=unit.body.physical_attrs.ENDURANCE.value
-    unitKi.ints[7]=get_ki_multiplier(unit)
+    local maxKi=calculate_max_ki(unit)
     unitKi.ints[2]=maxKi
     unitKi.ints[1]=maxKi
     unitKi.ints[3]=500

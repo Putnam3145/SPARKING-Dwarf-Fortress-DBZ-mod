@@ -532,28 +532,14 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
             ki.adjust_ki(attack.target_unit_id,-enemyKiInvestment)
             ki.adjust_ki(unit_id,-kiInvestment)
         end
-    end
-end
-
-function getSyndromeKiBoost(syndrome)
-    local kiBoost,investmentFraction,kiBoostTime=false,100,5000
-    for k,v in ipairs(syndrome.syn_class) do
-        if v.value:find('KI_BOOST_') then
-            kiBoost=tonumber(v.value:sub(10))
-        elseif v.value:find('KI_INVEST_FRACTION_') then
-            investmentFraction=tonumber(v.value:sub(20))
-        elseif v.value:find('KI_TIME_') then
-            kiBoostTime=tonumber(v.value:sub(9))
+    else
+        if action.type==df.unit_action_type.Attack then
+            local enemyKiInvestment=math.floor(ki.get_ki_investment(attack.target_unit_id)/2)
+            attack.unk_30=attack.unk_30-enemyKiInvestment
+            local ki_mat=dfhack.matinfo.find('KI')
+            dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,enemyKiInvestment)
+            ki.adjust_ki(attack.target_unit_id,-enemyKiInvestment)      
         end
-    end
-    return kiBoost,investmentFraction,kiBoostTime
-end
-
-eventful.onSyndrome.ki_boost=function(unit_id,syndrome_id)
-    local syndrome=df.syndrome.find(syndrome_id)
-    local kiBoost,investmentFraction,kiBoostTime=getSyndromeKiBoost(syndrome)
-    if kiBoost then
-        dfhack.run_script('dragonball/ki_boost','-unit',unit_id,'-boost',kiBoost,'-fraction',investmentFraction,'-time',kiBoostTime)
     end
 end
 
