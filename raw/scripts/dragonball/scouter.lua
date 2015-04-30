@@ -1,9 +1,10 @@
--- Gives power level of selected unit. Type "accurate" for a more linear, but more boring number.
+-- Gives power level of selected unit. Type "accurate" for a more linear, but more boring number or "legacy" for pre-ki calculation.
 
 local utils=require('utils')
 
 validArgs = utils.invert({
  'accurate',
+ 'legacy',
  'all',
  'citizens'
 })
@@ -49,7 +50,7 @@ end
 
 --blood_max appears to be the creature's body size divided by 10; the power level calculation relies on body size divided by 1000, so divided by 100 it is. blood_count refers to current blood amount, and it, when full, is equal to blood_max.
 
-local function getPowerLevel(saiyan,accurate)
+local function getPowerLevel(saiyan,accurate,legacy)
 	if accurate then
         local strength = saiyan.body.physical_attrs.STRENGTH.value/1000
         local agility = saiyan.body.physical_attrs.AGILITY.value/1000
@@ -59,7 +60,7 @@ local function getPowerLevel(saiyan,accurate)
         local kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
         local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
         return (strength+agility+endurance+toughness+spatialsense+kinestheticsense+willpower)/13.85
-	else
+	elseif legacy then
 		local strength,endurance,toughness,spatialsense,kinestheticsense,willpower
 		if saiyan.curse.attr_change then
 			strength = ((saiyan.body.physical_attrs.STRENGTH.value+saiyan.curse.attr_change.phys_att_add.STRENGTH)/3550)*(saiyan.curse.attr_change.phys_att_perc.STRENGTH/100)
@@ -88,12 +89,17 @@ local function getPowerLevel(saiyan,accurate)
 			qerror("Scouter broke! Oh well, there are more.",11)
 		end
 		return math.floor(powerlevel)
+    else
+        return dfhack.script_environment('dragonball/ki').get_max_ki(saiyan.id)
 	end
 end
 
 if args.all then
 	for k,v in ipairs(df.global.world.units.active) do
-		print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..getPowerLevel(v,args.accurate))
+        local powerlevel=getPowerLevel(v,args.accurate,args.legacy)
+        if powerlevel>0 then
+            print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..powerlevel)
+        end
 	end
 elseif args.citizens then
 	for k,v in ipairs(df.global.world.units.active) do
