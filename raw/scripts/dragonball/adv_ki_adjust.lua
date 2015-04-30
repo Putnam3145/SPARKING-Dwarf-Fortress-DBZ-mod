@@ -18,7 +18,7 @@ function kiViewScreen:init(args)
     local kiText='Ki investment (higher is less, 1 is all at once):'
     self.kiInvestText='Ki investment currently set to '
     local adventureID=df.global.world.units.active[0].id
-    self.kiInvestment=get_ki_investment(adventureID)
+    self.kiInvestment=ki.get_ki_investment(adventureID)
     self.investmentLabel=widgets.Label{
         frame={t=1},
         text=self.kiInvestText..self.kiInvestment
