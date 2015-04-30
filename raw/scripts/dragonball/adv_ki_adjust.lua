@@ -32,7 +32,7 @@ function kiViewScreen:init(args)
             frame={t=0,l=#kiText+1},
             text=tostring(ki.get_unit_ki_persist_entry(adventureID).ints[3]),
             on_submit=function(text)
-                if tonumber(text) and tonumber(text)>1 then
+                if tonumber(text) and tonumber(text)>=1 then
                     ki.set_ki_investment(adventureID,tonumber(text))
                     self.kiInvestment=tostring(ki.get_ki_investment(adventureID))
                     self.investmentLabel:setText(self.kiInvestText..self.kiInvestment)
