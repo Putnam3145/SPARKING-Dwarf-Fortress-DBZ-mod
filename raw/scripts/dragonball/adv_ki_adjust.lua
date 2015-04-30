@@ -18,7 +18,7 @@ function kiViewScreen:init(args)
     local kiText='Ki investment (higher is less, 1 is all at once):'
     self.kiInvestText='Ki investment currently set to '
     local adventureID=df.global.world.units.active[0].id
-    self.kiInvestment=ki.get_ki_investment(adventureID)
+    self.kiInvestment=tostring(ki.get_ki_investment(adventureID))
     self.investmentLabel=widgets.Label{
         frame={t=1},
         text=self.kiInvestText..self.kiInvestment
@@ -30,11 +30,11 @@ function kiViewScreen:init(args)
         },
         widgets.EditField{
             frame={t=0,l=#kiText+1},
-            text=self.kiInvestment,
+            text=tostring(ki.get_unit_ki_persist_entry(adventureID).ints[3]),
             on_submit=function(text)
                 if tonumber(text) and tonumber(text)>1 then
                     ki.set_ki_investment(adventureID,tonumber(text))
-                    self.kiInvestment=tostring(ki.get_unit_ki_persist_entry(adventureID).ints[3])
+                    self.kiInvestment=tostring(ki.get_ki_investment(adventureID))
                     self.investmentLabel:setText(self.kiInvestText..self.kiInvestment)
                 end
             end
