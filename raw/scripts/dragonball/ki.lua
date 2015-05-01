@@ -12,29 +12,33 @@ local function unitCanUseKi(unit_id)
     return false
 end
 
-local function get_ki_multiplier(unit)
-    local multiplier=1
+local function get_ki_boost(unit)
+    local multiplier,boost=1,0
     for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
         if class.value:find('KI_MULTIPLIER_') then 
             multiplier=multiplier*(tonumber(class.value:sub(15)) or 1)
+        elseif class.value:find('KI_BOOST_') then
+            boost=boost+(tonumber(synclass.value:sub(10)) or 0)
         end
     end
     for _,syndrome in ipairs(unit.syndromes.active) do
         for __,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
-            if synclass.value:find('KI_BOOST_') then
-                multiplier=multiplier*(tonumber(synclass.value:sub(10)) or 1)
+            if class.value:find('KI_MULTIPLIER_') then 
+                multiplier=multiplier*(tonumber(class.value:sub(15)) or 1)
+            elseif synclass.value:find('KI_BOOST_') then
+                boost=boost+(tonumber(synclass.value:sub(10)) or 0)
             end
         end
     end
-    return multiplier
+    return multiplier,boost
 end
 
 local function calculate_max_ki(unit)
     local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
     local focus = unit.status.current_soul.mental_attrs.FOCUS.value
     local endurance = unit.body.physical_attrs.ENDURANCE.value
-    local multiplier=get_ki_multiplier(unit)
-    return (willpower+focus+endurance)*multiplier
+    local multiplier,boost=get_ki_boost(unit)
+    return (willpower+focus+endurance+boost)*multiplier
 end
 
 local function get_new_fraction(unit)

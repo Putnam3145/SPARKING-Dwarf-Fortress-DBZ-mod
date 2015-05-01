@@ -526,7 +526,7 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
             local recoverCost=(attack.timer2-recover)*-50
             curKiInvestment=curKiInvestment-recoverCost
             local enemyKiInvestment=math.floor(ki.get_ki_investment(attack.target_unit_id)/2)
-            attack.unk_30=attack.unk_30+(curKiInvestment-enemyKiInvestment) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
+            attack.unk_30=math.min(attack.unk_30+(curKiInvestment-enemyKiInvestment),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
             local ki_mat=dfhack.matinfo.find('KI')
             dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,kiInvestment+enemyKiInvestment)
             ki.adjust_ki(attack.target_unit_id,-enemyKiInvestment)
@@ -535,7 +535,7 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
     else
         if action.type==df.unit_action_type.Attack then
             local enemyKiInvestment=math.floor(ki.get_ki_investment(attack.target_unit_id)/2)
-            attack.unk_30=attack.unk_30-enemyKiInvestment
+            attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
             local ki_mat=dfhack.matinfo.find('KI')
             dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,enemyKiInvestment)
             ki.adjust_ki(attack.target_unit_id,-enemyKiInvestment)      
