@@ -534,6 +534,7 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
         end
     else
         if action.type==df.unit_action_type.Attack then
+            local attack=action.data.attack
             local enemyKiInvestment=math.floor(ki.get_ki_investment(attack.target_unit_id)/2)
             attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
             local ki_mat=dfhack.matinfo.find('KI')
