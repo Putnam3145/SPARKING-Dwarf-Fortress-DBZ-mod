@@ -108,7 +108,7 @@ interaction_dragonball
             [IE_ARENA_NAME:Super Saiyan]
             [SYNDROME]
                 [SYN_CLASS:SUPER_SAIYAN]
-                [SYN_CLASS:KI_BOOST_500000]
+                [SYN_CLASS:KI_BOOST_500000] Linear boost of 500,000 ki; using the Bringer of Death system since the assumptions made there hold true in Sparking
                 [SYN_CLASS:KI_INVEST_FRACTION_100]
                 [SYN_NAME:Super Saiyan]
                 [CE_CAN_DO_INTERACTION:START:0:END:5000]
