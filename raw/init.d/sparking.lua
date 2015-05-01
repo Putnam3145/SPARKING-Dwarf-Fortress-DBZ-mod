@@ -478,7 +478,7 @@ end
 
 function chargeKi(unit_id)
     local ki=dfhack.script_environment('dragonball/ki')
-    ki.adjust_ki(unit_id,math.ceil(ki.get_ki(unit_id)/20))
+    ki.adjust_ki(unit_id,math.ceil(ki.get_max_ki(unit_id)/20))
 end
 
 function checkEveryUnitRegularlyForEvents()
