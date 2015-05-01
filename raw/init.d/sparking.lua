@@ -465,7 +465,8 @@ dbEvents.onUnitGravelyInjured.zenkai=function(unit)
         v.value=dbRound(v.value*zenkaiMultiplier)
         v.max_value=dbRound(v.max_value*zenkaiMultiplier)
     end
-    dfhack.script_environment('dragonball/ki').adjust_ki(math.floor(1000*zenkaiMultiplier))
+    local ki=dfhack.script_environment('dragonball/ki')
+    ki.adjust_max_ki(unit.id,dbRound(ki.get_max_ki(unit.id)*zenkaiMultiplier))
     unitHasZenkaiAlready(unit,true)
 end
 
@@ -488,11 +489,43 @@ function checkEveryUnitRegularlyForEvents()
         end
         checkIfUnitStillGravelyInjuredForZenkai(v)
         checkOverflows(v)
-        chargeKi(v.id)
+        chargeKi(v)
         dfhack.script_environment('dragonball/super_saiyan_trigger').runSuperSaiyanChecks(v.id)
     end
 end
 
+local function unitHasSyndrome(u,s_name)
+    for k,syn in ipairs(u.syndromes.active) do
+        if df.syndrome.find(syn.type).syn_name==s_name then return true end
+    end
+    return false
+end
+
+function forceSuperSaiyan(unit)
+    if unitHasSyndrome(unit,'can super saiyan god super saiyan 4') then
+        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan God Super Saiyan 4','-resetPolicy','DoNothing','-target',unit.id)
+    elseif unitHasSyndrome(unit,'Super Saiyan God') then
+        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan God Super Saiyan','-resetPolicy','DoNothing','-target',unit.id)
+    elseif unitHasSyndrome(unit,'can super saiyan 4') then
+        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan 4','-resetPolicy','DoNothing','-target',unit.id)
+    elseif unitHasSyndrome(unit,'can super saiyan 3') then
+        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan 3','-resetPolicy','DoNothing','-target',unit.id)
+    elseif unitHasSyndrome(unit,'can super saiyan 2') then
+        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan 2','-resetPolicy','DoNothing','-target',unit.id)
+    elseif unitHasSyndrome(unit,'can legendary super saiyan') then
+        dfhack.run_script('modtools/add-syndrome','-syndrome','Legendary Super Saiyan','-resetPolicy','DoNothing','-target',unit.id)
+    elseif unitHasSyndrome(unit,'can super saiyan') then
+        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan','-resetPolicy','DoNothing','-target',unit.id)
+    end
+end
+
+function unitInDeadlyCombat(unit_id)
+    local unit=df.unit.find(unit_id)
+    for k,v in ipairs(unit.status.current_soul.personality.emotions) do
+        if (v.thought==df.unit_thought_type.Conflict or v.thought==df.unit_thought_type.JoinConflict) and math.abs(df.global.cur_year_tick-v.year_tick)<50 then return true end
+    end
+    return false
+end
 
 dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_actions=function(unit_id,action)
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
@@ -514,8 +547,11 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
                 ki.adjust_ki(unit_id,(action.data.move.fatigue-curFatigue)*5)
             end
             local ki_mat=dfhack.matinfo.find('KI')
-            dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,kiInvestment)
+            dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,math.floor(math.sqrt(kiInvestment/10)))
         elseif action.type==df.unit_action_type.Attack then
+            if unitInDeadlyCombat(unit_id) then
+                forceSuperSaiyan(df.unit.find(unit_id))
+            end
             local curKiInvestment=kiInvestment
             local attack=action.data.attack
             local prepare,recover=attack.timer1,attack.timer2
@@ -525,7 +561,7 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
             attack.timer2=math.max(recover-(math.floor(curKiInvestment/50)),0)
             local recoverCost=(attack.timer2-recover)*-50
             curKiInvestment=curKiInvestment-recoverCost
-            local enemyKiInvestment=math.floor(ki.get_ki_investment(attack.target_unit_id)/2)
+            local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             attack.unk_30=math.min(attack.unk_30+(curKiInvestment-enemyKiInvestment),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
             local ki_mat=dfhack.matinfo.find('KI')
             dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,kiInvestment+enemyKiInvestment)
@@ -535,7 +571,10 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
     else
         if action.type==df.unit_action_type.Attack then
             local attack=action.data.attack
-            local enemyKiInvestment=math.floor(ki.get_ki_investment(attack.target_unit_id)/2)
+            if unitInDeadlyCombat(attack.target_unit_id) then
+                forceSuperSaiyan(df.unit.find(attack.target_unit_id))
+            end
+            local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
             local ki_mat=dfhack.matinfo.find('KI')
             dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,enemyKiInvestment)
