@@ -489,7 +489,7 @@ function checkEveryUnitRegularlyForEvents()
         end
         checkIfUnitStillGravelyInjuredForZenkai(v)
         checkOverflows(v)
-        chargeKi(v)
+        chargeKi(v.id)
         dfhack.script_environment('dragonball/super_saiyan_trigger').runSuperSaiyanChecks(v.id)
     end
 end
