@@ -38,7 +38,7 @@ local function calculate_max_ki(unit)
     local focus = unit.status.current_soul.mental_attrs.FOCUS.value
     local endurance = unit.body.physical_attrs.ENDURANCE.value
     local multiplier,boost=get_ki_boost(unit)
-    return (willpower+focus+endurance+boost)*multiplier
+    return (willpower+focus+endurance+boost)*multiplier,multiplier,boost
 end
 
 local function get_new_fraction(unit)
@@ -59,10 +59,17 @@ function init_ki(unit_id)
     local unitKi=dfhack.persistent.save({key='DBZ_KI/'..unit_id})
     local unit=df.unit.find(unit_id)
     if unitKi.ints[2]>0 then
-        unitKi.ints[2]=calculate_max_ki(unit)
+        local boost,multiplier
+        unitKi.ints[2],boost,multiplier=calculate_max_ki(unit)
         local new_fraction=get_new_fraction(unit)
         unitKi.ints[3]=get_new_fraction(unit) or unitKi.ints[4]==1 and 500 or unitKi.ints[3]
         unitKi.ints[4]=new_fraction and 1 or 0
+        if unitKi.ints[5]~=1 and (boost>0 or multiplier>1) then
+            unitKi.ints[5]=1
+            unitKi.ints[1]=(unitKi.ints[1]+boost)*multiplier
+        elseif unitKi.ints[5]==1 and boost==0 and multiplier==1 then
+            unitKi.ints[5]=0
+        end
         unitKi:save()
         return unitKi.ints[2]
     end
