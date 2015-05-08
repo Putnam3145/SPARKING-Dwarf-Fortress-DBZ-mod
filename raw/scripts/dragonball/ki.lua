@@ -62,7 +62,19 @@ function init_ki(unit_id)
         local boost,multiplier
         unitKi.ints[2],boost,multiplier=calculate_max_ki(unit)
         local new_fraction=get_new_fraction(unit)
-        unitKi.ints[3]=get_new_fraction(unit) or unitKi.ints[4]==1 and 500 or unitKi.ints[3]
+        if unitKi.ints[4]==1 then
+            if new_fraction then
+                unitKi.ints[3]=math.min(new_fraction,unitKi.ints[3])
+            else
+                unitKi.ints[3]=math.max(500,unitKi.ints[3])
+                unitKi.ints[4]=0
+            end
+        else
+            if new_fraction then
+                unitKi.ints[4]=1
+                unitKi.ints[3]=math.min(new_fraction,unitKi.ints[3])
+            end
+        end
         unitKi.ints[4]=new_fraction and 1 or 0
         if unitKi.ints[5]~=1 and (boost>0 or multiplier>1) then
             unitKi.ints[5]=1
@@ -140,7 +152,7 @@ function adjust_ki(unit_id,amount,force)
             return 0
         end
     else
-        unitKi.ints[1]=math.min(unitKi.ints[1]+amount,unitKi.ints[2])
+        unitKi.ints[1]=math.max(0,math.min(unitKi.ints[1]+amount,unitKi.ints[2]))
         unitKi:save()
         return unitKi.ints[1]
     end
