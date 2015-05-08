@@ -2,20 +2,14 @@ onUnitAction=onUnitAction or dfhack.event.new()
 
 local actions_already_checked=actions_already_checked or {}
 
-local function action_already_checked(unit_id,action_id)
-    local unit_action_checked=actions_already_checked[unit_id]
-    if unit_action_checked then
-        return unit_action_checked[action_id]
-    end
-end
-
 local function checkForActions()
     for k,unit in ipairs(df.global.world.units.active) do
+        actions_already_checked[unit.id]=actions_already_checked[unit.id] or {}
+        local unit_action_checked=actions_already_checked[unit.id]
         for _,action in ipairs(unit.actions) do
-            if not action_already_checked(unit.id,action.id) then
+            if not unit_action_checked[action.id] then
                 onUnitAction(unit.id,action)
-                actions_already_checked[unit.id]=actions_already_checked[unit.id] or {}
-                actions_already_checked[unit.id][action.id]=true
+                unit_action_checked[action.id]=true
             end
         end
     end
