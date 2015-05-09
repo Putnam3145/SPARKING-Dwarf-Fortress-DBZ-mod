@@ -519,59 +519,56 @@ local function unitInDeadlyCombat(unit_id)
     end
     return false
 end
-local action_actions={
-    Move=function(data,delay)
-        data.move.timer=math.min(data.move.timer+delay,20) 
-    end,
-    Attack=function(data,delay)
-        if data.attack.timer1>0 then
-            data.attack.timer1=math.min(data.attack.timer1+delay,20)
-        else
-            data.attack.timer2=math.min(data.attack.timer2+delay,20)
-        end
-    end,
-    HoldTerrain=function(data,delay)
-        data.holdterrain.timer=math.min(data.holdterrain.timer+delay,20)
-    end,
-    Climb=function(data,delay)
-        data.climb.timer=math.min(data.climb.timer+delay,20)
-    end,
-    --talking, of course, is a free action
-    Unsteady=function(data,delay)
-        data.unsteady.timer=math.min(data.unsteady.timer+delay,20)
-    end,
-    Recover=function(data,delay)
-        data.recover.timer=math.min(data.recover.timer+delay,20)
-    end,
-    StandUp=function(data,delay)
-        data.standup.timer=math.min(data.standup.timer+delay,20)
-    end,
-    LieDown=function(data,delay)
-        data.liedown.timer=math.min(data.liedown.timer+delay,20)        
-    end,
-    Job2=function(data,delay)
-        data.job2.timer=math.min(data.job2.timer+delay,20)        
-    end,
-    PushObject=function(data,delay)
-        data.pushobject.timer=math.min(data.pushobject.timer+delay,20)        
-    end,
-    SuckBlood=function(data,delay)
-        data.suckblood.timer=math.min(data.suckblood.timer+delay,20)        
-    end
-}
 
-local function slowEveryoneElseDown(kiAmount)
+
+
+local function slowEveryoneElseDown(unit_id,action,kiAmount)
+    local action_actions={
+        Move=function(data,delay)
+            data.move.timer=math.min(data.move.timer+delay,200) 
+        end,
+        Attack=function(data,delay)
+            if data.attack.timer1>0 then
+                data.attack.timer1=math.min(data.attack.timer1+delay,200)
+            else
+                data.attack.timer2=math.min(data.attack.timer2+delay,200)
+            end
+        end,
+        HoldTerrain=function(data,delay)
+            data.holdterrain.timer=math.min(data.holdterrain.timer+delay,200)
+        end,
+        Climb=function(data,delay)
+            data.climb.timer=math.min(data.climb.timer+delay,200)
+        end,
+        --talking, of course, is a free action
+        Unsteady=function(data,delay)
+            data.unsteady.timer=math.min(data.unsteady.timer+delay,200)
+        end,
+        Recover=function(data,delay)
+            data.recover.timer=math.min(data.recover.timer+delay,200)
+        end,
+        StandUp=function(data,delay)
+            data.standup.timer=math.min(data.standup.timer+delay,200)
+        end,
+        LieDown=function(data,delay)
+            data.liedown.timer=math.min(data.liedown.timer+delay,200)        
+        end,
+        Job2=function(data,delay)
+            data.job2.timer=math.min(data.job2.timer+delay,200)        
+        end,
+        PushObject=function(data,delay)
+            data.pushobject.timer=math.min(data.pushobject.timer+delay,200)        
+        end,
+        SuckBlood=function(data,delay)
+            data.suckblood.timer=math.min(data.suckblood.timer+delay,200)        
+        end
+    }
     local ki=dfhack.script_environment('dragonball/ki')
     local unit_action_type=df.unit_action_type
-    for k,v in ipairs(df.global.world.units.active) do
-        local thisAmount=ki.get_ki(v.id)
-        local thisDelay=math.max(dbRound((kiAmount-thisAmount)/500),0)
-        for _,action in ipairs(v.actions) do
-            local action_type=unit_action_type[action.type]
-            local action_func=action_actions[action_type]
-            if action_func then action_func(action.data,thisDelay) end
-        end
-    end
+    local thisAmount=ki.get_max_ki(unit_id)
+    local thisDelay=2*math.floor(kiAmount/thisAmount)
+    local action_func=action_actions[unit_action_type[action.type]]
+    if action_func then action_func(action.data,thisDelay) end
 end
 
 dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_actions=function(unit_id,action)
@@ -584,9 +581,7 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
             forceSuperSaiyan(df.unit.find(unit_id))
             local curKiInvestment=kiInvestment
             local attack=action.data.attack
-            if totalKi>50 then
-                local slowEveryoneDownCost=slowEveryoneElseDown(totalKi)
-            end
+            dfhack.script_environment('dragonball/unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{totalKi})
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             attack.unk_30=math.min(attack.unk_30+(curKiInvestment-enemyKiInvestment),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
             local ki_mat=dfhack.matinfo.find('KI')
