@@ -12,21 +12,43 @@ local function unitCanUseKi(unit_id)
     return false
 end
 
+function adjust_ki_mult_persist(unit_id,persist_key,amount)
+    local persist=dfhack.persistent.save({key='DBZ_KI/'..persist_key..'/'..unit_id})
+    persist.ints[1]=persist.ints[1]<0 and amount or persist.ints[1]*amount
+    persist:save()
+end
+
+function adjust_ki_boost_persist(unit_id,persist_key,amount)
+    local persist=dfhack.persistent.save({key='DBZ_KI/'..persist_key..'/'..unit_id})
+    persist.ints[2]=persist.ints[2]<0 and amount or persist.ints[2]+amount
+    persist:save()
+end
+
+local function get_ki_mult_persist(unit_id,persist_key)
+    local persist=dfhack.persistent.get('DBZ_KI/'..persist_key..'/'..unit_id)
+    if persist then return persist.ints[1] end
+end
+
+local function get_ki_boost_persist(unit_id,persist_key)
+    local persist=dfhack.persistent.get('DBZ_KI/'..persist_key..'/'..unit_id)
+    if persist then return persist.ints[2] end
+end
+
 local function get_ki_boost(unit)
     local multiplier,boost=1,0
     for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
         if class.value:find('KI_MULTIPLIER_') then 
-            multiplier=multiplier*(tonumber(class.value:sub(15)) or 1)
+            multiplier=multiplier*(tonumber(class.value:sub(15)) or get_ki_mult_persist(unit.id,class.value:sub(15)) or 1)
         elseif class.value:find('KI_BOOST_') then
-            boost=boost+(tonumber(class.value:sub(10)) or 0)
+            boost=boost+(tonumber(class.value:sub(10)) or get_ki_boost_persist(synclass.value:sub(10)) or 0)
         end
     end
     for _,syndrome in ipairs(unit.syndromes.active) do
         for __,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
             if synclass.value:find('KI_MULTIPLIER_') then 
-                multiplier=multiplier*(tonumber(synclass.value:sub(15)) or 1)
+                multiplier=multiplier*(tonumber(synclass.value:sub(15)) or get_ki_mult_persist(unit.id,synclass.value:sub(15)) or)
             elseif synclass.value:find('KI_BOOST_') then
-                boost=boost+(tonumber(synclass.value:sub(10)) or 0)
+                boost=boost+(tonumber(synclass.value:sub(10)) or get_ki_boost_persist(synclass.value:sub(10)) or 0)
             end
         end
     end
@@ -124,16 +146,8 @@ function get_max_ki(unit_id)
     return get_unit_ki_persist_entry(unit_id).ints[2]
 end
 
-function adjust_max_ki(unit_id,amount,set)
-    local unitKi=get_unit_ki_persist_entry(unit_id)
-    if set then
-        unitKi.ints[2]=amount
-        unitKi:save()
-    else
-        unitKi.ints[2]=unitKi.ints[2]+amount
-        unitKi:save()
-    end
-    return unitKi.ints[2]
+function adjust_max_ki(unit_id,amount)
+    adjust_ki_boost_persist(unit_id,'BASE',amount)
 end
 
 function adjust_ki(unit_id,amount,force)
