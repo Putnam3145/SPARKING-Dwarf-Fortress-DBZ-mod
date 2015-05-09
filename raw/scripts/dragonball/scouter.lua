@@ -90,7 +90,7 @@ local function getPowerLevel(saiyan,accurate,legacy)
 		end
 		return math.floor(powerlevel)
     else
-        return dfhack.script_environment('dragonball/ki').get_max_ki(saiyan.id)
+        return math.floor(dfhack.script_environment('dragonball/ki').get_max_ki(saiyan.id)/50)^2
 	end
 end
 

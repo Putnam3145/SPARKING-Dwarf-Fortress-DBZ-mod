@@ -566,7 +566,7 @@ local function slowEveryoneElseDown(unit_id,action,kiAmount)
     local ki=dfhack.script_environment('dragonball/ki')
     local unit_action_type=df.unit_action_type
     local thisAmount=ki.get_max_ki(unit_id)
-    local thisDelay=2*math.floor(kiAmount/thisAmount)
+    local thisDelay=2*math.floor(((kiAmount+1000)/(thisAmount+1000))+.5)
     local action_func=action_actions[unit_action_type[action.type]]
     if action_func then action_func(action.data,thisDelay) end
 end
