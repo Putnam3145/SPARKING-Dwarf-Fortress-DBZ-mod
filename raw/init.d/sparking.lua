@@ -113,7 +113,7 @@ local function superSaiyanGodSyndrome()
 end
 
 local function getPowerLevel(saiyan)
-    return dfhack.script_environment('dragonball/ki').get_max_ki(saiyan.id)
+    return saiyan.body.physical_attrs.ENDURANCE.value+saiyan.status.current_soul.mental_attrs.FOCUS.value+saiyan.status.current_soul.mental_attrs.WILLPOWER.value
 end
 
 local function getSuperSaiyanLevel(saiyan)
