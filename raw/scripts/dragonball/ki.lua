@@ -46,7 +46,7 @@ local function get_ki_boost(unit)
     for _,syndrome in ipairs(unit.syndromes.active) do
         for __,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
             if synclass.value:find('KI_MULTIPLIER_') then 
-                multiplier=multiplier*(tonumber(synclass.value:sub(15)) or get_ki_mult_persist(unit.id,synclass.value:sub(15)) or)
+                multiplier=multiplier*(tonumber(synclass.value:sub(15)) or get_ki_mult_persist(unit.id,synclass.value:sub(15)) or 1)
             elseif synclass.value:find('KI_BOOST_') then
                 boost=boost+(tonumber(synclass.value:sub(10)) or get_ki_boost_persist(synclass.value:sub(10)) or 0)
             end
