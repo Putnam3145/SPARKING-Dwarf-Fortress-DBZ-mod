@@ -52,14 +52,7 @@ end
 
 local function getPowerLevel(saiyan,accurate,legacy)
 	if accurate then
-        local strength = saiyan.body.physical_attrs.STRENGTH.value/1000
-        local agility = saiyan.body.physical_attrs.AGILITY.value/1000
-        local endurance = saiyan.body.physical_attrs.ENDURANCE.value/1000
-        local toughness = saiyan.body.physical_attrs.TOUGHNESS.value/1000
-        local spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1000
-        local kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
-        local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
-        return (strength+agility+endurance+toughness+spatialsense+kinestheticsense+willpower)/13.85
+        return saiyan.body.physical_attrs.ENDURANCE.value+saiyan.status.current_soul.mental_attrs.FOCUS.value+saiyan.status.current_soul.mental_attrs.WILLPOWER.value
 	elseif legacy then
 		local strength,endurance,toughness,spatialsense,kinestheticsense,willpower
 		if saiyan.curse.attr_change then
@@ -104,9 +97,9 @@ if args.all then
 elseif args.citizens then
 	for k,v in ipairs(df.global.world.units.active) do
 		if dfhack.units.isCitizen(v) then
-			print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..getPowerLevel(v,args.accurate))
+			print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..getPowerLevel(v,args.accurate,args.legacy))
 		end
 	end
 else
-	dfhack.gui.showPopupAnnouncement("The scouter says " .. getPowerLevel(dfhack.gui.getSelectedUnit(silent),args.accurate) .. "!",11)
+	dfhack.gui.showPopupAnnouncement("The scouter says " .. getPowerLevel(dfhack.gui.getSelectedUnit(silent),args.accurate,args.legacy) .. "!",11)
 end
