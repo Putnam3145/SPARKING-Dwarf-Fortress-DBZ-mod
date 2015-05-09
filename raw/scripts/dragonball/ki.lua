@@ -13,23 +13,27 @@ local function unitCanUseKi(unit_id)
 end
 
 function adjust_ki_mult_persist(unit_id,persist_key,amount)
+    if not persist_key then return false end
     local persist=dfhack.persistent.save({key='DBZ_KI/'..persist_key..'/'..unit_id})
     persist.ints[1]=persist.ints[1]<0 and amount or persist.ints[1]*amount
     persist:save()
 end
 
 function adjust_ki_boost_persist(unit_id,persist_key,amount)
+    if not persist_key then return false end
     local persist=dfhack.persistent.save({key='DBZ_KI/'..persist_key..'/'..unit_id})
     persist.ints[2]=persist.ints[2]<0 and amount or persist.ints[2]+amount
     persist:save()
 end
 
 local function get_ki_mult_persist(unit_id,persist_key)
+    if not persist_key then return 1 end
     local persist=dfhack.persistent.get('DBZ_KI/'..persist_key..'/'..unit_id)
     if persist then return persist.ints[1] end
 end
 
 local function get_ki_boost_persist(unit_id,persist_key)
+    if not persist_key then return 0 end
     local persist=dfhack.persistent.get('DBZ_KI/'..persist_key..'/'..unit_id)
     if persist then return persist.ints[2] end
 end
