@@ -170,7 +170,7 @@ local function applySuperSaiyanGodSyndrome()
     if df.global.gamemode==0 then
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
-        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 40 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
+        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 120000 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
     end
 end
 
