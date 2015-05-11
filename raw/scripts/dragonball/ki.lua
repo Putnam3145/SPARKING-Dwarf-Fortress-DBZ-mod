@@ -92,7 +92,7 @@ function init_ki(unit_id)
             if new_fraction then
                 unitKi.ints[3]=math.min(new_fraction,unitKi.ints[3])
             else
-                unitKi.ints[3]=math.max(500,unitKi.ints[3])
+                unitKi.ints[3]=math.max(100,unitKi.ints[3])
                 unitKi.ints[4]=0
             end
         else
@@ -114,7 +114,7 @@ function init_ki(unit_id)
     local maxKi=calculate_max_ki(unit)
     unitKi.ints[2]=maxKi
     unitKi.ints[1]=maxKi
-    unitKi.ints[3]=500
+    unitKi.ints[3]=100
     unitKi:save()
     return unitKi.ints[2]
 end
