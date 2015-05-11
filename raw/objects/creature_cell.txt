@@ -158,7 +158,7 @@ creature_cell
 			[CDI:TARGET:A:TOUCHABLE]
 			[CDI:TARGET_RANGE:A:1]
 			[CDI:MAX_TARGET_NUMBER:A:1]
-			[CDI:WAIT_PERIOD:200]
+			[CDI:WAIT_PERIOD:2000]
 [CREATURE:CELL_CORPSE_EXPLODE_DBZ] narhiril's. i've edited it a bit.
 	[DESCRIPTION:This corpse is being absorbed!]
 	[NAME:partially absorbed corpse:partially absorbed corpses:partially absorbed]
