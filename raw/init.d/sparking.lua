@@ -592,11 +592,18 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
             dfhack.script_environment('dragonball/unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{totalKi})
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             attack.unk_30=math.min(attack.unk_30+(curKiInvestment-enemyKiInvestment),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
-            if unitHasSyndrome(df.unit.find(attack.target_unit_id),'Legendary Super Saiyan') then
+            local enemy=df.unit.find(attack.target_unit_id)
+            if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30)/50)
                 attack.unk_30=math.max(attack.unk_30-(ki.get_max_ki(attack.target_unit_id)-enemyKiInvestment),0)
             end
             local ki_mat=dfhack.matinfo.find('KI')
+            if unitHasCreatureClass(unit,'ANDROID_INFINITE_ENERGY') then
+                kiInvestment=0
+            end
+            if unitHasCreatureClass(enemy,'ANDROID_INFINITE_ENERGY') then
+                enemyKiInvestment=0
+            end
             dfhack.maps.spawnFlow(unit.pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,math.min(kiInvestment+enemyKiInvestment,1000))
             ki.adjust_ki(attack.target_unit_id,-enemyKiInvestment)
             ki.adjust_ki(unit_id,-kiInvestment)
@@ -607,9 +614,13 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
             forceSuperSaiyan(df.unit.find(attack.target_unit_id))
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
-            if unitHasSyndrome(df.unit.find(attack.target_unit_id),'Legendary Super Saiyan') then
+            local enemy=df.unit.find(attack.target_unit_id)
+            if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/50))
                 attack.unk_30=math.max(attack.unk_30-(ki.get_max_ki(attack.target_unit_id)-enemyKiInvestment),0)
+            end
+            if unitHasCreatureClass(enemy,'ANDROID_INFINITE_ENERGY')) then
+                enemyKiInvestment=0
             end
             local ki_mat=dfhack.matinfo.find('KI')
             dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,math.min(enemyKiInvestment,1000))
@@ -627,6 +638,17 @@ eventful.onUnitDeath.immortal_db=function(unit_id)
 end
 
 eventful.enableEvent(eventful.eventType.UNIT_DEATH,5)
+
+eventful.onUnitAttack.absorb_energy=function(attackerId,defenderId,woundId)
+    local attacker=df.unit.find(attackerId)
+    if df.creature_raw.find(attacker.race).caste[attacker.caste].caste_id=='GERO' then
+        local adjust_ki=dfhack.script_environment('dragonball/ki').adjust_ki
+        adjust_ki(attackerId,100)
+        adjust_ki(defenderId,-100)
+    end
+end
+
+eventful.enableEvent(eventful.eventType.UNIT_ATTACK,5)
 
 function onStateChange(op)
     if op==SC_MAP_LOADED then
