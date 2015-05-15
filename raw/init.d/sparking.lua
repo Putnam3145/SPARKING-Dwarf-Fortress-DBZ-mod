@@ -566,7 +566,7 @@ local function slowEveryoneElseDown(unit_id,action,kiAmount)
     local ki=dfhack.script_environment('dragonball/ki')
     local unit_action_type=df.unit_action_type
     local thisAmount=ki.get_max_ki(unit_id)
-    local thisDelay=2*math.floor(((kiAmount+1000)/(thisAmount+1000))+.5)
+    local thisDelay=math.max(0,math.floor((averageTo1(averageTo1(kiAmount-thisAmount)))+.5))
     local action_func=action_actions[unit_action_type[action.type]]
     if action_func then action_func(action.data,thisDelay) end
 end
@@ -578,7 +578,7 @@ local function unitHasSyndrome(u,s_name)
     return false
 end
 
-dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_actions=function(unit_id,action)
+dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(unit_id,action)
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
     local ki=dfhack.script_environment('dragonball/ki')
     local kiInvestment=ki.get_ki_investment(unit_id)
@@ -589,7 +589,7 @@ dfhack.script_environment('dragonball/unit_action_check').onUnitAction.ki_action
             forceSuperSaiyan(unit)
             local curKiInvestment=kiInvestment
             local attack=action.data.attack
-            dfhack.script_environment('dragonball/unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{totalKi})
+            dfhack.script_environment('unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{totalKi})
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             attack.unk_30=math.min(attack.unk_30+(curKiInvestment-enemyKiInvestment),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
             local enemy=df.unit.find(attack.target_unit_id)
@@ -652,7 +652,7 @@ eventful.enableEvent(eventful.eventType.UNIT_ATTACK,5)
 
 function onStateChange(op)
     if op==SC_MAP_LOADED then
-        dfhack.script_environment('dragonball/unit_action_check').enableEvent()
+        dfhack.script_environment('unit_action_check').enableEvent()
 		dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
         require('repeat-util').scheduleEvery('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
     end
