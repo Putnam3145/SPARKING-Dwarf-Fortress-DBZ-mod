@@ -619,7 +619,7 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/50))
                 attack.unk_30=math.max(attack.unk_30-(ki.get_max_ki(attack.target_unit_id)-enemyKiInvestment),0)
             end
-            if unitHasCreatureClass(enemy,'ANDROID_INFINITE_ENERGY')) then
+            if unitHasCreatureClass(enemy,'ANDROID_INFINITE_ENERGY') then
                 enemyKiInvestment=0
             end
             local ki_mat=dfhack.matinfo.find('KI')
