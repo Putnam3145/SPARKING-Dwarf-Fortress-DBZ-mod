@@ -13,18 +13,20 @@ local function checkForActions()
         local unit_action_checked=actions_already_checked[unit_id]
         for _,action in ipairs(unit.actions) do
             local action_id=action.id
-            for kk,something_to_do_to_every_action in pairs(things_to_do_every_action) do
-                if something_to_do_to_every_action[1] then 
-                    if (unit_id==something_to_do_to_every_action[3] and action_id==something_to_do_to_every_action[4]) then
-                        things_to_do_every_action[kk]=nil
-                    else
-                        something_to_do_to_every_action[1](unit_id,action,table.unpack(something_to_do_to_every_action[2]))
+            if action.type~=-1 then
+                for kk,something_to_do_to_every_action in pairs(things_to_do_every_action) do
+                    if something_to_do_to_every_action[1] then 
+                        if (unit_id==something_to_do_to_every_action[3] and action_id==something_to_do_to_every_action[4]) then
+                            things_to_do_every_action[kk]=nil
+                        else
+                            something_to_do_to_every_action[1](unit_id,action,table.unpack(something_to_do_to_every_action[2]))
+                        end
                     end
                 end
-            end
-            if not unit_action_checked[action_id] then
-                onUnitAction(unit_id,action)
-                unit_action_checked[action_id]=true
+                if not unit_action_checked[action_id] then
+                    onUnitAction(unit_id,action)
+                    unit_action_checked[action_id]=true
+                end
             end
         end
     end

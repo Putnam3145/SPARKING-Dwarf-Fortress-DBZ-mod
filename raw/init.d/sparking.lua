@@ -315,11 +315,6 @@ local function combineCounters(unit1,unit2)
     trait1.value=math.min(totalValue,100)
 end
 
-local function combineKi(unit1,unit2)
-    local ki = dfhack.script_environment('dragonball/ki')
-    ki.adjust_ki(ki.get_max_ki(unit1.id))
-end
-
 local function fuseUnits(unit1,unit2)
     if unit1.race~=unit2.race then
         return nil
@@ -475,11 +470,6 @@ dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
     end
 end
 
-function chargeKi(unit_id)
-    local ki=dfhack.script_environment('dragonball/ki')
-    ki.adjust_ki(unit_id,math.ceil(ki.get_max_ki(unit_id)/20))
-end
-
 function checkEveryUnitRegularlyForEvents()
     for k,v in ipairs(df.global.world.units.active) do
         if v.body.blood_count<v.body.blood_max*.75 then 
@@ -487,7 +477,6 @@ function checkEveryUnitRegularlyForEvents()
         end
         checkIfUnitStillGravelyInjuredForZenkai(v)
         checkOverflows(v)
-        chargeKi(v.id)
         dfhack.script_environment('dragonball/super_saiyan_trigger').runSuperSaiyanChecks(v.id)
     end
 end
@@ -565,7 +554,7 @@ local function slowEveryoneElseDown(unit_id,action,kiAmount)
     }
     local ki=dfhack.script_environment('dragonball/ki')
     local unit_action_type=df.unit_action_type
-    local thisAmount=ki.get_max_ki(unit_id)
+    local thisAmount=ki.get_ki_investment(unit_id)
     local thisDelay=math.max(0,math.floor((averageTo1(averageTo1(kiAmount-thisAmount)))+.5))
     local action_func=action_actions[unit_action_type[action.type]]
     if action_func then action_func(action.data,thisDelay) end
@@ -582,49 +571,30 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
     local ki=dfhack.script_environment('dragonball/ki')
     local kiInvestment=ki.get_ki_investment(unit_id)
-    local totalKi=ki.get_max_ki(unit_id)
     if kiInvestment>0 then
         if action.type==df.unit_action_type.Attack and unitInDeadlyCombat(unit_id) then
             local unit=df.unit.find(unit_id)
             forceSuperSaiyan(unit)
             local curKiInvestment=kiInvestment
             local attack=action.data.attack
-            dfhack.script_environment('unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{totalKi})
-            local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
-            attack.unk_30=math.min(attack.unk_30+(curKiInvestment-enemyKiInvestment),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
+            dfhack.script_environment('unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
             local enemy=df.unit.find(attack.target_unit_id)
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
-                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30)/50)
-                attack.unk_30=math.max(attack.unk_30-(ki.get_max_ki(attack.target_unit_id)-enemyKiInvestment),0)
+                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/50))
             end
-            local ki_mat=dfhack.matinfo.find('KI')
-            if unitHasCreatureClass(unit,'ANDROID_INFINITE_ENERGY') then
-                kiInvestment=0
-            end
-            if unitHasCreatureClass(enemy,'ANDROID_INFINITE_ENERGY') then
-                enemyKiInvestment=0
-            end
-            dfhack.maps.spawnFlow(unit.pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,math.min(kiInvestment+enemyKiInvestment,1000))
-            ki.adjust_ki(attack.target_unit_id,-enemyKiInvestment)
-            ki.adjust_ki(unit_id,-kiInvestment)
+            local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
+            attack.unk_30=math.min(attack.unk_30+(curKiInvestment/50-enemyKiInvestment/50),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
         end
     else
         if action.type==df.unit_action_type.Attack and unitInDeadlyCombat(unit_id) then
             local attack=action.data.attack
             forceSuperSaiyan(df.unit.find(attack.target_unit_id))
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
-            attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
             local enemy=df.unit.find(attack.target_unit_id)
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/50))
-                attack.unk_30=math.max(attack.unk_30-(ki.get_max_ki(attack.target_unit_id)-enemyKiInvestment),0)
             end
-            if unitHasCreatureClass(enemy,'ANDROID_INFINITE_ENERGY') then
-                enemyKiInvestment=0
-            end
-            local ki_mat=dfhack.matinfo.find('KI')
-            dfhack.maps.spawnFlow(df.unit.find(unit_id).pos,df.flow_type.MaterialGas,ki_mat.type,ki_mat.index,math.min(enemyKiInvestment,1000))
-            ki.adjust_ki(attack.target_unit_id,-enemyKiInvestment)
+            attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
         end
     end
 end
@@ -642,9 +612,10 @@ eventful.enableEvent(eventful.eventType.UNIT_DEATH,5)
 eventful.onUnitAttack.absorb_energy=function(attackerId,defenderId,woundId)
     local attacker=df.unit.find(attackerId)
     if df.creature_raw.find(attacker.race).caste[attacker.caste].caste_id=='GERO' then
-        local adjust_ki=dfhack.script_environment('dragonball/ki').adjust_ki
-        adjust_ki(attackerId,100)
-        adjust_ki(defenderId,-100)
+        local ki=dfhack.script_environment('dragonball/ki')
+        local defender=df.unit.find(defenderId)
+        defender.counters2.exhaustion=defender.counters2.exhaustion+100
+        attacker.counters2.exhaustion=math.max(attacker.counters2.exhaustion-100,0)
     end
 end
 

@@ -49,4 +49,4 @@ end
 
 local kiScreen=kiViewScreen{frame_title='Ki settings',frame_width=80,frame_height=3}
 
-kiScreen:show()
+print('Dummied out until there\'s another use for it.')
