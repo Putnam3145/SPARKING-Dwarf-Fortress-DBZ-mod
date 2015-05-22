@@ -167,7 +167,7 @@ end
 
 local function applySuperSaiyanGodSyndrome()
     local syndromeUtil = require 'syndrome-util'
-    if df.global.gamemode==0 then
+    if df.global.gamemode==0 and df.creature_raw.find(df.global.ui.race_id).creature_id=='SAIYAN' then
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
         if superSaiyanGod and getPowerLevel(superSaiyanGod) > 120000 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
@@ -392,7 +392,7 @@ eventful.onProjItemCheckMovement.dragonball=function(projectile)
     end
 end
 
-function add_site(size,civ,site_type,name)
+local function add_site(size,civ,site_type,name)
     local x=(df.global.world.map.region_x+1)%16;
     local y=(df.global.world.map.region_y+1)%16;
     local minx,miny,maxx,maxy
@@ -420,7 +420,7 @@ function add_site(size,civ,site_type,name)
     
     require("plugins.dfusion.adv_tools").addSite(nil,nil,maxx,minx,maxy,miny,civ,name,site_type)
 end
-function claimSite(reaction,unit,input_items,input_reagents,output_items,call_native)
+local function claimSite(reaction,unit,input_items,input_reagents,output_items,call_native)
     dialog.showInputPrompt("Site name", "Select a name for a new site:", nil,nil, dfhack.curry(add_site,1,unit.civ_id,0))
     call_native.value=false
 end
@@ -430,17 +430,17 @@ local dbEvents={
     onUnitGravelyInjured=dfhack.event.new()
 }
     
-function dbRound(num)
+local function dbRound(num)
     return math.floor(num+0.5)
 end
 
-function checkIfUnitStillGravelyInjuredForZenkai(unit)
+local function checkIfUnitStillGravelyInjuredForZenkai(unit)
     if unit.body.blood_count>unit.body.blood_max*.75 then
         dfhack.persistent.save({key='ZENKAI_'..unit.id,value='false'})
     end
 end
 
-function unitHasZenkaiAlready(unit,set)
+local function unitHasZenkaiAlready(unit,set)
     if set then 
         dfhack.persistent.save({key='ZENKAI_'..unit.id,value='true'})
     else
@@ -451,7 +451,7 @@ function unitHasZenkaiAlready(unit,set)
     end
 end
 
-function averageTo1(num)
+local function averageTo1(num)
     return (1+num)/2
 end
 
@@ -470,14 +470,30 @@ dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
     end
 end
 
-function checkEveryUnitRegularlyForEvents()
+local function unitUndergoingSSJEmotion(unit)
+    if df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
+    local emotions=unit.status.current_soul.personality.emotions
+    for k,v in ipairs(emotions) do
+        local divider=tonumber(df.emotion_type.attrs[v.type].divider)
+        if (divider==2 or divider==1) and v.strength/divider>=50 then
+            return true
+        end
+    end
+    return false
+end
+
+local function checkEveryUnitRegularlyForEvents()
     for k,v in ipairs(df.global.world.units.active) do
         if v.body.blood_count<v.body.blood_max*.75 then 
             dbEvents.onUnitGravelyInjured(v)
         end
         checkIfUnitStillGravelyInjuredForZenkai(v)
         checkOverflows(v)
-        dfhack.script_environment('dragonball/super_saiyan_trigger').runSuperSaiyanChecks(v.id)
+        local super_saiyan_trigger=dfhack.script_environment('dragonball/super_saiyan_trigger')
+        super_saiyan_trigger.runSuperSaiyanChecks(v.id)
+        if unitUndergoingSSJEmotion(v) then
+            super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(v.id)
+        end
     end
 end
 
@@ -508,8 +524,6 @@ local function unitInDeadlyCombat(unit_id)
     end
     return false
 end
-
-
 
 local function slowEveryoneElseDown(unit_id,action,kiAmount)
     local action_actions={

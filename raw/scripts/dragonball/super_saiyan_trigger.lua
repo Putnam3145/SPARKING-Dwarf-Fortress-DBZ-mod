@@ -27,6 +27,7 @@ local args = utils.processArgs({...}, validArgs)
 
 function runSuperSaiyanChecksExtremeEmotion(unit_id)
     local unit = df.unit.find(unit_id)
+    if df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
     local powerLevel=getPowerLevel(unit)
 
     if powerLevel>75000 then
@@ -57,6 +58,7 @@ end
 
 function runSuperSaiyanChecks(unit_id)
     local unit=df.unit.find(unit_id)
+    if df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
     local powerLevel=getPowerLevel(unit)
     if unitHasSyndromeClass(unit,'SUPER_SAIYAN_GOD') and unitHasSyndromeClass(unit,'HAS_GONE_SUPER_SAIYAN_4') then
         if not unitHasSyndrome(unit,'can super saiyan god super saiyan 4') then
