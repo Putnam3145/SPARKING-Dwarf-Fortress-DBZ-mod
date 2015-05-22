@@ -579,11 +579,11 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             local attack=action.data.attack
             dfhack.script_environment('unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
             local enemy=df.unit.find(attack.target_unit_id)
-            if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
-                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/50))
-            end
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             attack.unk_30=math.min(attack.unk_30+(curKiInvestment/50-enemyKiInvestment/50),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
+            if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
+                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
+            end
         end
     else
         if action.type==df.unit_action_type.Attack and unitInDeadlyCombat(unit_id) then
@@ -591,10 +591,10 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             forceSuperSaiyan(df.unit.find(attack.target_unit_id))
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
-            if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
-                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/50))
-            end
             attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
+            if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
+                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
+            end
         end
     end
 end
