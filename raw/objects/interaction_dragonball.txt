@@ -403,7 +403,7 @@ interaction_dragonball
         [SYNDROME]
             [SYN_NAME:can super saiyan 4]
             [CE_CAN_DO_INTERACTION:START:0]
-                [CDI:ADV_NAME:Gain the ability to transform into a super saiyan 4!]
+                [CDI:ADV_NAME:Transform into a Super Saiyan 4!]
                 [CDI:INTERACTION:SUPER_SAIYAN_4]
                 [CDI:TARGET:A:LINE_OF_SIGHT]
                 [CDI:TARGET:B:SELF_ONLY]

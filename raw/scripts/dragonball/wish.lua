@@ -1,12 +1,8 @@
 local function getPowerLevel(saiyan)
-    local strength = saiyan.body.physical_attrs.STRENGTH.value/1000
-    local agility = saiyan.body.physical_attrs.AGILITY.value/1000
-    local endurance = saiyan.body.physical_attrs.ENDURANCE.value/1000
-    local toughness = saiyan.body.physical_attrs.TOUGHNESS.value/1000
-    local spatialsense = saiyan.status.current_soul.mental_attrs.SPATIAL_SENSE.value/1000
-    local kinestheticsense = saiyan.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value/1000
-    local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value/1000
-    return (strength+agility+endurance+toughness+spatialsense+kinestheticsense+willpower)/13.85
+    local focus = saiyan.status.current_soul.mental_attrs.FOCUS.value
+    local endurance = saiyan.body.physical_attrs.ENDURANCE.value
+    local willpower = saiyan.status.current_soul.mental_attrs.WILLPOWER.value
+    return focus+willpower+endurance
 end
 
 local function getGenderString(gender)
@@ -231,10 +227,15 @@ local function immortalityWish(adventure)
     end
 end
 
+
 local function ressurectionWish(pos)
+    local deathWasUnnatural={}
+    deathWasNatural[df.death_type.OLD_AGE]=true
+    deathWasNatural[df.death_type.HUNGER]=true
+    deathWasNatural[df.death_type.THIRST]=true
     local dead_people_list={}
     for k,v in ipairs(df.global.world.units.all) do
-        if dfhack.units.isDead(v) then
+        if dfhack.units.isDead(v) and not deathWasNatural[v.counters.death_cause] then
             table.insert(dead_people_list,{dfhack.TranslateName(dfhack.units.getVisibleName(v))..', '..df.creature_raw.find(v.id).caste[v.caste].caste_name[0],nil,v.id})
         end
     end
@@ -251,21 +252,32 @@ local function ressurectionWish(pos)
     return false
 end
 
+function summonShadowDragons()
+    return false --feature ain't in yet
+end
+
 function makeAWish(unit,adventure)
     if not unit then error('Something weird happened! No unit found!') end
     local script=require('gui.script')
     script.start(function()
-    local okay=true
-    repeat
-        okay,selection=script.showListPrompt('Wish','Choose your wish.',COLOR_GREEN,{'Items','Immortality','Ressurection'})
-        if selection==1 then
-            okay=hackWish(unit)
-        elseif selection==2 then
-            okay=immortalityWish(adventure)
-        else
-            okay=ressurectionWish(unit.pos)
-        end
-    until okay
+    for i=1,3 do
+        local okay=true
+        repeat
+            okay,selection=script.showListPrompt('Wish','Choose your wish.',COLOR_GREEN,{'Items','Immortality','Ressurection'})
+            if selection==1 then
+                okay=hackWish(unit)
+            elseif selection==2 then
+                okay=immortalityWish(adventure)
+            else
+                okay=ressurectionWish(unit.pos)
+            end
+        until okay
+    end
+    local wishes=dfhack.persistent.save({key='DRAGONBALL_WISH_COUNT'})
+    wishes.ints[1]=wishes.ints[1]+1
+    if wishes.ints[1]>9 then
+        summonShadowDragons()
+    end
 end)
 end
 

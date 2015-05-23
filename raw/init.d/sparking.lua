@@ -99,8 +99,16 @@ local function heal_and_revive_unit(unit) --literally just full-heal copied into
 end
 
 local function unitHasCreatureClass(unit,class)
-    for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
-        if class.value == class then return true end
+    for _,c_class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
+        if c_class.value == class then return true end
+    end
+    return false
+end
+
+local function getSubClassValue(unit,class)
+    for _,c_class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
+        local class_value=c_class.value
+        if class_value:sub(0,class_value:find('/')-1): == class then return class_value:sub(1+class_value:find('/.*')) end
     end
     return false
 end
@@ -203,14 +211,14 @@ end
 
 local function giveName(unit,nameCopy)
     for ii=1,3 do
-        local unitName = ii==1 and unit.name or ii==2 and unit.status.current_soul.name or df.historical_figure.find(unit.hist_figure_id).name
-        unitName.first_name = nameCopy.first_name
-        unitName.nickname = nameCopy.nickname
-        unitName.language = nameCopy.language
-        unitName.unknown = nameCopy.unknown
+        local unitName = ii==1 and unit.name or ii==2 and unit.status.current_soul.name or unit.hist_figure_id>-1 and df.historical_figure.find(unit.hist_figure_id).name or {words={}}
+        unitName.first_name = nameCopy.first_name or ""
+        unitName.nickname = nameCopy.nickname or ""
+        unitName.language = nameCopy.language or -1
+        unitName.unknown = nameCopy.unknown or 0
         for i=1,7 do
-            unitName.words[i-1] = nameCopy.words[i]
-            unitName.parts_of_speech[i-1] = nameCopy.parts_of_speech[i]
+            unitName.words[i-1] = nameCopy.words[i] or -1
+            unitName.parts_of_speech[i-1] = nameCopy.parts_of_speech[i] or -1
         end
     end
 end
@@ -384,13 +392,29 @@ local function fixAllOverflows()
     end
 end
 
-kamehamehaMat=dfhack.matinfo.find("KAMEHAMEHA_DB")
+local projectileFunctionsImpact,projectileFunctionsMove={},{}
+
+projectileFunctionsMove['KAMEHAMEHA_DB']=function(projectile)
+    dfhack.maps.spawnFlow(projectile.cur_pos,3,0,dfhack.matinfo.find("KAMEHAMEHA_DB").index,400)
+end
+
+projectileFunctionsMove['SUN_BEAM_DB']=function(projectile)
+    dfhack.maps.spawnFlow(projectile.cur_pos,3,0,dfhack.matinfo.find("SUN_BEAM_DB").index,200)
+end
 
 eventful.onProjItemCheckMovement.dragonball=function(projectile)
-    if dfhack.matinfo.decode(projectile.item)==kamehamehaMat then 
-        dfhack.maps.spawnFlow(projectile.cur_pos,3,0,kamehamehaMat.index,400)
-    end
+    local mat=dfhack.matinfo.decode(projectile.item)
+    local matId=mat and (mat.inorganic and mat.inorganic.id or mat.material.id) or ''
+    local projFunc=projectileFunctionsMove[matId]
+    if projFunc then projFunc(projectile) end
 end
+
+--[[eventful.onProjItemCheckImpact.dragonball=function(projectile,somebool) --not implemented yet, since nothing requires it yet
+    local mat=dfhack.matinfo.decode(projectile.item)
+    local matId=mat and (mat.inorganic and mat.inorganic.id or mat.material.id) or ''
+    local projFunc=projectileFunctionsImpact[matId]
+    if projFunc then projFunc(projectile,somebool) end
+end]]
 
 local function add_site(size,civ,site_type,name)
     local x=(df.global.world.map.region_x+1)%16;
@@ -482,6 +506,13 @@ local function unitUndergoingSSJEmotion(unit)
     return false
 end
 
+local function renameUnitIfApplicable(unit)
+    local newName={first_name=getSubClassValue(unit,'SPECIAL_NAME')}
+    if newName.first_name then
+        giveName(unit,newName)
+    end
+end
+
 local function checkEveryUnitRegularlyForEvents()
     for k,v in ipairs(df.global.world.units.active) do
         if v.body.blood_count<v.body.blood_max*.75 then 
@@ -494,6 +525,7 @@ local function checkEveryUnitRegularlyForEvents()
         if unitUndergoingSSJEmotion(v) then
             super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(v.id)
         end
+        renameUnitIfApplicable(v)
     end
 end
 
@@ -594,9 +626,13 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             dfhack.script_environment('unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
-            attack.unk_30=math.min(attack.unk_30+(curKiInvestment/50-enemyKiInvestment/50),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
+            attack.unk_30=math.min(math.floor(attack.unk_30*(curKiInvestment/enemyKiInvestment)+.5),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
+            end
+            if df.creature_raw.find(unit.race).caste[unit.caste].caste_id=='GLACIUS' and kiInvestment<35000000 then
+                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510
+                attack.unk_30=0
             end
         end
     else
@@ -605,7 +641,7 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             forceSuperSaiyan(df.unit.find(attack.target_unit_id))
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
-            attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
+            attack.unk_30=math.max(math.floor(.5+math.log(attack.unk_30-enemyKiInvestment)),0)
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
             end
@@ -613,11 +649,136 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
     end
 end
 
+local syndrome_function={}
+
+syndrome_function['void banisher']=function(unit_id)
+    local ki=dfhack.script_environment('dragonball/ki')
+    local unit=df.unit.find(unit_id)
+    forceSuperSaiyan(unit)
+    if ki.get_ki_investment(unit_id)<500000000
+        unit.animal.vanish_countdown=2
+    end
+end
+
+syndrome_function['void summoner']=function(unit_id)
+    local ki=dfhack.script_environment('dragonball/ki')
+    local unit=df.unit.find(unit_id)
+    forceSuperSaiyan(unit)
+    unit.body.blood_count=math.max(0,math.min(unit.body.blood_count,ki.get_ki_investment(unit_id)-1200000000))
+end
+
+syndrome_function['namek regenerate']=function(unit_id)
+    dfhack.run_script('full-heal','-unit',unit_id)
+end
+
+syndrome_function['cell absorbed']=function(unit_id)
+    dfhack.run_script('dragonball/cell_absorb',unit_id)
+end
+
+syndrome_function['kronos time stopped']=function(unit_id)
+    local action_actions={
+        Move=function(data)
+            data.move.timer=1200
+        end,
+        Attack=function(data)
+            if data.attack.timer1>0 then
+                data.attack.timer1=1200
+            else
+                data.attack.timer2=1200
+            end
+        end,
+        HoldTerrain=function(data)
+            data.holdterrain.timer=1200
+        end,
+        Climb=function(data)
+            data.climb.timer=1200
+        end,
+        --talking, of course, is a free action
+        Unsteady=function(data)
+            data.unsteady.timer=1200
+        end,
+        Recover=function(data)
+            data.recover.timer=1200
+        end,
+        StandUp=function(data)
+            data.standup.timer=1200
+        end,
+        LieDown=function(data)
+            data.liedown.timer=1200
+        end,
+        Job2=function(data)
+            data.job2.timer=1200
+        end,
+        PushObject=function(data)
+            data.pushobject.timer=1200
+        end,
+        SuckBlood=function(data)
+            data.suckblood.timer=1200        
+        end
+    }
+    for k,v in ipairs(df.global.world.units.active) do
+        if v.id~=unit_id then
+            for _,action in ipairs(v.actions) do
+                local func=action_actions[df.action_type[action.type]]
+                if func then func(action.data) end
+            end
+        end
+    end
+end
+
+syndrome_function['hypocrisy shot']=function(unit_id)
+    local conflicts={
+        ROMANCE={{'LOVE_PROPENSITY',1}},
+        MERRIMENT={{'CHEER_PROPENSITY',1}},
+        SELF_CONTROL={{'IMMODERATION',-1}},
+        TRANQUILITY={{'VIOLENT',-1},{'EXCITEMENT_SEEKING',-1}},
+        MARTIAL_PROWESS={{'VIOLENT',1}},
+        PERSEVERENCE={{'PERSEVERENCE',1}},
+        HARMONY={{'DISCORD',-1},{'FRIENDLINESS',1}}
+        FRIENDSHIP={{'FRIENDLINESS',1}}
+        DECORUM={{'POLITENESS',1}}
+        POWER={{'CRUELTY',1}}
+        STOICISM={{'PRIVACY',1}}
+        ALTRUISM={{'SACRIFICE',1}}
+        LAW={{'DUTIFULNESS',1}}
+        LOYALTY={{'DUTIFULNESS',1}}
+        INDEPENDENCE={{'DUTIFULNESS',-1}}
+        ARTWORK={{'ART_INCLINED',-1},{'NATURE',-1}}
+    }
+    local unit=df.unit.find(unit_id)
+    local damageTotal=0
+    local personality=unit.status.current_soul.personality
+    for key,value --[[HA!]] in pairs(personality.values) do
+        local conflict=conflicts[df.value_type[value.type]]
+        if conflict then
+            for _,vv in conflict do
+                local trait=(personality.values[vv[1]]-50)*vv[2]
+                damageTotal=damageTotal+math.abs(trait-value.strength)
+            end
+        end
+    end
+    unit.body.blood_count=math.floor(unit.body.blood_count/damageTotal) --until I can better inflict wounds through DFHack...
+end
+
+eventful.onSyndrome.dragonball_syndrome=function(unit_id,syndrome_index)
+    local syn_name=df.syndrome.find(syndrome_index).syn_name
+    local syn_func=syndrome_function[syn_name]
+    if syn_func then syn_func(unit_id) end
+end
+
 eventful.enableEvent(eventful.eventType.SYNDROME,5)
 
 eventful.onUnitDeath.immortal_db=function(unit_id)
     if dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..unit_id) then
         heal_and_revive_unit(df.unit.find(unit_id))
+    end
+end
+
+eventful.onUnitDeath.hades_db=function(unit_id)
+    local unit=df.unit.find(unit_id)
+    local rng=dfhack.random.new()
+    if df.creature_raw.find(unit.race).caste[unit.caste].caste_id=='HADES' and rng:random(5)==0 then
+        heal_and_revive_unit(unit_id)
     end
 end
 
