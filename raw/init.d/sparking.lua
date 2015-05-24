@@ -108,7 +108,9 @@ end
 local function getSubClassValue(unit,class)
     for _,c_class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
         local class_value=c_class.value
-        if class_value:sub(0,class_value:find('/')-1): == class then return class_value:sub(1+class_value:find('/.*')) end
+        if class_value:find('/') then
+            if class_value:sub(0,class_value:find('/')-1) == class then return class_value:sub(1+class_value:find('/.*')) end
+        end
     end
     return false
 end
@@ -211,14 +213,15 @@ end
 
 local function giveName(unit,nameCopy)
     for ii=1,3 do
-        local unitName = ii==1 and unit.name or ii==2 and unit.status.current_soul.name or unit.hist_figure_id>-1 and df.historical_figure.find(unit.hist_figure_id).name or {words={}}
-        unitName.first_name = nameCopy.first_name or ""
+        local unitName = ii==1 and unit.name or ii==2 and unit.status.current_soul.name or unit.hist_figure_id>-1 and df.historical_figure.find(unit.hist_figure_id).name or {words={},parts_of_speech={}}
+        unitName.first_name = nameCopy.first_name or "dummy"
         unitName.nickname = nameCopy.nickname or ""
         unitName.language = nameCopy.language or -1
         unitName.unknown = nameCopy.unknown or 0
+        unitName.has_name=true
         for i=1,7 do
-            unitName.words[i-1] = nameCopy.words[i] or -1
-            unitName.parts_of_speech[i-1] = nameCopy.parts_of_speech[i] or -1
+            unitName.words[i-1] = nameCopy.words and nameCopy.words[i] or -1
+            unitName.parts_of_speech[i-1] = nameCopy.parts_of_speech and nameCopy.parts_of_speech[i] or -1
         end
     end
 end
@@ -483,7 +486,7 @@ dbEvents.onUnitGravelyInjured.zenkai=function(unit)
     if not unitHasCreatureClass(unit,'ZENKAI') or unitHasZenkaiAlready(unit) then return false end
     local zenkaiMultiplier=averageTo1(averageTo1(math.sqrt((unit.body.blood_max*.75)/unit.body.blood_count)))
     local endurance=unit.body.physical_attrs.ENDURANCE
-    endurance.value=math.min(dbRound(v.value*zenkaiMultiplier),endurance.max_value)
+    endurance.value=math.min(dbRound(unit.value*zenkaiMultiplier),endurance.max_value)
     unitHasZenkaiAlready(unit,true)
 end
 
@@ -560,48 +563,48 @@ end
 local function slowEveryoneElseDown(unit_id,action,kiAmount)
     local action_actions={
         Move=function(data,delay)
-            data.move.timer=math.min(data.move.timer+delay,200) 
+            data.move.timer=math.min(dbRound(data.move.timer*delay),200) 
         end,
         Attack=function(data,delay)
             if data.attack.timer1>0 then
-                data.attack.timer1=math.min(data.attack.timer1+delay,200)
+                data.attack.timer1=math.min(dbRound(data.attack.timer1*delay),200)
             else
-                data.attack.timer2=math.min(data.attack.timer2+delay,200)
+                data.attack.timer2=math.min(dbRound(data.attack.timer2*delay),200)
             end
         end,
         HoldTerrain=function(data,delay)
-            data.holdterrain.timer=math.min(data.holdterrain.timer+delay,200)
+            data.holdterrain.timer=math.min(dbRound(data.holdterrain.timer*delay),200)
         end,
         Climb=function(data,delay)
-            data.climb.timer=math.min(data.climb.timer+delay,200)
+            data.climb.timer=math.min(dbRound(data.climb.timer*delay),200)
         end,
         --talking, of course, is a free action
         Unsteady=function(data,delay)
-            data.unsteady.timer=math.min(data.unsteady.timer+delay,200)
+            data.unsteady.timer=math.min(dbRound(data.unsteady.timer*delay),200)
         end,
         Recover=function(data,delay)
-            data.recover.timer=math.min(data.recover.timer+delay,200)
+            data.recover.timer=math.min(dbRound(data.recover.timer*delay),200)
         end,
         StandUp=function(data,delay)
-            data.standup.timer=math.min(data.standup.timer+delay,200)
+            data.standup.timer=math.min(dbRound(data.standup.timer*delay),200)
         end,
         LieDown=function(data,delay)
-            data.liedown.timer=math.min(data.liedown.timer+delay,200)        
+            data.liedown.timer=math.min(dbRound(data.liedown.timer*delay),200)        
         end,
         Job2=function(data,delay)
-            data.job2.timer=math.min(data.job2.timer+delay,200)        
+            data.job2.timer=math.min(dbRound(data.job2.timer*delay),200)
         end,
         PushObject=function(data,delay)
-            data.pushobject.timer=math.min(data.pushobject.timer+delay,200)        
+            data.pushobject.timer=math.min(dbRound(data.pushobject.timer*delay),200)
         end,
         SuckBlood=function(data,delay)
-            data.suckblood.timer=math.min(data.suckblood.timer+delay,200)        
+            data.suckblood.timer=math.min(dbRound(data.suckblood.timer*delay),200)        
         end
     }
     local ki=dfhack.script_environment('dragonball/ki')
     local unit_action_type=df.unit_action_type
     local thisAmount=ki.get_ki_investment(unit_id)
-    local thisDelay=math.max(0,math.floor((averageTo1(averageTo1(kiAmount-thisAmount)))+.5))
+    local thisDelay=kiAmount/thisAmount
     local action_func=action_actions[unit_action_type[action.type]]
     if action_func then action_func(action.data,thisDelay) end
 end
@@ -616,17 +619,17 @@ end
 dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(unit_id,action)
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
     local ki=dfhack.script_environment('dragonball/ki')
-    local kiInvestment=ki.get_ki_investment(unit_id)
+    local kiInvestment,kiType=ki.get_ki_investment(unit_id)
     if kiInvestment>0 then
         if action.type==df.unit_action_type.Attack and unitInDeadlyCombat(unit_id) then
             local unit=df.unit.find(unit_id)
             forceSuperSaiyan(unit)
-            local curKiInvestment=kiInvestment
             local attack=action.data.attack
             dfhack.script_environment('unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
             local enemy=df.unit.find(attack.target_unit_id)
-            local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
-            attack.unk_30=math.min(math.floor(attack.unk_30*(curKiInvestment/enemyKiInvestment)+.5),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
+            local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
+            local kiRatio=enemyKiType-1>kiType and 0 or enemyKiType<kiType-1 and kiInvestment or kiInvestment/enemyKiInvestment
+            attack.unk_30=math.min(math.floor(attack.unk_30*kiRatio+.5),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
             end
@@ -641,7 +644,7 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             forceSuperSaiyan(df.unit.find(attack.target_unit_id))
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
-            attack.unk_30=math.max(math.floor(.5+math.log(attack.unk_30-enemyKiInvestment)),0)
+            attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
             end
@@ -655,7 +658,7 @@ syndrome_function['void banisher']=function(unit_id)
     local ki=dfhack.script_environment('dragonball/ki')
     local unit=df.unit.find(unit_id)
     forceSuperSaiyan(unit)
-    if ki.get_ki_investment(unit_id)<500000000
+    if ki.get_ki_investment(unit_id)<500000000 then
         unit.animal.vanish_countdown=2
     end
 end
@@ -734,15 +737,15 @@ syndrome_function['hypocrisy shot']=function(unit_id)
         TRANQUILITY={{'VIOLENT',-1},{'EXCITEMENT_SEEKING',-1}},
         MARTIAL_PROWESS={{'VIOLENT',1}},
         PERSEVERENCE={{'PERSEVERENCE',1}},
-        HARMONY={{'DISCORD',-1},{'FRIENDLINESS',1}}
-        FRIENDSHIP={{'FRIENDLINESS',1}}
-        DECORUM={{'POLITENESS',1}}
-        POWER={{'CRUELTY',1}}
-        STOICISM={{'PRIVACY',1}}
-        ALTRUISM={{'SACRIFICE',1}}
-        LAW={{'DUTIFULNESS',1}}
-        LOYALTY={{'DUTIFULNESS',1}}
-        INDEPENDENCE={{'DUTIFULNESS',-1}}
+        HARMONY={{'DISCORD',-1},{'FRIENDLINESS',1}},
+        FRIENDSHIP={{'FRIENDLINESS',1}},
+        DECORUM={{'POLITENESS',1}},
+        POWER={{'CRUELTY',1}},
+        STOICISM={{'PRIVACY',1}},
+        ALTRUISM={{'SACRIFICE',1}},
+        LAW={{'DUTIFULNESS',1}},
+        LOYALTY={{'DUTIFULNESS',1}},
+        INDEPENDENCE={{'DUTIFULNESS',-1}},
         ARTWORK={{'ART_INCLINED',-1},{'NATURE',-1}}
     }
     local unit=df.unit.find(unit_id)
@@ -761,12 +764,10 @@ syndrome_function['hypocrisy shot']=function(unit_id)
 end
 
 eventful.onSyndrome.dragonball_syndrome=function(unit_id,syndrome_index)
-    local syn_name=df.syndrome.find(syndrome_index).syn_name
+    local syn_name=df.syndrome.find(df.unit.find(unit_id).syndromes.active[syndrome_index].type).syn_name
     local syn_func=syndrome_function[syn_name]
     if syn_func then syn_func(unit_id) end
 end
-
-eventful.enableEvent(eventful.eventType.SYNDROME,5)
 
 eventful.onUnitDeath.immortal_db=function(unit_id)
     if dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..unit_id) then
@@ -774,15 +775,26 @@ eventful.onUnitDeath.immortal_db=function(unit_id)
     end
 end
 
-eventful.onUnitDeath.hades_db=function(unit_id)
-    local unit=df.unit.find(unit_id)
+local special_unit_death_classes={}
+
+special_unit_death_classes['HADES']=function(unit_id)
     local rng=dfhack.random.new()
-    if df.creature_raw.find(unit.race).caste[unit.caste].caste_id=='HADES' and rng:random(5)==0 then
-        heal_and_revive_unit(unit_id)
-    end
+    if rng:random(5)~=0 then heal_and_revive_unit(df.unit.find(unit_id)) end
 end
 
-eventful.enableEvent(eventful.eventType.UNIT_DEATH,5)
+special_unit_death_classes['KRONOS']=function(unit_id)
+    local rng=dfhack.random.new()
+    if rng:random(4)~=0 then heal_and_revive_unit(df.unit.find(unit_id)) end
+end
+
+eventful.onUnitDeath.special_unit_death_db=function(unit_id)
+    local unit=df.unit.find(unit_id)
+    local caste=df.creature_raw.find(unit.race).caste[unit.caste]
+    for _,c_class in ipairs(caste.creature_class) do
+        local func=special_unit_death_classes[c_class.value]
+        if func then func(unit_id) end
+    end
+end
 
 eventful.onUnitAttack.absorb_energy=function(attackerId,defenderId,woundId)
     local attacker=df.unit.find(attackerId)
@@ -794,12 +806,14 @@ eventful.onUnitAttack.absorb_energy=function(attackerId,defenderId,woundId)
     end
 end
 
-eventful.enableEvent(eventful.eventType.UNIT_ATTACK,5)
-
 function onStateChange(op)
     if op==SC_MAP_LOADED then
         dfhack.script_environment('unit_action_check').enableEvent()
 		dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
         require('repeat-util').scheduleEvery('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
+        eventful.enableEvent(eventful.eventType.UNIT_ATTACK,5)
+        eventful.enableEvent(eventful.eventType.UNIT_DEATH,5)
+        eventful.enableEvent(eventful.eventType.SYNDROME,5)
+        if dfhack.persistent.save({key='DRAGONBALL_WISH_COUNT'}).ints[2]==1 then require('repeat-util').scheduleEvery('shadow dragons',100,'ticks',dfhack.script_environment('dragonball/shadow_dragon').shadow_dragon_loop) end
     end
 end

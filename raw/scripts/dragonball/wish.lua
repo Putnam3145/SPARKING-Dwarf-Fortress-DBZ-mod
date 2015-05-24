@@ -252,10 +252,6 @@ local function ressurectionWish(pos)
     return false
 end
 
-function summonShadowDragons()
-    return false --feature ain't in yet
-end
-
 function makeAWish(unit,adventure)
     if not unit then error('Something weird happened! No unit found!') end
     local script=require('gui.script')
@@ -275,8 +271,11 @@ function makeAWish(unit,adventure)
     end
     local wishes=dfhack.persistent.save({key='DRAGONBALL_WISH_COUNT'})
     wishes.ints[1]=wishes.ints[1]+1
-    if wishes.ints[1]>9 then
-        summonShadowDragons()
+    wishes:save()
+    if wishes.ints[1]>9 and wishes.ints[2]<1 then
+        dfhack.script_environment('dragonball/shadow_dragon').init_shadow_dragons()
+        wishes.ints[2]=1
+        wishes:save()
     end
 end)
 end
