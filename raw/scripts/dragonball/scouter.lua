@@ -3,28 +3,13 @@
 local utils=require('utils')
 
 validArgs = utils.invert({
- 'accurate',
  'legacy',
  'all',
- 'citizens'
+ 'citizens',
+ 'ignoreGod'
 })
 
 local args = utils.processArgs({...}, validArgs)
-
-local function unitIsGod(unit)
-    local unitraws = df.creature_raw.find(unit.race)
-    local casteraws = unitraws.caste[unit.caste]
-    local unitclasses = casteraws.creature_class
-    for _,class in ipairs(unitclasses) do
-        if class.value == "GOD" then return true end
-    end
-    for _,syndrome in ipairs(unit.syndromes.active) do
-        for _,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
-            if synclass.value == "GOD" then return true end
-        end
-    end
-    return false
-end
 
 --power levels should account for disabilities and such
 local function isWinded(unit)
@@ -48,12 +33,9 @@ local function getExhaustion(unit)
     return 1
 end
 
---blood_max appears to be the creature's body size divided by 10; the power level calculation relies on body size divided by 1000, so divided by 100 it is. blood_count refers to current blood amount, and it, when full, is equal to blood_max.
-
-local function getPowerLevel(saiyan,accurate,legacy)
-	if accurate then
-        return saiyan.body.physical_attrs.ENDURANCE.value+saiyan.status.current_soul.mental_attrs.FOCUS.value+saiyan.status.current_soul.mental_attrs.WILLPOWER.value
-	elseif legacy then
+local function getPowerLevel(saiyan,legacy,ignoreGod)
+    if not saiyan then return 'nothing' end
+    if legacy then
 		local strength,endurance,toughness,spatialsense,kinestheticsense,willpower
 		if saiyan.curse.attr_change then
 			strength = ((saiyan.body.physical_attrs.STRENGTH.value+saiyan.curse.attr_change.phys_att_add.STRENGTH)/3550)*(saiyan.curse.attr_change.phys_att_perc.STRENGTH/100)
@@ -77,19 +59,28 @@ local function getPowerLevel(saiyan,accurate,legacy)
 		if isStunned(saiyan) then powerlevel=powerlevel/1.5 end
 		if isParalyzed(saiyan) then powerlevel=powerlevel/5 end
 		if isUnconscious(saiyan) then powerlevel=powerlevel/10 end
-		if powerlevel == 1/0 or unitIsGod(saiyan) then
-			dfhack.gui.showPopupAnnouncement("The scouter broke at this incredible power. Either the power belongs to a god... or it's immeasurable.",1)
-			qerror("Scouter broke! Oh well, there are more.",11)
+		if powerlevel == 1/0 then
+			return 'undefined'
 		end
 		return math.floor(powerlevel)
     else
-        return math.floor(dfhack.script_environment('dragonball/ki').get_max_ki(saiyan.id)/50)^2
-	end
+        local powerLevel,kiLevel=dfhack.script_environment('dragonball/ki').get_ki_investment(saiyan.id)
+        if kiLevel>1 then 
+            if ignoreGod or kiLevel==1 then
+                local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or tostring(kiLevel-2)..' infinity cores'
+                return powerLevel..' ('..kiLevelStr..')'
+            else
+                return '(undetectable--a god?!)'
+            end
+        else
+            return powerLevel
+        end
+    end
 end
 
 if args.all then
 	for k,v in ipairs(df.global.world.units.active) do
-        local powerlevel=getPowerLevel(v,args.accurate,args.legacy)
+        local powerlevel=getPowerLevel(v,args.legacy,args.ignoreGod)
         if powerlevel>0 then
             print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..powerlevel)
         end
@@ -97,9 +88,9 @@ if args.all then
 elseif args.citizens then
 	for k,v in ipairs(df.global.world.units.active) do
 		if dfhack.units.isCitizen(v) then
-			print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..getPowerLevel(v,args.accurate,args.legacy))
+			print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..getPowerLevel(v,args.legacy,args.ignoreGod))
 		end
 	end
 else
-	dfhack.gui.showPopupAnnouncement("The scouter says " .. getPowerLevel(dfhack.gui.getSelectedUnit(silent),args.accurate,args.legacy) .. "!",11)
+	dfhack.gui.showPopupAnnouncement("The scouter says " .. getPowerLevel(dfhack.gui.getSelectedUnit(silent),args.legacy,args.ignoreGod) .. "!",11)
 end
