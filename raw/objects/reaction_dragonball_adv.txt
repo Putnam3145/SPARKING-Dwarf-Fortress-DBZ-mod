@@ -21,10 +21,6 @@ reaction_dragonball_adv
 [REACTION:INSTANT_TRANSMISSION_INSTRUCTIONS_1]
 	[NAME:Ctrl+t for instant transmission]
 	[ADVENTURE_MODE_ENABLED]
-
-[REACTION:KI_ADJUST_INSTRUCTIONS_1]
-    [NAME:Ctrl+k for ki information]
-    [ADVENTURE_MODE_ENABLED]
     
 [REACTION:ADV_FORT_INSTRUCTIONS_4]
     [NAME:+-Advfort-related reactions-+]
