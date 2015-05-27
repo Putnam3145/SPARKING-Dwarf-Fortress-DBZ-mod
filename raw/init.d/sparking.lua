@@ -633,9 +633,12 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
             end
-            if df.creature_raw.find(unit.race).caste[unit.caste].caste_id=='GLACIUS' and kiInvestment<35000000 then
-                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510
+            local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
+            if caste_id=='GLACIUS' and kiInvestment<35000000 then
+                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510 --approximately absolute zero
                 attack.unk_30=0
+            elseif caste_id=='CRYSTALLOS' and kiType<4 then
+                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9001 --over 9000, but also about -281 kelvins
             end
         end
     else
@@ -647,6 +650,13 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
+            end
+            local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
+            if caste_id=='GLACIUS' then
+                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510
+                attack.unk_30=0
+            elseif caste_id=='CRYSTALLOS' then
+                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9001
             end
         end
     end
@@ -667,7 +677,7 @@ syndrome_function['void summoner']=function(unit_id)
     local ki=dfhack.script_environment('dragonball/ki')
     local unit=df.unit.find(unit_id)
     forceSuperSaiyan(unit)
-    unit.body.blood_count=math.max(0,math.min(unit.body.blood_count,ki.get_ki_investment(unit_id)-1200000000))
+    unit.body.blood_count=math.max(0,math.min(unit.body.blood_count,unit.body.blood_count*(ki.get_ki_investment(unit_id)/24000000000)))
 end
 
 syndrome_function['namek regenerate']=function(unit_id)
@@ -763,6 +773,42 @@ syndrome_function['hypocrisy shot']=function(unit_id)
     unit.body.blood_count=math.floor(unit.body.blood_count/damageTotal) --until I can better inflict wounds through DFHack...
 end
 
+syndrome_function['Super Saiyan']=function(unit_id)
+    local ki = dfhack.script_environment('dragonball/ki')
+    local totalKi,kiType=ki.get_ki_investment(unit_id)
+    local SSPersist=ki.adjust_ki_mult_persist(unit_id,'SUPER_SAIYAN',1.02)
+end
+
+syndrome_function['Super Saiyan 2']=function(unit_id)
+    local ki = dfhack.script_environment('dragonball/ki')
+    local totalKi,kiType=ki.get_ki_investment(unit_id)
+    local SSPersist=ki.adjust_ki_mult_persist(unit_id,'SUPER_SAIYAN',1.04)
+end
+
+syndrome_function['Super Saiyan 3']=function(unit_id)
+    local ki = dfhack.script_environment('dragonball/ki')
+    local totalKi,kiType=ki.get_ki_investment(unit_id)
+    local SSPersist=ki.adjust_ki_mult_persist(unit_id,'SUPER_SAIYAN',1.08)
+end
+
+syndrome_function['Super Saiyan 4']=function(unit_id)
+    local ki = dfhack.script_environment('dragonball/ki')
+    local totalKi,kiType=ki.get_ki_investment(unit_id)
+    local SSPersist=ki.adjust_ki_mult_persist(unit_id,'SUPER_SAIYAN',1.16)
+end
+
+syndrome_function['Super Saiyan God Super Saiyan']=function(unit_id)
+    local ki = dfhack.script_environment('dragonball/ki')
+    local totalKi,kiType=ki.get_ki_investment(unit_id)
+    local SSPersist=ki.adjust_ki_mult_persist(unit_id,'SUPER_SAIYAN',1.08)
+end
+
+syndrome_function['Super Saiyan God Super Saiyan 4']=function(unit_id)
+    local ki = dfhack.script_environment('dragonball/ki')
+    local totalKi,kiType=ki.get_ki_investment(unit_id)
+    local SSPersist=ki.adjust_ki_mult_persist(unit_id,'SUPER_SAIYAN',1.16)
+end
+
 eventful.onSyndrome.dragonball_syndrome=function(unit_id,syndrome_index)
     local syn_name=df.syndrome.find(df.unit.find(unit_id).syndromes.active[syndrome_index].type).syn_name
     local syn_func=syndrome_function[syn_name]
@@ -796,14 +842,27 @@ eventful.onUnitDeath.special_unit_death_db=function(unit_id)
     end
 end
 
-eventful.onUnitAttack.absorb_energy=function(attackerId,defenderId,woundId)
+special_unit_attack_castes={}
+
+special_unit_attack_castes['GERO']=function(attackerId,defenderId,woundId)
+    local defender=df.unit.find(defenderId)
     local attacker=df.unit.find(attackerId)
-    if df.creature_raw.find(attacker.race).caste[attacker.caste].caste_id=='GERO' then
-        local ki=dfhack.script_environment('dragonball/ki')
-        local defender=df.unit.find(defenderId)
-        defender.counters2.exhaustion=defender.counters2.exhaustion+100
-        attacker.counters2.exhaustion=math.max(attacker.counters2.exhaustion-100,0)
-    end
+    defender.counters2.exhaustion=defender.counters2.exhaustion+100
+    attacker.counters2.exhaustion=math.max(attacker.counters2.exhaustion-100,0)
+end
+
+special_unit_attack_castes['RAPTOR']=function(attackerId,defenderId,woundId)
+    local defender=df.unit.find(defenderId)
+    local attacker=df.unit.find(attackerId)
+    defender.counters2.exhaustion=defender.counters2.exhaustion+200
+    attacker.counters2.exhaustion=math.max(attacker.counters2.exhaustion-200,0)
+end
+
+eventful.onUnitAttack.special_unit_attack_db=function(attackerId,defenderId,woundId)
+    local attacker=df.unit.find(attackerId)
+    local caste_name=df.creature_raw.find(attacker.race).caste[attacker.caste].caste_id
+    local caste_func=special_unit_attack_castes[caste_name]
+    if caste_func then caste_func(attackerId,defenderId,woundId) end
 end
 
 function onStateChange(op)
