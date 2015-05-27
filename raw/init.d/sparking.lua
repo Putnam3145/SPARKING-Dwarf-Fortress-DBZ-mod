@@ -651,9 +651,12 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
             end
-            if df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id=='GLACIUS' then
+            local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
+            if caste_id=='GLACIUS' then
                 unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510
                 attack.unk_30=0
+            elseif caste_id=='CRYSTALLOS' then
+                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9001
             end
         end
     end
