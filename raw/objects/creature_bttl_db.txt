@@ -173,6 +173,7 @@ creature_shadow_db
         [FEMALE]
         [DESCRIPTION:A malevolent draconic creature introduced by overuse of the dragon balls. Her ki is divine.]
         [ORIENTATION:FEMALE:0:0:1]
+        [ORIENTATION:MALE:1:0:0]
         [CREATURE_CLASS:SPECIAL_NAME/Alpha Shenron] you may be surprised to know that this is a completely valid creature class
         [CREATURE_CLASS:KI_BOOST_1200000000]
         [SET_TL_GROUP:BY_CATEGORY:EYE:EYE]
