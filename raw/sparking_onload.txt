@@ -6,3 +6,4 @@ modtools/reaction-trigger -reactionName WISH_DB -command [ dragonball/wish -unit
 modtools/reaction-trigger -reactionName WISH_DB_ADV -command [ dragonball/wish -adventure ]
 modtools/reaction-trigger -reactionName MAGIC_MATERIALIZATION_NAMEK -command [ dragonball/magic_materialization -unit \\WORKER_ID ]
 dragonball/projectile_expansion
+dragonball/dwarf_scouter

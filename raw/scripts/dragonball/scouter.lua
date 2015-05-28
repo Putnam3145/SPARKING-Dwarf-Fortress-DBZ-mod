@@ -33,7 +33,7 @@ local function getExhaustion(unit)
     return 1
 end
 
-local function getPowerLevel(saiyan,legacy,ignoreGod)
+function getPowerLevel(saiyan,legacy,ignoreGod)
     if not saiyan then return 'nothing' end
     if legacy then
 		local strength,endurance,toughness,spatialsense,kinestheticsense,willpower
@@ -66,14 +66,12 @@ local function getPowerLevel(saiyan,legacy,ignoreGod)
     else
         local powerLevel,kiLevel=dfhack.script_environment('dragonball/ki').get_ki_investment(saiyan.id)
         if kiLevel>1 then 
-            if ignoreGod or kiLevel==1 then
+            if ignoreGod then
                 local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or tostring(kiLevel-2)..' infinity cores'
-                return powerLevel..' ('..kiLevelStr..')'
+                return powerLevel..' ('..kiLevelStr..' ki)'
             else
                 return '(undetectable--a god?!)'
             end
-        else
-            return powerLevel
         end
     end
 end
@@ -92,5 +90,8 @@ elseif args.citizens then
 		end
 	end
 else
-	dfhack.gui.showPopupAnnouncement("The scouter says " .. getPowerLevel(dfhack.gui.getSelectedUnit(silent),args.legacy,args.ignoreGod) .. "!",11)
+    local unit=dfhack.gui.getSelectedUnit(true)
+    if unit then
+        dfhack.gui.showPopupAnnouncement("The scouter says " .. getPowerLevel(dfhack.gui.getSelectedUnit(true),args.legacy,args.ignoreGod) .. "!",11)
+    end
 end
