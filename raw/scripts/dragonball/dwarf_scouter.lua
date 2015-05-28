@@ -34,13 +34,23 @@ function getMilitarySelectedUnit()
     end
 end
 
-local militaryScouter=defclass(militaryScouter,gui.Screen)
+local TransparentViewscreen=defclass(TransparentViewscreen,gui.Screen)
 
-function militaryScouter:onGetSelectedUnit()
+function TransparentViewscreen:onInput(keys)
+    self:inputToSubviews(keys)
+    self:sendInputToParent(keys)
+    if keys.LEAVESCREEN then
+        self:dismiss()
+    end
+end
+
+local MilitaryScouter=defclass(MilitaryScouter,TransparentViewscreen)
+
+function MilitaryScouter:onGetSelectedUnit()
     return getMilitarySelectedUnit()
 end
 
-function militaryScouter:onRender()
+function MilitaryScouter:onRender()
     self._native.parent:render()
     if self._native.parent._type~=df.viewscreen_layer_militaryst then self:dismiss() return end
     if self._native.parent.page==0 and (self._native.parent.layer_objects[1].active or self._native.parent.layer_objects[2].active) then
@@ -56,17 +66,9 @@ function militaryScouter:onRender()
     end
 end
 
-function militaryScouter:onInput(keys)
-    self:inputToSubviews(keys)
-    self:sendInputToParent(keys)
-    if keys.LEAVESCREEN then
-        self:dismiss()
-    end
-end
+local TextViewScouter=defclass(TextViewScouter,TransparentViewscreen)
 
-local textviewScouter=defclass(textviewScouter,gui.Screen)
-
-function textviewScouter:onRender()
+function TextViewScouter:onRender()
     self._native.parent:render()
     if self._native.parent._type~=df.viewscreen_textviewerst then self:dismiss() return end
     local scroll_pos=self._native.parent.scroll_pos
@@ -87,26 +89,40 @@ function textviewScouter:onRender()
     end
 end
 
-function textviewScouter:onInput(keys)
-    self:inputToSubviews(keys)
-    self:sendInputToParent(keys)
-    if keys.LEAVESCREEN then
-        self:dismiss()
+local DungeonScouter=defclass(DungeonScouter,TransparentViewscreen)
+
+function DungeonScouter:onRender()
+    local dungeon_viewscreen=self._native.parent
+    dungeon_viewscreen:render()
+    if dungeon_viewscreen._type~=df.viewscreen_dungeon_monsterstatusst then self:dismiss() return end
+    if not(dungeon_viewscreen.view_skills) and dungeon_viewscreen.unit then
+        local unit=dungeon_viewscreen.unit
+        local powerLevel,potential=getPowerLevel(unit)
+        if powerLevel then
+            local stringSoFar='Power Level: '
+            local plevelcolor=powerLevel<1250 and COLOR_LIGHTRED or powerLevel<2750 and COLOR_WHITE or powerLevel<5000 and COLOR_GREEN or powerLevel<10000 and COLOR_LIGHTGREEN or powerLevel<100000 and COLOR_LIGHTCYAN or COLOR_LIGHTMAGENTA
+            dfhack.screen.paintString({fg=plevelcolor},0,21,'Power Level ' ..powerLevel..'/'..potential)
+        end
     end
 end
 
 local viewscreenActions={}
 
 viewscreenActions[df.viewscreen_layer_militaryst]=function() --yeah that works
-    local scouter=militaryScouter()
+    local scouter=MilitaryScouter()
     scouter:show()
 end
 
 viewscreenActions[df.viewscreen_textviewerst]=function()
     if dfhack.gui.getCurViewscreen().parent._type==df.viewscreen_unitst then
-        local scouter=textviewScouter()
+        local scouter=TextViewScouter()
         scouter:show()
     end
+end
+
+viewscreenActions[df.viewscreen_dungeon_monsterstatusst]=function()
+    local scouter=DungeonScouter()
+    scouter:show()
 end
 
 dfhack.onStateChange.dwarf_scouter=function(code)
