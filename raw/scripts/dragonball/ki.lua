@@ -70,7 +70,6 @@ local function get_ki_boost(unit)
 end
 
 local function calculate_max_ki_portions(unit)
-    if not unit.status.current_soul then return 0,0,0 end
     local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
     local focus = unit.status.current_soul.mental_attrs.FOCUS.value
     local endurance = unit.body.physical_attrs.ENDURANCE.value
@@ -93,10 +92,14 @@ local function getYukiPerc(unit)
     local yukiPerc=1
     for k,v in ipairs(unit.status.current_soul.personality.emotions) do
         local emotion_type=df.emotion_type[v.type]
+        local divider=10*tonumber(df.emotion_type.attrs[v.type].divider)
+        local multiplier=v.strength/divider
+        if divider==0 then multiplier=1 end
+        print(yukiPerc,df.emotion_type[v.type],df.emotion_type.attrs[v.type].divider)
         if isPositiveWillpowerEmotion[emotion_type] then
-            yukiPerc=yukiPerc*(v.strength/(10*tonumber(df.emotion_type.attrs[v.type].divider)))
+            yukiPerc=yukiPerc*multiplier
         else
-            yukiPerc=yukiPerc/(v.strength/(10*tonumber(df.emotion_type.attrs[v.type].divider)))
+            yukiPerc=yukiPerc/multiplier
         end
     end
     return math.min(1,math.max(0,yukiPerc))
@@ -142,7 +145,6 @@ end
 function get_max_ki(unit_id)
     if not unitCanUseKi(unit_id) then return 0 end
     local unit=df.unit.find(unit_id)
-    if not unit.status.current_soul then return 0 end
     local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
     local focus = unit.status.current_soul.mental_attrs.FOCUS.value
     local endurance = unit.body.physical_attrs.ENDURANCE.value
