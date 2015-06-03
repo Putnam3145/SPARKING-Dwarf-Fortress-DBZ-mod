@@ -74,7 +74,7 @@ function TextViewScouter:onRender()
     local scroll_pos=self._native.parent.scroll_pos
     if scroll_pos<2 then
         local unit=self._native.parent.parent.unit
-        local powerLevel,potential=getPowerLevel(unit)
+        local powerLevel,potential=getPowerLevel(unit,true)
         if powerLevel then
             local powerstr=' power level is '
             powerstr=unit.sex==0 and 'Her'..powerstr or unit.sex==1 and 'His'..powerstr or 'Its'..powerstr --capitalization is important!
