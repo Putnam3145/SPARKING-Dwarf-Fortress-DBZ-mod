@@ -95,7 +95,6 @@ local function getYukiPerc(unit)
         local divider=10*tonumber(df.emotion_type.attrs[v.type].divider)
         local multiplier=v.strength/divider
         if divider==0 then multiplier=1 end
-        print(yukiPerc,df.emotion_type[v.type],df.emotion_type.attrs[v.type].divider)
         if isPositiveWillpowerEmotion[emotion_type] then
             yukiPerc=yukiPerc*multiplier
         else

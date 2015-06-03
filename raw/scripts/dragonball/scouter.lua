@@ -72,6 +72,8 @@ function getPowerLevel(saiyan,legacy,ignoreGod)
             else
                 return '(undetectable--a god?!)'
             end
+        else
+            return powerLevel
         end
     end
 end
