@@ -101,7 +101,7 @@ local function getYukiPerc(unit)
             yukiPerc=yukiPerc/multiplier
         end
     end
-    return math.min(1,math.max(0,yukiPerc))
+    return math.min(1,math.max(0.25,yukiPerc))
 end
 
 local function averageTo1(number)
