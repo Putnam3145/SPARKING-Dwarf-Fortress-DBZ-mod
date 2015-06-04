@@ -1,10 +1,10 @@
 local gui=require('gui')
 
-local getPowerLevel=function(unit)
+local getPowerLevel=function(unit,numOnly)
     if not unit then return 'nothing' end
     local powerLevel,kiLevel=dfhack.script_environment('dragonball/ki').get_ki_investment(unit.id)
     local potential=dfhack.script_environment('dragonball/ki').get_max_ki(unit.id)
-    if kiLevel>1 then 
+    if kiLevel>1 and not numOnly then 
         local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or tostring(kiLevel-2)..' infinity cores'
         return powerLevel..' ('..kiLevelStr..')',potential
     else
@@ -74,7 +74,7 @@ function TextViewScouter:onRender()
     local scroll_pos=self._native.parent.scroll_pos
     if scroll_pos<2 then
         local unit=self._native.parent.parent.unit
-        local powerLevel,potential=getPowerLevel(unit)
+        local powerLevel,potential=getPowerLevel(unit,true)
         if powerLevel then
             local powerstr=' power level is '
             powerstr=unit.sex==0 and 'Her'..powerstr or unit.sex==1 and 'His'..powerstr or 'Its'..powerstr --capitalization is important!
@@ -118,14 +118,13 @@ local function getYukiPerc(unit)
         local divider=10*tonumber(df.emotion_type.attrs[v.type].divider)
         local multiplier=v.strength/divider
         if divider==0 then multiplier=1 end
-        print(yukiPerc,df.emotion_type[v.type],df.emotion_type.attrs[v.type].divider)
         if isPositiveWillpowerEmotion[emotion_type] then
             yukiPerc=yukiPerc*multiplier
         else
             yukiPerc=yukiPerc/multiplier
         end
     end
-    return math.min(1,math.max(0,yukiPerc))
+    return math.min(1,math.max(0.25,yukiPerc))
 end
 
 local function averageTo1(number)

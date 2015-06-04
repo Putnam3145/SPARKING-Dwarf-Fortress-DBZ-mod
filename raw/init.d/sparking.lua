@@ -180,7 +180,10 @@ local function applySuperSaiyanGodSyndrome()
     if df.global.gamemode==0 and df.creature_raw.find(df.global.ui.race_id).creature_id=='SAIYAN' then
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
-        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 120000 then syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) end
+        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 120000 and superSaiyanLevel(superSaiyanGod)<6 then 
+            dfhack.gui.showPopupAnnouncement(dfhack.gui.showPopupAnnouncement(dfhack.TranslateName(dfhack.units.getVisibleName(superSaiyanGod))..' has become a Super Saiyan God!',COLOR_CYAN,true)
+            syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) 
+        end
     end
 end
 
@@ -517,6 +520,7 @@ local function renameUnitIfApplicable(unit)
 end
 
 local function checkEveryUnitRegularlyForEvents()
+    applySuperSaiyanGodSyndrome()
     for k,v in ipairs(df.global.world.units.active) do
         if v.body.blood_count<v.body.blood_max*.75 then 
             dbEvents.onUnitGravelyInjured(v)
