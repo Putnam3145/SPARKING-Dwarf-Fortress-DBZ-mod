@@ -120,6 +120,9 @@ function getKiType(unit,totalKi)
     local kiType=m.min(4,m.max(0,m.floor(m.log(totalKi/375000)/m.log(40))))
     if kiType==4 then
         kiType=m.floor(totalKi/24000000000)+2
+        if kiType>10 then
+            return 12
+        end
     end
     return kiType
 end

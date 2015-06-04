@@ -181,8 +181,8 @@ local function applySuperSaiyanGodSyndrome()
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
         if superSaiyanGod and getPowerLevel(superSaiyanGod) > 120000 and superSaiyanLevel(superSaiyanGod)<6 then 
-            dfhack.gui.showPopupAnnouncement(dfhack.gui.showPopupAnnouncement(dfhack.TranslateName(dfhack.units.getVisibleName(superSaiyanGod))..' has become a Super Saiyan God!',COLOR_CYAN,true)
-            syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing) 
+            dfhack.gui.showPopupAnnouncement(dfhack.gui.showPopupAnnouncement(dfhack.TranslateName(dfhack.units.getVisibleName(superSaiyanGod))..' has become a Super Saiyan God!',COLOR_CYAN,true))
+            syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing)
         end
     end
 end
