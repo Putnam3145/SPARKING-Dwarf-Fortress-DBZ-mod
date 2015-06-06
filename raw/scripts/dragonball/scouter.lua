@@ -67,7 +67,7 @@ function getPowerLevel(saiyan,legacy,ignoreGod)
         local powerLevel,kiLevel=dfhack.script_environment('dragonball/ki').get_ki_investment(saiyan.id)
         if kiLevel>1 then 
             if ignoreGod then
-                local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or tostring(kiLevel-2)..' infinity cores'
+                local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or kiLevel<11 and tostring(kiLevel-2)..' infinity cores' or "the culmination"
                 return powerLevel..' ('..kiLevelStr..' ki)'
             else
                 return '(undetectable--a god?!)'

@@ -5,7 +5,7 @@ local getPowerLevel=function(unit,numOnly)
     local powerLevel,kiLevel=dfhack.script_environment('dragonball/ki').get_ki_investment(unit.id)
     local potential=dfhack.script_environment('dragonball/ki').get_max_ki(unit.id)
     if kiLevel>1 and not numOnly then 
-        local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or tostring(kiLevel-2)..' infinity cores'
+        local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or kiLevel<11 and tostring(kiLevel-2)..' infinity cores' or "the culmination"
         return powerLevel..' ('..kiLevelStr..')',potential
     else
         return powerLevel,potential
