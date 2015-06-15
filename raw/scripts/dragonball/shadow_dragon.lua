@@ -137,7 +137,7 @@ shadow_dragon_action[7]=function()
     shenron.flags2.visitor_uninvited=true
     shenron.flags3.no_meandering=true
     shenron.flags1.active_invader=true
-    local message=[["What does it take?! Does the afterlife just hate you and refuse you entry, or what?! ...Hh. I apologize. Genuinely. I let myself get carried away. I don't resent you at all. I mean, I'll still kill you since you insist on fighting, but please rest assured I feel nothing but respect for any of you. You see, my philosophy is simple. I believe that we were all created for a purpose. There are, of course, the creators and destroyers of worlds, or of universes. Simple enough. Then myself and the other Shadow Dragons—we are the Eternal's creatures, and our purpose is to enact its supreme will. As, you'll notice, I am doing so now. You, on the other hand..."]]
+    local message=[["What does it take?! Does the afterlife just hate you and refuse you entry, or what?! ...Hh. I apologize. Genuinely. I let myself get carried away. I don't resent you at all. I mean, I'll still kill you since you insist on fighting, but please rest assured I feel nothing but respect for any of you. You see, my philosophy is simple. I believe that we were all created for a purpose. There are, of course, the creators and destroyers of worlds, or of universes. Simple enough. Then myself and the other Shadow DragonsÂ—we are the Eternal's creatures, and our purpose is to enact its supreme will. As, you'll notice, I am doing so now. You, on the other hand..."]]
     dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,RECENTER=true,PAUSE=true},shenron.pos,message,COLOR_LIGHTCYAN)
     local shadow_dragon_persist=dfhack.persistent.save({key='DRAGONBALL_WISH_COUNT'})
     shadow_dragon_persist.ints[4]=shenron.id
@@ -247,7 +247,7 @@ shadow_dragon_action[14]=function()
     shadow_dragon_persist:save()
     require('repeat-util').cancel('shadow dragons')
     local message=[["Haha, wow, you killed Lord Entropy? Good, I don't have to. Maybe one of you'll be strong enough for me to have fun with one day. Maybe. I doubt it. Don't expect to see me again, except maybe answering your prayers and helping the weak."]]
-    dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,RECENTER=fakse,PAUSE=true},{},message,COLOR_LIGHTCYAN)
+    dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,RECENTER=false,PAUSE=true},{},message,COLOR_LIGHTCYAN)
 end
 
 function init_entropy()
