@@ -558,6 +558,7 @@ end
 
 local function unitInDeadlyCombat(unit_id)
     local unit=df.unit.find(unit_id)
+    if not unit.status.current_soul then return false end
     for k,v in ipairs(unit.status.current_soul.personality.emotions) do
         if (v.thought==df.unit_thought_type.Conflict or v.thought==df.unit_thought_type.JoinConflict) and math.abs(df.global.cur_year_tick-v.year_tick)<50 then return true end
     end
