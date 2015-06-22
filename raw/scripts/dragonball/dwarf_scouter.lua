@@ -149,6 +149,10 @@ function TextViewScouter:showMoreInfo()
     dlg.showMessage('Ki','Genki: '..genkiInvestment..'/'..maxGenki..' Yuki: '..yukiInvestment..'/'..maxYuki..' Shoki: '..shokiInvestment..'/'..maxShoki..'.'..NEWLINE..'Yuki is determined by willpower, emotions and discipline, '..NEWLINE..'Shoki is determined by focus, stress and discipline'..NEWLINE..'and Genki by endurance, health and fighting skill.')
 end
 
+function TextViewScouter:onGetSelectedUnit()
+    return self._native.parent.parent.unit()
+end
+
 local DungeonScouter=defclass(DungeonScouter,TransparentViewscreen)
 
 function DungeonScouter:onRender()
@@ -164,6 +168,10 @@ function DungeonScouter:onRender()
             dfhack.screen.paintString({fg=plevelcolor},0,21,'Power Level ' ..powerLevel..'/'..potential)
         end
     end
+end
+
+function DungeonScouter:onGetSelectedUnit()
+   return self._native.parent.unit 
 end
 
 local viewscreenActions={}
