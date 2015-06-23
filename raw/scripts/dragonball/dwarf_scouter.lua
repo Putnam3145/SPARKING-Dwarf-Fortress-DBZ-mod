@@ -161,7 +161,7 @@ function DungeonScouter:onRender()
     if dungeon_viewscreen._type~=df.viewscreen_dungeon_monsterstatusst then self:dismiss() return end
     if not(dungeon_viewscreen.view_skills) and dungeon_viewscreen.unit then
         local unit=dungeon_viewscreen.unit
-        local powerLevel,potential=getPowerLevel(unit)
+        local powerLevel,potential=getPowerLevel(unit,true)
         if powerLevel then
             local stringSoFar='Power Level: '
             local plevelcolor=powerLevel<1250 and COLOR_LIGHTRED or powerLevel<2750 and COLOR_WHITE or powerLevel<5000 and COLOR_GREEN or powerLevel<10000 and COLOR_LIGHTGREEN or powerLevel<100000 and COLOR_LIGHTCYAN or COLOR_LIGHTMAGENTA
