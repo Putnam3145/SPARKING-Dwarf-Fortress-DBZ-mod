@@ -489,7 +489,7 @@ dbEvents.onUnitGravelyInjured.zenkai=function(unit)
     if not unitHasCreatureClass(unit,'ZENKAI') or unitHasZenkaiAlready(unit) then return false end
     local zenkaiMultiplier=averageTo1(averageTo1(math.sqrt((unit.body.blood_max*.75)/unit.body.blood_count)))
     local endurance=unit.body.physical_attrs.ENDURANCE
-    endurance.value=math.min(dbRound(unit.value*zenkaiMultiplier),endurance.max_value)
+    endurance.value=math.min(dbRound(endurance.value*zenkaiMultiplier),endurance.max_value)
     unitHasZenkaiAlready(unit,true)
 end
 
