@@ -537,6 +537,7 @@ local function checkEveryUnitRegularlyForEvents()
 end
 
 local function forceSuperSaiyan(unit)
+    if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return end
     local superSaiyanLevel=getSuperSaiyanLevel(unit)
     if superSaiyanLevel==7 then
         dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan God Super Saiyan 4','-resetPolicy','DoNothing','-target',unit.id)
