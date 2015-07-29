@@ -127,6 +127,7 @@ interaction_dragonball
                 [CDI:VERB:have transformed into a golden oozaru:has transformed into a golden oozaru:NA]
                 [CDI:WAIT_PERIOD:10000]
             [CE_DISPLAY_NAME:NAME:(Super Saiyan):(Super Saiyans):Super Saiyan:START:0:END:5000]
+			[CE_FLASH_TILE:TILE:033:6:0:1:FREQUENCY:300:300]
 [INTERACTION:SUPER_SAIYAN_2]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -160,6 +161,7 @@ interaction_dragonball
                 [CDI:WAIT_PERIOD:10000]
                 [CE:PERIODIC:MOON_PHASE:27:0]
             [CE_DISPLAY_NAME:NAME:(Super Saiyan 2):(Super Saiyans 2):Super Saiyan 2:START:0:END:5000]
+			[CE_FLASH_TILE:TILE:019:6:0:1:FREQUENCY:300:300]
 [INTERACTION:SUPER_SAIYAN_3]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -193,6 +195,7 @@ interaction_dragonball
                 [CDI:WAIT_PERIOD:10000]
                 [CE:PERIODIC:MOON_PHASE:27:0]
             [CE_DISPLAY_NAME:NAME:(Super Saiyan 3):(Super Saiyans 3):Super Saiyan 3:START:0:END:5000]
+			[CE_FLASH_TILE:TILE:083:6:0:1:FREQUENCY:300:300]
 [INTERACTION:ASSJ]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -248,6 +251,7 @@ interaction_dragonball
             [SYN_CLASS:KI_MULTIPLIER_2]
             [SYN_CLASS:KI_INVEST_FRACTION_50]
             [CE_PHYS_ATT_CHANGE:AGILITY:200:0:TOUGHNESS:200:0:ENDURANCE:80:0:START:0:END:5000]
+			[CE_FLASH_TILE:TILE:050:4:0:1:FREQUENCY:300:300]
 [INTERACTION:KAIOKEN_5]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -262,6 +266,7 @@ interaction_dragonball
             [SYN_CLASS:KI_INVEST_FRACTION_20]
             [CE_PHYS_ATT_CHANGE:AGILITY:500:0:TOUGHNESS:500:0:ENDURANCE:50:0:START:0:END:5000]
             [CE_PAIN:SEV:500:PROB:50:BP:BY_CATEGORY:ALL:ALL:MUSCULAR_ONLY:RESISTABLE:START:5000:END:5500]
+			[CE_FLASH_TILE:TILE:053:4:0:1:FREQUENCY:300:300]
 [INTERACTION:KAIOKEN_10]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -277,6 +282,7 @@ interaction_dragonball
             [CE_PHYS_ATT_CHANGE:AGILITY:1000:0:TOUGHNESS:1000:0:ENDURANCE:30:0:START:0:END:5000]
             [CE_PAIN:SEV:1000:PROB:70:BP:BY_CATEGORY:ALL:ALL:MUSCULAR_ONLY:RESISTABLE:START:5000:END:5500]
             [CE_BLEEDING:SEV:10:PROB:20:BP:BY_CATEGORY:ALL:ALL:MUSCULAR_ONLY:START:5000:END:5500]
+			[CE_FLASH_TILE:TILE:088:4:0:1:FREQUENCY:300:300]
 [INTERACTION:BOO_REGENERATE]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -343,6 +349,7 @@ interaction_dragonball
                 [CE:PERIODIC:MOON_PHASE:27:0]
             [CE_DISPLAY_NAME:NAME:(Great Ape):(Great Apes):Great Ape:START:0:END:5000]
                 [CE:PERIODIC:MOON_PHASE:27:0]
+			[CE_FLASH_TILE:TILE:033:4:6:1:FREQUENCY:300:300]
                 
 [INTERACTION:GOLDEN_OOZARU]
     [I_SOURCE:CREATURE_ACTION]
@@ -365,7 +372,8 @@ interaction_dragonball
                 [CE:PERIODIC:MOON_PHASE:27:0]
             [CE_DISPLAY_NAME:NAME:(Golden Great Ape):(Golden Great Apes):Golden Great Ape:START:0:END:5000]
                 [CE:PERIODIC:MOON_PHASE:27:0]
-                
+ 			[CE_FLASH_TILE:TILE:033:4:14:1:FREQUENCY:300:300]
+               
 [INTERACTION:GOLDEN_OOZARU_2]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -390,6 +398,7 @@ interaction_dragonball
                 [CE:PERIODIC:MOON_PHASE:27:0]
             [CE_DISPLAY_NAME:NAME:(Golden Great Ape):(Golden Great Apes):Golden Great Ape:START:0:END:5000]
                 [CE:PERIODIC:MOON_PHASE:27:0]
+			[CE_FLASH_TILE:TILE:019:4:14:1:FREQUENCY:300:300]
                 
 [INTERACTION:CAN_SUPER_SAIYAN_4]
     [I_SOURCE:CREATURE_ACTION]
@@ -440,6 +449,7 @@ interaction_dragonball
                 [CDI:ADV_NAME:Use this to show that you've gone super saiyan 4!]
                 [CDI:TARGET:A:SELF_ONLY]
                 [CDI:WAIT_PERIOD:5000]
+			[CE_FLASH_TILE:TILE:090:6:0:1:FREQUENCY:300:300]
                     
 [INTERACTION:HAS_GONE_SUPER_SAIYAN_4]
     [I_SOURCE:CREATURE_ACTION]
@@ -483,6 +493,7 @@ interaction_dragonball
                 [CDI:VERBAL_SPEECH:dragonball/supersaiyangod.txt]
                 [CDI:VERB:have transformed into a Super Saiyan God Super Saiyan:has transformed into a Super Saiyan God Super Saiyan:NA]
                 [CDI:WAIT_PERIOD:10000]
+			[CE_DISPLAY_TILE:TILE:083:4:0:1]
                 
 [INTERACTION:SUPER_SAIYAN_GOD_SUPER_SAIYAN]
     [I_SOURCE:CREATURE_ACTION]
@@ -506,6 +517,7 @@ interaction_dragonball
         [SYN_CLASS:KI_MULTIPLIER_SUPER_SAIYAN]
         [SYN_NAME:Super Saiyan God Super Saiyan]
         [CE_DISPLAY_NAME:NAME:(Super Saiyan God SS):(Super Saiyan God SSs):Super Saiyan God Super Saiyan:START:0:END:5000]
+    	[CE_FLASH_TILE:TILE:019:3:9:1:FREQUENCY:300:300]
         
 [INTERACTION:SUPER_SAIYAN_GOD_SUPER_SAIYAN_4] what use is having super saiyan 4 without at least one original transformation COME ON
     [I_SOURCE:CREATURE_ACTION]
@@ -530,7 +542,8 @@ interaction_dragonball
             [SYN_CLASS:KI_MULTIPLIER_SUPER_SAIYAN]
             [SYN_NAME:Super Saiyan God Super Saiyan 4]
             [CE_DISPLAY_NAME:NAME:(Super Saiyan God SS 4):(Super Saiyan God SSs 4):Super Saiyan God SS 4:START:0:END:5000]
-                
+    		[CE_FLASH_TILE:TILE:090:3:9:1:FREQUENCY:300:300]
+            
 [INTERACTION:LEGENDARY_SUPER_SAIYAN]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -555,6 +568,7 @@ interaction_dragonball
             [SYN_CLASS:KI_INVEST_FRACTION_200]
             [SYN_NAME:Legendary Super Saiyan]
             [CE_DISPLAY_NAME:NAME:(Legendary Super Saiyan):(Legendary Super Saiyans):Legendary Super Saiyan:START:0:END:5000]
+			[CE_FLASH_TILE:TILE:083:2:0:1:FREQUENCY:300:300]
 
 [INTERACTION:BEERUS_INCREASE_POWER]
     [I_SOURCE:CREATURE_ACTION]
