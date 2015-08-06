@@ -149,6 +149,10 @@ function TextViewScouter:showMoreInfo()
     dlg.showMessage('Ki','Genki: '..genkiInvestment..'/'..maxGenki..' Yuki: '..yukiInvestment..'/'..maxYuki..' Shoki: '..shokiInvestment..'/'..maxShoki..'.'..NEWLINE..'Yuki is determined by willpower, emotions and discipline, '..NEWLINE..'Shoki is determined by focus, stress and discipline'..NEWLINE..'and Genki by endurance, health and fighting skill.')
 end
 
+function TextViewScouter:onGetSelectedUnit()
+    return self._native.parent.parent.unit()
+end
+
 local DungeonScouter=defclass(DungeonScouter,TransparentViewscreen)
 
 function DungeonScouter:onRender()
@@ -157,13 +161,17 @@ function DungeonScouter:onRender()
     if dungeon_viewscreen._type~=df.viewscreen_dungeon_monsterstatusst then self:dismiss() return end
     if not(dungeon_viewscreen.view_skills) and dungeon_viewscreen.unit then
         local unit=dungeon_viewscreen.unit
-        local powerLevel,potential=getPowerLevel(unit)
+        local powerLevel,potential=getPowerLevel(unit,true)
         if powerLevel then
             local stringSoFar='Power Level: '
             local plevelcolor=powerLevel<1250 and COLOR_LIGHTRED or powerLevel<2750 and COLOR_WHITE or powerLevel<5000 and COLOR_GREEN or powerLevel<10000 and COLOR_LIGHTGREEN or powerLevel<100000 and COLOR_LIGHTCYAN or COLOR_LIGHTMAGENTA
             dfhack.screen.paintString({fg=plevelcolor},0,21,'Power Level ' ..powerLevel..'/'..potential)
         end
     end
+end
+
+function DungeonScouter:onGetSelectedUnit()
+   return self._native.parent.unit 
 end
 
 local viewscreenActions={}

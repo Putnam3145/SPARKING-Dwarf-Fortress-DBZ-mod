@@ -489,7 +489,7 @@ dbEvents.onUnitGravelyInjured.zenkai=function(unit)
     if not unitHasCreatureClass(unit,'ZENKAI') or unitHasZenkaiAlready(unit) then return false end
     local zenkaiMultiplier=averageTo1(averageTo1(math.sqrt((unit.body.blood_max*.75)/unit.body.blood_count)))
     local endurance=unit.body.physical_attrs.ENDURANCE
-    endurance.value=math.min(dbRound(unit.value*zenkaiMultiplier),endurance.max_value)
+    endurance.value=math.min(dbRound(endurance.value*zenkaiMultiplier),endurance.max_value)
     unitHasZenkaiAlready(unit,true)
 end
 
@@ -537,6 +537,7 @@ local function checkEveryUnitRegularlyForEvents()
 end
 
 local function forceSuperSaiyan(unit)
+    if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return end
     local superSaiyanLevel=getSuperSaiyanLevel(unit)
     if superSaiyanLevel==7 then
         dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan God Super Saiyan 4','-resetPolicy','DoNothing','-target',unit.id)
@@ -558,6 +559,7 @@ end
 
 local function unitInDeadlyCombat(unit_id)
     local unit=df.unit.find(unit_id)
+    if not unit.status.current_soul then return false end
     for k,v in ipairs(unit.status.current_soul.personality.emotions) do
         if (v.thought==df.unit_thought_type.Conflict or v.thought==df.unit_thought_type.JoinConflict) and math.abs(df.global.cur_year_tick-v.year_tick)<50 then return true end
     end

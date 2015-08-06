@@ -68,9 +68,9 @@ function getPowerLevel(saiyan,legacy,ignoreGod)
         if kiLevel>1 then 
             if ignoreGod then
                 local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or kiLevel<11 and tostring(kiLevel-2)..' infinity cores' or "the culmination"
-                return powerLevel..' ('..kiLevelStr..' ki)'
+                return powerLevel..' ('..kiLevelStr..' ki)',powerLevel
             else
-                return '(undetectable--a god?!)'
+                return '(undetectable--a god?!)',1
             end
         else
             return powerLevel
@@ -80,8 +80,8 @@ end
 
 if args.all then
 	for k,v in ipairs(df.global.world.units.active) do
-        local powerlevel=getPowerLevel(v,args.legacy,args.ignoreGod)
-        if powerlevel>0 then
+        local powerlevel,powerNum=getPowerLevel(v,args.legacy,args.ignoreGod)
+        if powerNum and powerNum>0 or powerlevel>0 then
             print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..powerlevel)
         end
 	end
