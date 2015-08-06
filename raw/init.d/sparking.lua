@@ -634,6 +634,7 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             dfhack.script_environment('unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
+			enemyKiInvestment=math.max(enemyKiInvestment,1)
             local kiRatio=enemyKiType-1>kiType and 0 or enemyKiType<kiType-1 and kiInvestment or kiInvestment/enemyKiInvestment
             attack.unk_30=math.min(math.floor(attack.unk_30*kiRatio+.5),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
@@ -872,7 +873,7 @@ eventful.onUnitAttack.special_unit_attack_db=function(attackerId,defenderId,woun
 end
 
 function onStateChange(op)
-    if op==SC_MAP_LOADED then
+    if op==SC_MAP_LOADED or op==SC_WORLD_LOADED then
         dfhack.script_environment('unit_action_check').enableEvent()
 		dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
         require('repeat-util').scheduleEvery('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)

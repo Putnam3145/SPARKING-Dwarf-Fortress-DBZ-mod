@@ -136,11 +136,11 @@ function get_ki_investment(unit_id)
     local shokiPerc=math.min(1,30/math.sqrt(math.max(unit.status.current_soul.personality.stress_level,1))*averageTo1(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5))
     local boostPerc
     do
-        local totalKi=(((yuki+shoki+genki)/3000)^3)*3000 --the multiplicand and divisor there both being 3000 is actually a total coincidence--fun fact!
+        local totalKi=yuki+shoki+genki
         local genkiFraction,yukiFraction,shokiFraction=genki/totalKi,yuki/totalKi,shoki/totalKi
         boostPerc=(genkiPerc*genkiFraction)+(yukiPerc*yukiFraction)+(shokiPerc*shokiFraction)
     end
-    local totalKi=math.floor(boost*boostPerc+genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc+.5)
+    local totalKi=math.floor(boost*boostPerc+(((genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc+.5)/3000)^3)*3000)
     return totalKi,getKiType(unit,totalKi)
 end
 
