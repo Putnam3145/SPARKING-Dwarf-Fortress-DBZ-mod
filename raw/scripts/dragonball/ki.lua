@@ -140,7 +140,7 @@ function get_ki_investment(unit_id)
         local genkiFraction,yukiFraction,shokiFraction=genki/totalKi,yuki/totalKi,shoki/totalKi
         boostPerc=(genkiPerc*genkiFraction)+(yukiPerc*yukiFraction)+(shokiPerc*shokiFraction)
     end
-    local totalKi=math.floor(boost*boostPerc+(((genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc+.5)/3000)^3)*3000)
+    local totalKi=math.floor(boost*boostPerc+((2^((genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc)/7228.262519))*2250)+.5)
     return totalKi,getKiType(unit,totalKi)
 end
 
@@ -151,5 +151,5 @@ function get_max_ki(unit_id)
     local focus = unit.status.current_soul.mental_attrs.FOCUS.value
     local endurance = unit.body.physical_attrs.ENDURANCE.value
     local multiplier,boost=get_ki_boost(unit)
-    return (((((willpower+focus+endurance)/3000)^3)*3000)+boost)*multiplier
+    return math.floor(((((2^(willpower+focus+endurance)/7228,262519)*2250)+boost)*multiplier)+0.5)
 end
