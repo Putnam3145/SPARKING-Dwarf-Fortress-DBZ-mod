@@ -150,7 +150,7 @@ function TextViewScouter:showMoreInfo()
 end
 
 function TextViewScouter:onGetSelectedUnit()
-    return self._native.parent.parent.unit()
+    return self._native.parent.parent.unit
 end
 
 local DungeonScouter=defclass(DungeonScouter,TransparentViewscreen)
