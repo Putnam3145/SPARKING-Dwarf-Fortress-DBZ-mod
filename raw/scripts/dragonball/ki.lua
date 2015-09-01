@@ -151,5 +151,5 @@ function get_max_ki(unit_id)
     local focus = unit.status.current_soul.mental_attrs.FOCUS.value
     local endurance = unit.body.physical_attrs.ENDURANCE.value
     local multiplier,boost=get_ki_boost(unit)
-    return math.floor(((((2^(willpower+focus+endurance)/7228,262519)*2250)+boost)*multiplier)+0.5)
+    return math.floor(((((2^((willpower+focus+endurance)/7228.262519))*2250)+boost)*multiplier)+0.5)
 end
