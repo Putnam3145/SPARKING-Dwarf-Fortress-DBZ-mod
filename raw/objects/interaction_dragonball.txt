@@ -113,7 +113,7 @@ interaction_dragonball
         [IE_ARENA_NAME:Super Saiyan]
         [SYNDROME]
             [SYN_CLASS:SUPER_SAIYAN]
-            [SYN_CLASS:KI_BOOST_145000000] Linear boost of 500,000 ki; using the Bringer of Death system since the assumptions made there hold true in Sparking
+            [SYN_CLASS:KI_BOOST_145000000] Linear boost of 145,000,000 ki instead of exponential boost because... well it's probably not gonna stay that way long
             [SYN_CLASS:KI_MULTIPLIER_SUPER_SAIYAN]
             [SYN_NAME:Super Saiyan]
             [CE_CAN_DO_INTERACTION:START:0:END:5000]
@@ -127,6 +127,7 @@ interaction_dragonball
                 [CDI:VERB:have transformed into a golden oozaru:has transformed into a golden oozaru:NA]
                 [CDI:WAIT_PERIOD:10000]
             [CE_DISPLAY_NAME:NAME:(Super Saiyan):(Super Saiyans):Super Saiyan:START:0:END:5000]
+            [CE_CHANGE_PERSONALITY:FACET:ANGER_PROPENSITY:20:FACET:FRIENDLINESS:-20:FACET:BRAVERY:20:FACET:CONFIDENCE:20:FACET:VENGEFUL:20:FACET:ASSERTIVE:20:PROB:100:START:0:END:5000:ABRUPT_START:ABRUPT_END]
 [INTERACTION:SUPER_SAIYAN_2]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -160,6 +161,7 @@ interaction_dragonball
                 [CDI:WAIT_PERIOD:10000]
                 [CE:PERIODIC:MOON_PHASE:27:0]
             [CE_DISPLAY_NAME:NAME:(Super Saiyan 2):(Super Saiyans 2):Super Saiyan 2:START:0:END:5000]
+            [CE_CHANGE_PERSONALITY:FACET:ANGER_PROPENSITY:40:FACET:FRIENDLINESS:-40:FACET:BRAVERY:40:FACET:CONFIDENCE:40:FACET:VENGEFUL:40:FACET:ASSERTIVE:40:PROB:100:START:0:END:5000:ABRUPT_START:ABRUPT_END]
 [INTERACTION:SUPER_SAIYAN_3]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
@@ -193,6 +195,7 @@ interaction_dragonball
                 [CDI:WAIT_PERIOD:10000]
                 [CE:PERIODIC:MOON_PHASE:27:0]
             [CE_DISPLAY_NAME:NAME:(Super Saiyan 3):(Super Saiyans 3):Super Saiyan 3:START:0:END:5000]
+            [CE_CHANGE_PERSONALITY:FACET:ANGER_PROPENSITY:50:FACET:FRIENDLINESS:-50:FACET:BRAVERY:50:FACET:CONFIDENCE:50:FACET:VENGEFUL:50:FACET:ASSERTIVE:50:PROB:100:START:0:END:5000:ABRUPT_START:ABRUPT_END]
 [INTERACTION:ASSJ]
     [I_SOURCE:CREATURE_ACTION]
     [I_TARGET:A:CREATURE]
