@@ -117,14 +117,14 @@ end
 
 function getKiType(unit,totalKi)
     local m=math --local variables are much faster than global variables and there's a lot of math here
-    local kiType=m.min(4,m.max(0,m.floor(m.log(totalKi/375000)/m.log(40))))
+    local kiType=m.min(4,m.max(0,m.log(totalKi/10875000)/m.log(40)))
     if kiType==4 then
-        kiType=m.floor(totalKi/24000000000)+2
+        kiType=m.floor(totalKi/6960000000000)+2
         if kiType>10 then
             return 12
         end
     end
-    return kiType
+	if kiType<1.6 then return 0 else return math.floor(kiType) end
 end
 
 function get_ki_investment(unit_id)
@@ -140,7 +140,7 @@ function get_ki_investment(unit_id)
         local genkiFraction,yukiFraction,shokiFraction=genki/totalKi,yuki/totalKi,shoki/totalKi
         boostPerc=(genkiPerc*genkiFraction)+(yukiPerc*yukiFraction)+(shokiPerc*shokiFraction)
     end
-    local totalKi=math.floor(boost*boostPerc+genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc+.5)
+    local totalKi=math.floor(boost*boostPerc+((2^((genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc)/7228.262519))*2250)+.5)
     return totalKi,getKiType(unit,totalKi)
 end
 
@@ -151,5 +151,5 @@ function get_max_ki(unit_id)
     local focus = unit.status.current_soul.mental_attrs.FOCUS.value
     local endurance = unit.body.physical_attrs.ENDURANCE.value
     local multiplier,boost=get_ki_boost(unit)
-    return (willpower+focus+endurance+boost)*multiplier
+    return math.floor(((((2^((willpower+focus+endurance)/7228.262519))*2250)+boost)*multiplier)+0.5)
 end

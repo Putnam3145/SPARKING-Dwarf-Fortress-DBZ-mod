@@ -559,6 +559,7 @@ end
 
 local function unitInDeadlyCombat(unit_id)
     local unit=df.unit.find(unit_id)
+    if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return true end
     if not unit.status.current_soul then return false end
     for k,v in ipairs(unit.status.current_soul.personality.emotions) do
         if (v.thought==df.unit_thought_type.Conflict or v.thought==df.unit_thought_type.JoinConflict) and math.abs(df.global.cur_year_tick-v.year_tick)<50 then return true end
@@ -634,15 +635,16 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             dfhack.script_environment('unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
+			enemyKiInvestment=math.max(enemyKiInvestment,1)
             local kiRatio=enemyKiType-1>kiType and 0 or enemyKiType<kiType-1 and kiInvestment or kiInvestment/enemyKiInvestment
-            attack.unk_30=math.min(math.floor(attack.unk_30*kiRatio+.5),2000000000) --unk_30 is the velocity of the attack, and yes, this will get ridiculous when you're a god
+            attack.attack_velocity=math.min(math.floor(attack.attack_velocity*kiRatio+.5),2000000000)
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
-                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
+                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.attack_velocity/100))
             end
             local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
             if caste_id=='GLACIUS' and kiInvestment<35000000 then
                 unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510 --approximately absolute zero
-                attack.unk_30=0
+                attack.attack_velocity=0
             elseif caste_id=='CRYSTALLOS' and kiType<4 then
                 unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9001 --over 9000, but also about -281 kelvins
             end
@@ -653,14 +655,14 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             forceSuperSaiyan(df.unit.find(attack.target_unit_id))
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
-            attack.unk_30=math.max(attack.unk_30-enemyKiInvestment,0)
+            attack.attack_velocity=math.max(attack.attack_velocity-enemyKiInvestment,0)
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
-                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.unk_30/100))
+                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.attack_velocity/100))
             end
             local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
             if caste_id=='GLACIUS' then
                 unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510
-                attack.unk_30=0
+                attack.attack_velocity=0
             elseif caste_id=='CRYSTALLOS' then
                 unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9001
             end
@@ -872,7 +874,7 @@ eventful.onUnitAttack.special_unit_attack_db=function(attackerId,defenderId,woun
 end
 
 function onStateChange(op)
-    if op==SC_MAP_LOADED then
+    if op==SC_MAP_LOADED or op==SC_WORLD_LOADED then
         dfhack.script_environment('unit_action_check').enableEvent()
 		dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
         require('repeat-util').scheduleEvery('DBZ Event Check',100,'ticks',checkEveryUnitRegularlyForEvents)
