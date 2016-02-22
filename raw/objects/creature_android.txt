@@ -7,6 +7,7 @@ creature_android
 		[CASTE_NAME:android:androids:android]
 		[CREATURE_TILE:'A']
 		[COLOR:3:0:0]
+		[OUTSIDER_CONTROLLABLE]
 		[INTELLIGENT]
 		[CANOPENDOORS]
 		[PERSONALITY:VIOLENT:25:80:100]

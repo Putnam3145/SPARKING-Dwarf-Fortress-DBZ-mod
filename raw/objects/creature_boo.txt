@@ -7,6 +7,7 @@ creature_boo
 	[CASTE_NAME:majin:majin:majin]
 	[DESCRIPTION:A creature created in the distant past by an evil wizard. He can regenerate himself from any situation.]
 	[CREATURE_TILE:'M']
+	[OUTSIDER_CONTROLLABLE]
 	[COLOR:5:0:1]
 	[INTELLIGENT]
 	[MEGABEAST][ITEMCORPSE:TOOL:DRAGONBALL:NONE:NONE]
