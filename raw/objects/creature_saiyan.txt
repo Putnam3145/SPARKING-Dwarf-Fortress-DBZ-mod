@@ -5,6 +5,7 @@ creature_saiyan
 		[CASTE_NAME:saiyan:saiyans:saiyan]
 		[CREATURE_TILE:'S']
 		[COLOR:3:0:0]
+		[OUTSIDER_CONTROLLABLE]
 		[INTELLIGENT]
 		[CANOPENDOORS]
 		[PERSONALITY:VIOLENT:25:80:100]
