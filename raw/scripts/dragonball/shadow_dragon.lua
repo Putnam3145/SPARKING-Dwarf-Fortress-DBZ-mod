@@ -12,6 +12,7 @@ local function someReasonableLocation()
 end
 
 function init_shadow_dragons()
+    dfhack.script_environment('dragonball/ki').setWorldKiMode('bttl')
     local alphaMessage=[["Thanks for summoning the dragon so often. I'm Alpha Shenron, and we are the Shadow Dragons. If you take too long to defeat us, the Eternal will come and destroy the universe. No pressure."]]
     dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,PAUSE=true,RECENTER=false},copyall(df.global.cursor),alphaMessage,COLOR_LIGHTCYAN)
     local gaia_shenron=dfhack.script_environment('dragonball/spawn-unit').place({position=someReasonableLocation(),race='SHADOW_DRAGON_DB',caste=1,age=25,name='Gaia Shenron',civ_id=-1})
@@ -248,6 +249,7 @@ shadow_dragon_action[14]=function()
     require('repeat-util').cancel('shadow dragons')
     local message=[["Haha, wow, you killed Lord Entropy? Good, I don't have to. Maybe one of you'll be strong enough for me to have fun with one day. Maybe. I doubt it. Don't expect to see me again, except maybe answering your prayers and helping the weak."]]
     dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,RECENTER=false,PAUSE=true},{},message,COLOR_LIGHTCYAN)
+    dfhack.script_environment('dragonball/ki').setWorldKiMode('super')
 end
 
 function init_entropy()

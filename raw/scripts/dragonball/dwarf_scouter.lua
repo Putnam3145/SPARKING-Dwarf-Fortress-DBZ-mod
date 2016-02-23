@@ -1,14 +1,24 @@
 local gui=require('gui')
+local ki=dfhack.script_environment('dragonball/ki')
 
 local getPowerLevel=function(unit,numOnly)
     if not unit then return 'nothing' end
-    local powerLevel,kiLevel=dfhack.script_environment('dragonball/ki').get_ki_investment(unit.id)
-    local potential=dfhack.script_environment('dragonball/ki').get_max_ki(unit.id)
-    if kiLevel>1 and not numOnly then 
-        local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or kiLevel<11 and tostring(kiLevel-2)..' infinity cores' or "the culmination"
-        return powerLevel..' ('..kiLevelStr..')',potential
+    local powerLevel,kiLevel=ki.get_ki_investment(unit.id)
+    local potential=ki.get_max_ki(unit.id)
+    local kiWorldMode=ki.getWorldKiMode()
+    if kiWorldMode=='bttl' then
+        if kiLevel>1 and not numOnly then 
+            local kiLevelStr=kiLevel==1 and 'god' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or kiLevel<11 and tostring(kiLevel-2)..' infinity cores' or "the culmination"
+            return powerLevel..' ('..kiLevelStr..')',potential
+        else
+            return powerLevel,potential
+        end
     else
-        return powerLevel,potential
+        if kiLevel==1 and not numOnly then
+            return powerLevel..' (god)',potential
+        else
+            return powerLevel,potential
+        end
     end
 end
 
@@ -112,19 +122,27 @@ local isPositiveWillpowerEmotion={
 }
 
 local function getYukiPerc(unit)
-    local yukiPerc=1
+    local m=math
+    local yukiPerc=
+    local stressLevel=unit.status.current_soul.personality.stressLevel
     for k,v in ipairs(unit.status.current_soul.personality.emotions) do
         local emotion_type=df.emotion_type[v.type]
-        local divider=10*tonumber(df.emotion_type.attrs[v.type].divider)
-        local multiplier=v.strength/divider
-        if divider==0 then multiplier=1 end
         if isPositiveWillpowerEmotion[emotion_type] then
-            yukiPerc=yukiPerc*multiplier
-        else
-            yukiPerc=yukiPerc/multiplier
+            local multiplicand=tonumber(df.emotion_type.attrs[v.type].divider)
+            if multiplicand~=0 then multiplicand=1/m.abs(multiplicand) end
+            local stress_addition=v.strength*-multiplicand
+            stressLevel=stressLevel-stress_addition
         end
     end
-    return math.min(1,math.max(0.25,yukiPerc))
+    return stressLevel>0 and m.min(1,8/(m.log(stressLevel)/m.log(2))) or 1
+end
+
+local function getShokiPerc(unit) --remember to update once structures are properly mapped!
+    local distractednessTotal=0
+    for k,need in ipairs(unit.status.current_soul.personality.unk_v4201_1a) do
+        distractednessTotal=distractednessTotal+need.unk_8
+    end
+    return distractednessTotal>0 and math.min(1,8/(math.log(distractednessTotal)/math.log(2)) or 1 --i think the same equation ought to work for both...
 end
 
 local function averageTo1(number)
@@ -132,21 +150,18 @@ local function averageTo1(number)
 end
 
 function TextViewScouter:showMoreInfo()
-    local ki=dfhack.script_environment('dragonball/ki')
     local unit=self._native.parent.parent.unit
-    local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
-    local focus = unit.status.current_soul.mental_attrs.FOCUS.value
-    local endurance = unit.body.physical_attrs.ENDURANCE.value
-    local totalKi=willpower+focus+endurance
+    local boost,willpower,focus,endurance = ki.calculate_max_ki_portions(unit)
+    local totalKi=willpower+focus+endurance+boost
     local genkipercent,yukipercent,shokipercent=endurance/totalKi,willpower/totalKi,focus/totalKi
-    local genkiAdjust=math.min(1,(unit.body.blood_count/unit.body.blood_max)*averageTo1(dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)/5))
-    local yukiAdjust=math.min(1,getYukiPerc(unit)*averageTo1(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5))
-    local shokiAdjust=math.min(1,30/math.sqrt(math.max(unit.status.current_soul.personality.stress_level,1))*averageTo1(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5))
+    local genkiAdjust=math.min(1,((unit.body.blood_count/unit.body.blood_max)*dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)/5)/2)
+    local yukiAdjust=math.min(1,(getYukiPerc(unit)*dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5)/2)
+    local shokiAdjust=math.min(1,(getShokiPerc(unit)*dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5)/2)
     local maxKi=ki.get_max_ki(unit.id)
     local maxGenki,maxYuki,maxShoki=(genkipercent*maxKi),(yukipercent*maxKi),(shokipercent*maxKi)
     local genkiInvestment,yukiInvestment,shokiInvestment=math.floor(maxGenki*genkiAdjust+.5),math.floor(maxYuki*yukiAdjust+.5),math.floor(maxShoki*shokiAdjust+.5)
     local dlg=require('gui.dialogs')
-    dlg.showMessage('Ki','Genki: '..genkiInvestment..'/'..maxGenki..' Yuki: '..yukiInvestment..'/'..maxYuki..' Shoki: '..shokiInvestment..'/'..maxShoki..'.'..NEWLINE..'Yuki is determined by willpower, emotions and discipline, '..NEWLINE..'Shoki is determined by focus, stress and discipline'..NEWLINE..'and Genki by endurance, health and fighting skill.')
+    dlg.showMessage('Ki','Genki: '..genkiInvestment..'/'..maxGenki..' Yuki: '..yukiInvestment..'/'..maxYuki..' Shoki: '..shokiInvestment..'/'..maxShoki..'.'..NEWLINE..'Yuki is determined by persevering attributes, stress and discipline, '..NEWLINE..'Shoki by intelligent and aware attributes, distractedness and discipline'..NEWLINE..'and Genki by physical strength, health and fighting skill.')
 end
 
 function TextViewScouter:onGetSelectedUnit()
@@ -164,7 +179,7 @@ function DungeonScouter:onRender()
         local powerLevel,potential=getPowerLevel(unit,true)
         if powerLevel then
             local stringSoFar='Power Level: '
-            local plevelcolor=powerLevel<1250 and COLOR_LIGHTRED or powerLevel<2750 and COLOR_WHITE or powerLevel<5000 and COLOR_GREEN or powerLevel<10000 and COLOR_LIGHTGREEN or powerLevel<100000 and COLOR_LIGHTCYAN or COLOR_LIGHTMAGENTA
+            local plevelcolor=powerLevel<1000 and COLOR_RED powerLevel<2000 and COLOR_LIGHTRED or powerLevel<4000 and COLOR_WHITE or powerLevel<8000 and COLOR_GREEN or powerLevel<16000 and COLOR_LIGHTGREEN or powerLevel<32000 and COLOR_LIGHTCYAN or COLOR_LIGHTMAGENTA
             dfhack.screen.paintString({fg=plevelcolor},0,21,'Power Level ' ..powerLevel..'/'..potential)
         end
     end

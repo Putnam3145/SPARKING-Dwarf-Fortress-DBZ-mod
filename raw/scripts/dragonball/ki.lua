@@ -69,10 +69,10 @@ local function get_ki_boost(unit)
     return multiplier,boost
 end
 
-local function calculate_max_ki_portions(unit)
-    local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
-    local focus = unit.status.current_soul.mental_attrs.FOCUS.value
-    local endurance = unit.body.physical_attrs.ENDURANCE.value
+function calculate_max_ki_portions(unit)
+    local willpower = (unit.status.current_soul.mental_attrs.WILLPOWER.value+unit.body.physical_attrs.TOUGHNESS+unit.status.current_soul.PATIENCE.value)/3
+    local focus = (unit.status.current_soul.mental_attrs.FOCUS.value+unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value+unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+unit.status.current_soul.ANALYTICAL_ABILITY.value+unit.status.current_soul.MEMORY.value)/5
+    local endurance = (unit.body.physical_attrs.ENDURANCE.value+unit.body.physical_attrs.AGILITY.value+unit.body.physical_attrs.STRENGTH.value)/3
     local multiplier,boost=get_ki_boost(unit)
     return boost*multiplier,willpower*multiplier,focus*multiplier,endurance*multiplier
 end
@@ -89,67 +89,97 @@ local isPositiveWillpowerEmotion={
 }
 
 local function getYukiPerc(unit)
-    local yukiPerc=1
+    local m=math
+    local yukiPerc=
+    local stressLevel=unit.status.current_soul.personality.stressLevel
     for k,v in ipairs(unit.status.current_soul.personality.emotions) do
         local emotion_type=df.emotion_type[v.type]
-        local divider=10*tonumber(df.emotion_type.attrs[v.type].divider)
-        local multiplier=v.strength/divider
-        if divider==0 then multiplier=1 end
         if isPositiveWillpowerEmotion[emotion_type] then
-            yukiPerc=yukiPerc*multiplier
-        else
-            yukiPerc=yukiPerc/multiplier
+            local multiplicand=tonumber(df.emotion_type.attrs[v.type].divider)
+            if multiplicand~=0 then multiplicand=1/m.abs(multiplicand) end
+            local stress_addition=v.strength*-multiplicand
+            stressLevel=stressLevel-stress_addition
         end
     end
-    return math.min(1,math.max(0.25,yukiPerc))
+    return stressLevel>0 and m.min(1,8/(m.log(stressLevel)/m.log(2))) or 1
+end
+
+local function getShokiPerc(unit) --remember to update once structures are properly mapped!
+    local distractednessTotal=0
+    for k,need in ipairs(unit.status.current_soul.personality.unk_v4201_1a) do
+        distractednessTotal=distractednessTotal+need.unk_8
+    end
+    return distractednessTotal>0 and math.min(1,8/(math.log(distractednessTotal)/math.log(2)) or 1 --i think the same equation ought to work for both...
 end
 
 local function averageTo1(number)
     return (1+number)/2
 end
 
-function adjustKiType(unit_id,amount)
-    local ki_level_persist=dfhack.persistent.get('KI_LEVEL/'..unit.id)
-    ki_level_persist.ints[1]=ki_level_persist.ints[1]+amount
-    ki_level_persist:save()
-    return ki_level_persist.ints[1]
+local function getSubClassValue(unit,class)
+    for _,c_class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
+        local class_value=c_class.value
+        if class_value:find('/') then
+            if class_value:sub(0,class_value:find('/')-1) == class then return class_value:sub(1+class_value:find('/.*')) end
+        end
+    end
+    for _,syndrome in ipairs(unit.syndromes.active)
+        for __,s_class in ipairs(df.syndrome.find(syndrome.type).syn_class) do
+            local class_value=s_class.value
+            if class_value:find('/') then
+                if class_value:sub(0,class_value:find('/')-1) == class then return class_value:sub(1+class_value:find('/.*')) end
+            end
+        end
+    end
+    return false
+end
+
+function getWorldKiMode()
+    local world_ki_persist=dfhack.persistent.save({key='DBZ_WORLD_KI_MODE'})
+    if world_ki_persist.value=='' then world_ki_persist.value='super' world_ki_persist:save() end
+    return world_ki_persist.value
+end
+
+function setWorldKiMode(mode)
+    return dfhack.persistent.save({key='DBZ_WORLD_KI_MODE',value=mode}).value
 end
 
 function getKiType(unit,totalKi)
-    local m=math --local variables are much faster than global variables and there's a lot of math here
-    local kiType=m.min(4,m.max(0,m.log(totalKi/10875000)/m.log(40)))
-    if kiType==4 then
-        kiType=m.floor(totalKi/6960000000000)+2
-        if kiType>10 then
-            return 12
+    if getWorldKiMode()=='bttl' then
+        local m=math --local variables are much faster than global variables and there's a lot of math here
+        local kiType=m.min(4,m.max(0,m.log(totalKi/10875000)/m.log(40)))
+        if kiType==4 then
+            kiType=m.floor(totalKi/6960000000000)+2
+            if kiType>10 then
+                return 12
+            end
         end
+        if kiType<1.6 then return 0 else return math.floor(kiType) end
+    else
+        return getSubClassValue(unit,'KI_TYPE') or 0
     end
-	if kiType<1.6 then return 0 else return math.floor(kiType) end
 end
 
 function get_ki_investment(unit_id)
     if not unitCanUseKi(unit_id) then return 0,0 end
     local unit = df.unit.find(unit_id)
     local boost,yuki,shoki,genki=calculate_max_ki_portions(unit)
-    local genkiPerc=math.min(1,(unit.body.blood_count/unit.body.blood_max)*averageTo1(dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)/5))
-    local yukiPerc=math.min(1,getYukiPerc(unit)*averageTo1(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5))
-    local shokiPerc=math.min(1,30/math.sqrt(math.max(unit.status.current_soul.personality.stress_level,1))*averageTo1(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5))
+    local genkiPerc=math.min(1,((unit.body.blood_count/unit.body.blood_max)*dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)/5)/2)
+    local yukiPerc=math.min(1,(getYukiPerc(unit)*dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5)/2)
+    local shokiPerc=math.min(1,(getShokiPerc(unit)*dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5)/2)
     local boostPerc
     do
         local totalKi=yuki+shoki+genki
         local genkiFraction,yukiFraction,shokiFraction=genki/totalKi,yuki/totalKi,shoki/totalKi
         boostPerc=(genkiPerc*genkiFraction)+(yukiPerc*yukiFraction)+(shokiPerc*shokiFraction)
     end
-    local totalKi=math.floor(boost*boostPerc+((2^((genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc)/7228.262519))*2250)+.5)
+    local totalKi=math.floor(boost*boostPerc+((2^((genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc)/5000))*2250)+.5)
     return totalKi,getKiType(unit,totalKi)
 end
 
 function get_max_ki(unit_id)
     if not unitCanUseKi(unit_id) then return 0 end
     local unit=df.unit.find(unit_id)
-    local willpower = unit.status.current_soul.mental_attrs.WILLPOWER.value
-    local focus = unit.status.current_soul.mental_attrs.FOCUS.value
-    local endurance = unit.body.physical_attrs.ENDURANCE.value
-    local multiplier,boost=get_ki_boost(unit)
-    return math.floor(((((2^((willpower+focus+endurance)/7228.262519))*2250)+boost)*multiplier)+0.5)
+    local boost,yuki,shoki,genki=calculate_max_ki_portions(unit)
+    return math.floor((((2^((yuki+shoki+genki)/5000))*2250)+boost)+0.5)
 end

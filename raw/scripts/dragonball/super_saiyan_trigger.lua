@@ -60,10 +60,10 @@ function runSuperSaiyanChecks(unit_id)
     if df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
     local powerLevel=getPowerLevel(unit)
     if unitHasSyndromeClass(unit,'SUPER_SAIYAN_GOD') and unitHasSyndromeClass(unit,'HAS_GONE_SUPER_SAIYAN_4') then
-        if not unitHasSyndrome(unit,'can super saiyan god super saiyan 4') then
-            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a super saiyan god super saiyan 4!',11)
+        if not unitHasSyndrome(unit,'can super saiyan blue 4') then
+            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a super saiyan blue 4!',11)
         end
-        dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan god super saiyan 4','-resetPolicy','DoNothing','-target',unit_id,'-skipImmunities')
+        dfhack.run_script('modtools/add-syndrome','-syndrome','can super saiyan blue 4','-resetPolicy','DoNothing','-target',unit_id,'-skipImmunities')
     end
     if powerLevel>128000 then
         if not unitHasSyndrome(unit,'can super saiyan blue') then
