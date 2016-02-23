@@ -70,8 +70,8 @@ local function get_ki_boost(unit)
 end
 
 function calculate_max_ki_portions(unit)
-    local willpower = (unit.status.current_soul.mental_attrs.WILLPOWER.value+unit.body.physical_attrs.TOUGHNESS+unit.status.current_soul.PATIENCE.value)/3
-    local focus = (unit.status.current_soul.mental_attrs.FOCUS.value+unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value+unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+unit.status.current_soul.ANALYTICAL_ABILITY.value+unit.status.current_soul.MEMORY.value)/5
+    local willpower = (unit.status.current_soul.mental_attrs.WILLPOWER.value+unit.body.physical_attrs.TOUGHNESS.value+unit.status.current_soul.mental_attrs.PATIENCE.value)/3
+    local focus = (unit.status.current_soul.mental_attrs.FOCUS.value+unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value+unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+unit.status.current_soul.mental_attrs.ANALYTICAL_ABILITY.value+unit.status.current_soul.mental_attrs.MEMORY.value)/5
     local endurance = (unit.body.physical_attrs.ENDURANCE.value+unit.body.physical_attrs.AGILITY.value+unit.body.physical_attrs.STRENGTH.value)/3
     local multiplier,boost=get_ki_boost(unit)
     return boost*multiplier,willpower*multiplier,focus*multiplier,endurance*multiplier
@@ -90,8 +90,7 @@ local isPositiveWillpowerEmotion={
 
 local function getYukiPerc(unit)
     local m=math
-    local yukiPerc=
-    local stressLevel=unit.status.current_soul.personality.stressLevel
+    local stressLevel=unit.status.current_soul.personality.stress_level
     for k,v in ipairs(unit.status.current_soul.personality.emotions) do
         local emotion_type=df.emotion_type[v.type]
         if isPositiveWillpowerEmotion[emotion_type] then
@@ -109,7 +108,7 @@ local function getShokiPerc(unit) --remember to update once structures are prope
     for k,need in ipairs(unit.status.current_soul.personality.unk_v4201_1a) do
         distractednessTotal=distractednessTotal+need.unk_8
     end
-    return distractednessTotal>0 and math.min(1,8/(math.log(distractednessTotal)/math.log(2)) or 1 --i think the same equation ought to work for both...
+    return distractednessTotal>0 and math.min(1,8/(math.log(distractednessTotal)/math.log(2))) or 1 --i think the same equation ought to work for both...
 end
 
 local function averageTo1(number)
@@ -123,7 +122,7 @@ local function getSubClassValue(unit,class)
             if class_value:sub(0,class_value:find('/')-1) == class then return class_value:sub(1+class_value:find('/.*')) end
         end
     end
-    for _,syndrome in ipairs(unit.syndromes.active)
+    for _,syndrome in ipairs(unit.syndromes.active) do
         for __,s_class in ipairs(df.syndrome.find(syndrome.type).syn_class) do
             local class_value=s_class.value
             if class_value:find('/') then

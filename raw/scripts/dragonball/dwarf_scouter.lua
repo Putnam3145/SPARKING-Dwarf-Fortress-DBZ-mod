@@ -123,8 +123,7 @@ local isPositiveWillpowerEmotion={
 
 local function getYukiPerc(unit)
     local m=math
-    local yukiPerc=
-    local stressLevel=unit.status.current_soul.personality.stressLevel
+    local stressLevel=unit.status.current_soul.personality.stress_level
     for k,v in ipairs(unit.status.current_soul.personality.emotions) do
         local emotion_type=df.emotion_type[v.type]
         if isPositiveWillpowerEmotion[emotion_type] then
@@ -142,7 +141,7 @@ local function getShokiPerc(unit) --remember to update once structures are prope
     for k,need in ipairs(unit.status.current_soul.personality.unk_v4201_1a) do
         distractednessTotal=distractednessTotal+need.unk_8
     end
-    return distractednessTotal>0 and math.min(1,8/(math.log(distractednessTotal)/math.log(2)) or 1 --i think the same equation ought to work for both...
+    return distractednessTotal>0 and math.min(1,8/(math.log(distractednessTotal)/math.log(2))) or 1 --i think the same equation ought to work for both...
 end
 
 local function averageTo1(number)
@@ -179,7 +178,7 @@ function DungeonScouter:onRender()
         local powerLevel,potential=getPowerLevel(unit,true)
         if powerLevel then
             local stringSoFar='Power Level: '
-            local plevelcolor=powerLevel<1000 and COLOR_RED powerLevel<2000 and COLOR_LIGHTRED or powerLevel<4000 and COLOR_WHITE or powerLevel<8000 and COLOR_GREEN or powerLevel<16000 and COLOR_LIGHTGREEN or powerLevel<32000 and COLOR_LIGHTCYAN or COLOR_LIGHTMAGENTA
+            local plevelcolor=powerLevel<1000 and COLOR_LIGHTMAGENTA or powerLevel<2000 and COLOR_LIGHTRED or powerLevel<4000 and COLOR_RED or powerLevel<8000 and COLOR_WHITE or powerLevel<16000 and COLOR_GREEN or powerLevel<32000 and COLOR_LIGHTGREEN or COLOR_LIGHTCYAN
             dfhack.screen.paintString({fg=plevelcolor},0,21,'Power Level ' ..powerLevel..'/'..potential)
         end
     end
