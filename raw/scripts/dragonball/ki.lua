@@ -103,11 +103,8 @@ local function getYukiPerc(unit)
     return stressLevel>0 and m.min(1,8/(m.log(stressLevel)/m.log(2))) or 1
 end
 
-local function getShokiPerc(unit) --remember to update once structures are properly mapped!
-    local distractednessTotal=0
-    for k,need in ipairs(unit.status.current_soul.personality.current_focus) do
-        distractednessTotal=distractednessTotal+need.unk_8
-    end
+local function getShokiPerc(unit)
+    local distractednessTotal=unit.status.current_soul.personality.current_focus
     return distractednessTotal>0 and math.min(1,8/(math.log(distractednessTotal)/math.log(2))) or 1 --i think the same equation ought to work for both...
 end
 
