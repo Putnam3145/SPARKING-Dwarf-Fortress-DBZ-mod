@@ -540,9 +540,9 @@ local function forceSuperSaiyan(unit)
     if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return end
     local superSaiyanLevel=getSuperSaiyanLevel(unit)
     if superSaiyanLevel==7 then
-        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan God Blue 4','-resetPolicy','DoNothing','-target',unit.id)
+        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan Blue 4','-resetPolicy','DoNothing','-target',unit.id)
     elseif superSaiyanLevel==6 then
-        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan God Blue','-resetPolicy','DoNothing','-target',unit.id)
+        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan Blue','-resetPolicy','DoNothing','-target',unit.id)
     elseif superSaiyanLevel==5 then
         dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan 4','-resetPolicy','DoNothing','-target',unit.id)
     elseif superSaiyanLevel==4 then
@@ -623,7 +623,7 @@ local function unitHasSyndrome(u,s_name)
     return false
 end
 
-dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(unit_id,action)
+dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=function(unit_id,action)
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
     local ki=dfhack.script_environment('dragonball/ki')
     local kiInvestment,kiType=ki.get_ki_investment(unit_id)
@@ -632,7 +632,7 @@ dfhack.script_environment('unit_action_check').onUnitAction.ki_actions=function(
             local unit=df.unit.find(unit_id)
             forceSuperSaiyan(unit)
             local attack=action.data.attack
-            dfhack.script_environment('unit_action_check').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
+            dfhack.script_environment('modtools/putnam_events').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
 			enemyKiInvestment=math.max(enemyKiInvestment,1)
@@ -845,7 +845,8 @@ end
 
 function onStateChange(op)
     if op==SC_MAP_LOADED or op==SC_WORLD_LOADED then
-        dfhack.script_environment('unit_action_check').enableEvent()
+        local putnamEvents=dfhack.script_environment('modtools/putnam_events')
+        putnamEvents.enableEvent(putnamEvents.eventTypes.ON_ACTION)
 		dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
         require('repeat-util').scheduleEvery('DBZ Event Check',50,'ticks',checkEveryUnitRegularlyForEvents)
         eventful.enableEvent(eventful.eventType.UNIT_ATTACK,5)
