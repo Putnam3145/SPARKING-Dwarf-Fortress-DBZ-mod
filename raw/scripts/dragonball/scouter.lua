@@ -1,4 +1,4 @@
--- Gives power level of selected unit. Type "accurate" for a more linear, but more boring number or "legacy" for pre-ki calculation.
+-- Gives power level of selected unit. Use "-ignoreGod" to get godly ki levels and "-legacy" for pre-ki calculation.
 
 local utils=require('utils')
 
