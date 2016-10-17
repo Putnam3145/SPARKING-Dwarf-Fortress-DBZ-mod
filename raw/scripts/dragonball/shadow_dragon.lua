@@ -6,7 +6,7 @@ local function someReasonableLocation()
     end
     for k,v in ipairs(df.global.world.units.active) do
         if dfhack.units.isCitizen(v) then
-            return {unit.pos.x,unit.pos.y,unit.pos.z}
+            return {v.pos.x,v.pos.y,v.pos.z}
         end
     end
 end

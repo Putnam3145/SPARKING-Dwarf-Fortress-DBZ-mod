@@ -7,7 +7,6 @@ item_weapon_dragonball
 		[TWO_HANDED:30]
 		[MINIMUM_SIZE:20]
 		[MATERIAL_SIZE:1]
-		[TRAINING]
 		[ATTACK:EDGE:1:1:whack:whacks ineffectively:NO_SUB:50]
 			[ATTACK_PREPARE_AND_RECOVER:3:3]
 	[ITEM_WEAPON:ITEM_WEAPON_DIGFISTS_DB]

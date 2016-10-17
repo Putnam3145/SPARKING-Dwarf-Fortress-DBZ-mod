@@ -163,7 +163,6 @@ creature_super_db
 
 	[CASTE:GOD_OF_DESTRUCTION]
 		[FANCIFUL]
-
 		[MALE]
 		[PRONE_TO_RAGE:10000]
 		[DESCRIPTION:The God of Destruction of this universe. Lock yourselves up, for when he arrives, your only hope is the Super Saiyan God.]
