@@ -74,7 +74,7 @@ function calculate_max_ki_portions(unit)
     local focus = (unit.status.current_soul.mental_attrs.FOCUS.value+unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value+unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+unit.status.current_soul.mental_attrs.ANALYTICAL_ABILITY.value+unit.status.current_soul.mental_attrs.MEMORY.value)/5
     local endurance = (unit.body.physical_attrs.ENDURANCE.value+unit.body.physical_attrs.AGILITY.value+unit.body.physical_attrs.STRENGTH.value)/3
     local multiplier,boost=get_ki_boost(unit)
-    return boost*multiplier,willpower*multiplier,focus*multiplier,endurance*multiplier
+    return boost,willpower,focus,endurance,multiplier
 end
 
 local isPositiveWillpowerEmotion={
@@ -159,7 +159,7 @@ end
 function get_ki_investment(unit_id)
     if not unitCanUseKi(unit_id) then return 0,0 end
     local unit = df.unit.find(unit_id)
-    local boost,yuki,shoki,genki=calculate_max_ki_portions(unit)
+    local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
     local genkiPerc=math.min(1,((unit.body.blood_count/unit.body.blood_max)*dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)/5)/2)
     local yukiPerc=math.min(1,(getYukiPerc(unit)*dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5)/2)
     local shokiPerc=math.min(1,(getShokiPerc(unit)*dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5)/2)
@@ -170,12 +170,12 @@ function get_ki_investment(unit_id)
         boostPerc=(genkiPerc*genkiFraction)+(yukiPerc*yukiFraction)+(shokiPerc*shokiFraction)
     end
     local totalKi=math.floor(boost*boostPerc+((2^((genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc)/5000))*2250)+.5)
-    return totalKi,getKiType(unit,totalKi)
+    return totalKi*multiplier,getKiType(unit,totalKi*multiplier)
 end
 
 function get_max_ki(unit_id)
     if not unitCanUseKi(unit_id) then return 0 end
     local unit=df.unit.find(unit_id)
-    local boost,yuki,shoki,genki=calculate_max_ki_portions(unit)
-    return math.floor((((2^((yuki+shoki+genki)/5000))*2250)+boost)+0.5)
+    local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
+    return math.floor((((2^((yuki+shoki+genki)/5000))*2250)+boost)+0.5)*multiplier
 end
