@@ -152,8 +152,19 @@ function getKiType(unit,totalKi)
         end
         if kiType<1.6 then return 0 else return math.floor(kiType) end
     else
-        return getSubClassValue(unit,'KI_TYPE') or 0
+        return tonumber(getSubClassValue(unit,'KI_TYPE')) or 0
     end
+end
+
+function ki_func(num)
+    return (2^(num/5000))*2250
+end
+
+function get_max_ki_pre_boost(unit_id)
+    if not unitCanUseKi(unit_id) then return 0 end
+    local unit=df.unit.find(unit_id)
+    local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
+    return math.floor(ki_func(yuki+shoki+genki)+0.5)
 end
 
 function get_ki_investment(unit_id)
@@ -169,13 +180,13 @@ function get_ki_investment(unit_id)
         local genkiFraction,yukiFraction,shokiFraction=genki/totalKi,yuki/totalKi,shoki/totalKi
         boostPerc=(genkiPerc*genkiFraction)+(yukiPerc*yukiFraction)+(shokiPerc*shokiFraction)
     end
-    local totalKi=math.floor(boost*boostPerc+((2^((genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc)/5000))*2250)+.5)
-    return totalKi*multiplier,getKiType(unit,totalKi*multiplier)
+    local totalKi=boost*boostPerc+ki_func(genki*genki_perc+yuki*yuki_perc+shoki*shoki_perc)
+    return math.floor(totalKi*multiplier+.5),getKiType(unit,math.floor(totalKi*multiplier+.5))
 end
 
 function get_max_ki(unit_id)
     if not unitCanUseKi(unit_id) then return 0 end
     local unit=df.unit.find(unit_id)
     local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
-    return math.floor((((2^((yuki+shoki+genki)/5000))*2250)+boost)+0.5)*multiplier
+    return math.floor((((ki_func(yuki+shoki+genki)*2250)+boost)*multiplier)+0.5)
 end

@@ -1,6 +1,6 @@
 local utils=require('utils')
 local function getPowerLevel(unit)
-    return dfhack.script_environment("dragonball/ki").get_max_ki(unit.id)
+    return dfhack.script_environment("dragonball/ki").get_max_ki_pre_boost(unit.id)
 end
 
 local function unitHasSyndrome(u,s_name)

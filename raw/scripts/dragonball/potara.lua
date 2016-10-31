@@ -304,5 +304,4 @@ function potara()
 	dfhack.timeout(200,'ticks',potara)
 end
 
-monthlyCheck()
 potara()
