@@ -82,7 +82,7 @@ creature_cell
 		[EQUIPS]
 		[LAIR:LABYRINTH:100]
 		[LAIR_HUNTER]
-		[LAIR_HUNTER_SPEECH:cell.txt]
+		[LAIR_HUNTER_SPEECH:dragonball_cell.txt]
 		[HOMEOTHERM:10067]
 		[SWIMS_LEARNED]
 
@@ -103,7 +103,7 @@ creature_cell
 				[CDI:TARGET:A:LINE_OF_SIGHT]
 				[CDI:TARGET_RANGE:A:5]
 				[CDI:MAX_TARGET_NUMBER:A:1]
-				[CDI:VERBAL_SPEECH:solar_flare.txt]
+				[CDI:VERBAL_SPEECH:dragonball_solar_flare.txt]
 				[CDI:TARGET_VERB:are blinded:is blinded]
 				[CDI:WAIT_PERIOD:100]
 		[CAN_DO_INTERACTION:CELL_ABSORB]
