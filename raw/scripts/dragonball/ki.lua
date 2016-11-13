@@ -180,7 +180,7 @@ function get_ki_investment(unit_id)
         local genkiFraction,yukiFraction,shokiFraction=genki/totalKi,yuki/totalKi,shoki/totalKi
         boostPerc=(genkiPerc*genkiFraction)+(yukiPerc*yukiFraction)+(shokiPerc*shokiFraction)
     end
-    local totalKi=boost*boostPerc+ki_func(genki*genki_perc+yuki*yuki_perc+shoki*shoki_perc)
+    local totalKi=boost*boostPerc+ki_func(genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc)
     return math.floor(totalKi*multiplier+.5),getKiType(unit,math.floor(totalKi*multiplier+.5))
 end
 
