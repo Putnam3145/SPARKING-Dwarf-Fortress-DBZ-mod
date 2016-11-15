@@ -56,7 +56,7 @@ creature_saiyan
 					[CDI:VERB:test for super saiyan:test for super saiyan]
                     [CDI:TARGET_VERB:scream:screams:NA]
 					[CDI:VERBAL]
-					[CDI:VERBAL_SPEECH:dragonball/yelling.txt]
+					[CDI:VERBAL_SPEECH:dragonball_yelling.txt]
 					[CDI:WAIT_PERIOD:500]
 		[USE_MATERIAL_TEMPLATE:SPIT:SPIT_TEMPLATE]
 		[SECRETION:LOCAL_CREATURE_MAT:SWEAT:LIQUID:BY_CATEGORY:ALL:SKIN:EXERTION]
