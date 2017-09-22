@@ -123,7 +123,7 @@ local function superSaiyanGodSyndrome()
 end
 
 local function getPowerLevel(saiyan)
-    return saiyan.body.physical_attrs.ENDURANCE.value+saiyan.status.current_soul.mental_attrs.FOCUS.value+saiyan.status.current_soul.mental_attrs.WILLPOWER.value
+    return dfhack.script_environment('dragonball/ki').get_max_ki_pre_boost(saiyan)
 end
 
 local function getSuperSaiyanLevel(saiyan)
@@ -180,7 +180,7 @@ local function applySuperSaiyanGodSyndrome()
     if df.global.gamemode==0 and df.creature_raw.find(df.global.ui.race_id).creature_id=='SAIYAN' then
         if getSuperSaiyanCount()<6 then return nil end
         local superSaiyanGod = unitWithHighestPowerLevel()
-        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 120000 and superSaiyanLevel(superSaiyanGod)<6 then 
+        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 10000000 and superSaiyanLevel(superSaiyanGod)<6 then 
             dfhack.gui.showPopupAnnouncement(dfhack.gui.showPopupAnnouncement(dfhack.TranslateName(dfhack.units.getVisibleName(superSaiyanGod))..' has become a Super Saiyan God!',COLOR_CYAN,true))
             syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing)
         end
@@ -265,7 +265,7 @@ local function insertSkill(unit,skill)
         demotion_counter = skill.demotion_counter, 
         unk_1c = skill.unk_1c
         }
-        )
+    )
 end
 
 local function combineSoul(unit1,unit2)
@@ -375,7 +375,7 @@ end
 
 local function fixStrengthBug(unit)
     local strength = unit.body.physical_attrs.STRENGTH
-    strength.value=strength.value>1000000 and 1000000 or strength.value
+    strength.value=math.min(strength.value,1000000)
 end
 
 local function checkOverflows(unit)
@@ -420,41 +420,7 @@ end
     local matId=mat and (mat.inorganic and mat.inorganic.id or mat.material.id) or ''
     local projFunc=projectileFunctionsImpact[matId]
     if projFunc then projFunc(projectile,somebool) end
-end]]
-
-local function add_site(size,civ,site_type,name)
-    local x=(df.global.world.map.region_x+1)%16;
-    local y=(df.global.world.map.region_y+1)%16;
-    local minx,miny,maxx,maxy
-    if(x<size) then
-        minx=0
-        maxx=2*size
-    elseif(x+size>16) then
-        maxx=16
-        minx=16-2*size
-    else
-        minx=x-size
-        maxx=x+size
-    end
-        
-    if(y<size) then
-        miny=0
-        maxy=2*size
-    elseif(y+size>16) then
-        maxy=16
-        miny=16-2*size
-    else
-        miny=y-size
-        maxy=y+size
-    end
-    
-    require("plugins.dfusion.adv_tools").addSite(nil,nil,maxx,minx,maxy,miny,civ,name,site_type)
-end
-local function claimSite(reaction,unit,input_items,input_reagents,output_items,call_native)
-    dialog.showInputPrompt("Site name", "Select a name for a new site:", nil,nil, dfhack.curry(add_site,1,unit.civ_id,0))
-    call_native.value=false
-end
-eventful.registerReaction("LUA_HOOK_MAKE_SITE3x3",claimSite)
+]]
 
 local dbEvents={
     onUnitGravelyInjured=dfhack.event.new()
@@ -481,8 +447,9 @@ local function unitHasZenkaiAlready(unit,set)
     end
 end
 
-local function averageTo1(num)
-    return (1+num)/2
+local function averageTo1(num,howMany)
+    howMany=tonumber(howMany) or 1
+    return (howMany+num)/(howMany+1)
 end
 
 dbEvents.onUnitGravelyInjured.zenkai=function(unit)
@@ -519,20 +486,24 @@ local function renameUnitIfApplicable(unit)
     end
 end
 
+function regularUnitChecks(unit)
+    if unit.body.blood_count<unit.body.blood_max*.75 then 
+        dbEvents.onUnitGravelyInjured(unit)
+    end
+    checkIfUnitStillGravelyInjuredForZenkai(unit)
+    checkOverflows(unit)
+    local super_saiyan_trigger=dfhack.script_environment('dragonball/super_saiyan_trigger')
+    super_saiyan_trigger.runSuperSaiyanChecks(unit.id)
+    if unitUndergoingSSJEmotion(unit) then
+        super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(unit.id)
+    end
+    renameUnitIfApplicable(unit)
+end
+
 local function checkEveryUnitRegularlyForEvents()
     applySuperSaiyanGodSyndrome()
     for k,v in ipairs(df.global.world.units.active) do
-        if v.body.blood_count<v.body.blood_max*.75 then 
-            dbEvents.onUnitGravelyInjured(v)
-        end
-        checkIfUnitStillGravelyInjuredForZenkai(v)
-        checkOverflows(v)
-        local super_saiyan_trigger=dfhack.script_environment('dragonball/super_saiyan_trigger')
-        super_saiyan_trigger.runSuperSaiyanChecks(v.id)
-        if unitUndergoingSSJEmotion(v) then
-            super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(v.id)
-        end
-        renameUnitIfApplicable(v)
+        regularUnitChecks(v)
     end
 end
 
@@ -650,6 +621,7 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
                 end
             end
             attack.attack_velocity=math.min(math.floor(attack.attack_velocity*kiRatio+.5),2000000000)
+            attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*averageTo1(kiRatio,5),2000000000))
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.attack_velocity/100))
             end

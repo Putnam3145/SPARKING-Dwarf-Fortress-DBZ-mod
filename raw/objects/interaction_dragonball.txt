@@ -473,7 +473,7 @@ interaction_dragonball
 			[SYN_NAME:can super saiyan blue]
             [CE_CAN_DO_INTERACTION:START:0]
                 [CDI:ADV_NAME:Transform into a super saiyan blue!]
-                [CDI:INTERACTION:SUPER_SAIYAN]
+                [CDI:INTERACTION:SUPER_SAIYAN_GOD_SUPER_SAIYAN]
                 [CDI:TARGET:A:LINE_OF_SIGHT]
                 [CDI:TARGET:B:SELF_ONLY]
                 [CDI:USAGE_HINT:ATTACK]

@@ -138,8 +138,8 @@ end
 
 local function getShokiPerc(unit) --remember to update once structures are properly mapped!
     local distractednessTotal=0
-    for k,need in ipairs(unit.status.current_soul.personality.unk_v4201_1a) do
-        distractednessTotal=distractednessTotal+need.unk_8
+    for k,need in ipairs(unit.status.current_soul.personality.needs) do
+        distractednessTotal=distractednessTotal+need.focus_level
     end
     return distractednessTotal>0 and math.min(1,8/(math.log(distractednessTotal)/math.log(2))) or 1 --i think the same equation ought to work for both...
 end

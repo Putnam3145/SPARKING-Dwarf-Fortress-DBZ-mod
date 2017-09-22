@@ -157,7 +157,11 @@ function getKiType(unit,totalKi)
 end
 
 function ki_func(num)
-    return (2^(num/5000))*2250
+    if num>51882 then --this is the second intersection point of the two functions
+        return (num^2)/900
+    else
+        return (2^(num/5000))*2250
+    end
 end
 
 function get_max_ki_pre_boost(unit_id)
@@ -188,5 +192,5 @@ function get_max_ki(unit_id)
     if not unitCanUseKi(unit_id) then return 0 end
     local unit=df.unit.find(unit_id)
     local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
-    return math.floor((((ki_func(yuki+shoki+genki)*2250)+boost)*multiplier)+0.5)
+    return math.floor((((ki_func(yuki+shoki+genki))+boost)*multiplier)+0.5)
 end
