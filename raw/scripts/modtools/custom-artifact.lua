@@ -64,7 +64,7 @@ validArgs = utils.invert({
 function getItemType(item) --just kinda grabbed this from item-trigger, like the help dialogue above
     local itemType
     if item:getSubtype() ~= -1 and dfhack.items.getSubtypeDef(item:getType(),item:getSubtype()) then
-        itemType = item:getType()..':'..dfhack.items.getSubtypeDef(item:getType(),item:getSubtype()).id
+        itemType = df.item_type[item:getType()]..':'..dfhack.items.getSubtypeDef(item:getType(),item:getSubtype()).id
     else
         itemType = df.item_type[item:getType()]
     end
