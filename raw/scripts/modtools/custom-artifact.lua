@@ -61,7 +61,7 @@ validArgs = utils.invert({
     'help'
 })
 
-function getitemType(item) --just kinda grabbed this from item-trigger, like the help dialogue above
+function getItemType(item) --just kinda grabbed this from item-trigger, like the help dialogue above
     local itemType
     if item:getSubtype() ~= -1 and dfhack.items.getSubtypeDef(item:getType(),item:getSubtype()) then
         itemType = item:getType()..':'..dfhack.items.getSubtypeDef(item:getType(),item:getSubtype()).id
@@ -103,6 +103,7 @@ function createArtifact(itemType,itemSubtype,name,material,entityFilter,siteFilt
             end
         end
     end
+    local pickedSite=eligibleSites[rng:random(#eligibleSites)-1]
     newArtifact.anon_1=-1000000  --TODO: REPLACE REPLACE REPLACE REPLACE REPLACE ALL OF THESE ANON IS BAD
     newArtifact.anon_2=-1000000
     newArtifact.anon_3=-1000000
@@ -191,12 +192,13 @@ if #itemTypeSplit>1 then
     end
 end
 
+args.amount=args.amount and tonumber(args.amount) or 1
 
 local totalArtifactsOfItemType=0
 
 if not args.ignoreExisting then
     for k,v in ipairs(df.global.world.artifacts.all) do
-        if getItemType(item)==args.itemType then
+        if getItemType(v.item)==args.itemType then
             totalArtifactsOfItemType=totalArtifactsOfItemType+1
         end
     end
@@ -206,5 +208,6 @@ local itemMat=args.itemMat and dfhack.matinfo.find(args.itemMat) or false
 
 if totalArtifactsOfItemType<args.amount then
     for i=totalArtifactsOfItemType,args.amount-1,1 do
+        createArtifact(itemType,itemSubtype,args.name,itemMat,args.specificEntityType and utils.invert(args.specificEntityType),args.specificSiteType and utils.invert(args.specificSiteType))
     end
 end
