@@ -1,4 +1,4 @@
-creature_shadow_db
+creature_bttl_db
 
 [OBJECT:CREATURE]
 
