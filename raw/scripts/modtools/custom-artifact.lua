@@ -103,7 +103,7 @@ function createArtifact(itemType,itemSubtype,name,material,entityFilter,siteFilt
             end
         end
     end
-    local pickedSite=eligibleSites[rng:random(#eligibleSites)-1]
+    local pickedSite=eligibleSites[rng:random(#eligibleSites)+1]
     newArtifact.anon_1=-1000000  --TODO: REPLACE REPLACE REPLACE REPLACE REPLACE ALL OF THESE ANON IS BAD
     newArtifact.anon_2=-1000000
     newArtifact.anon_3=-1000000
@@ -120,7 +120,6 @@ function createArtifact(itemType,itemSubtype,name,material,entityFilter,siteFilt
     newArtifact.anon_17=250
     newArtifact.anon_18=0
     newArtifact.anon_19=3
-    --set your damn artifact records
     if name then
         newArtifact.name.has_name=true
         newArtifact.name.first_name=name
