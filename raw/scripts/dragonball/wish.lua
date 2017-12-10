@@ -254,6 +254,10 @@ end
 
 function makeAWish(unit,adventure)
     if not unit then error('Something weird happened! No unit found!') end
+    local last_wish_found=dfhack.persistent.save({key='DRAGONBALL_LAST_WISH_TIME'})
+    if last_wish_found.ints[1]==df.global.cur_year or (last_wish_found.ints[1]==df.global.cur_year-1 and last_wish_found.ints[2]<df.global.cur_year_tick) then
+        dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,RECENTER=true,PAUSE=true},unit.pos,'The dragon balls still need to recharge!',COLOR_LIGHTGREEN)
+    end
     local script=require('gui.script')
     script.start(function()
     for i=1,3 do
@@ -272,6 +276,8 @@ function makeAWish(unit,adventure)
     local wishes=dfhack.persistent.save({key='DRAGONBALL_WISH_COUNT'})
     wishes.ints[1]=wishes.ints[1]+1
     wishes:save()
+    last_wish_found.ints[1]=df.global.cur_year
+    last_wish_found.ints[2]=df.global.cur_year_tick
     if wishes.ints[1]>9 and wishes.ints[2]<1 then
         dfhack.script_environment('dragonball/shadow_dragon').init_shadow_dragons()
         wishes.ints[2]=1
