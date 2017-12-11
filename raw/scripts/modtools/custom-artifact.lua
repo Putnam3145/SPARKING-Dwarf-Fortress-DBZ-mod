@@ -17,19 +17,21 @@ Arguments::
             WEAPON:ITEM_WEAPON_PICK
             RING
      -itemMat mat
-         the material of the newly generated item. if not set, will generate from valid mats.
+         the material of the newly generated item
          examples:
             INORGANIC:IRON
             CREATURE_MAT:DWARF:BRAIN
             PLANT_MAT:MUSHROOM_HELMET_PLUMP:DRINK
      -name name
-        the item's name. should be set, will just go with no name if not
+        the item's name
+        should be set, will just go with no name if not
      -amount num
          the minimum artifacts required
          will continue to create new artifacts until this amount is reached
          this argument is optional and will default to 1
      -ignoreExisting
          will create (num) artifacts named (name) regardless of existing artifacts of that type
+         do not use in onload scripts, will overrun world with that artifact type given enough reloads
      -specificEntityType [ entity1 entity2 ... ]
         entity filter, will only spawn in these entity's sites
         examples:
@@ -161,7 +163,7 @@ end
 
 local args = utils.processArgs({...}, validArgs)
 
-if args.help or not args.itemType then
+if args.help or not args.itemType or not args.itemMat then
     print(usage)
     return
 end
