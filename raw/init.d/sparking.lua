@@ -603,7 +603,6 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
             local unit=df.unit.find(unit_id)
             forceSuperSaiyan(unit)
             local attack=action.data.attack
-            dfhack.script_environment('modtools/putnam_events').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
 			enemyKiInvestment=math.max(enemyKiInvestment,1)
@@ -620,8 +619,8 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
                     end
                 end
             end
-            attack.attack_velocity=math.min(math.floor(attack.attack_velocity*kiRatio+.5),2000000000)
-            attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*averageTo1(kiRatio,5),2000000000))
+            attack.attack_velocity=math.min(math.floor(attack.attack_velocity*sqrt(kiRatio)+.5),2000000000)
+            attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*sqrt(kiRatio)+.5),2000000000)
             if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
                 ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.attack_velocity/100))
             end
