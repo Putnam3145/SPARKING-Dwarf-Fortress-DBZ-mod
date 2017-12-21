@@ -1,3 +1,5 @@
+--@ module = true
+
 local transformations={}
 
 function load_transformation_file(file_name)
@@ -57,7 +59,13 @@ end
 
 function transform(unit_id,transformation,transforming)
     local persist=get_transformation(transformation)
-    persist.ints[1]=transforming and 1 or 0
+    if transforming then
+        persist.ints[1]=1
+        local _=transformations[transformation].on_transform and transformations[transformation].on_transform(df.unit.find(unit))
+    else
+        persist.ints[1]=0
+        local _=transformations[transformation].on_untransform and transformations[transformation].on_untransform(df.unit.find(unit))
+    end
     persist:save()
     return persist
 end
