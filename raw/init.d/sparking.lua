@@ -594,17 +594,21 @@ local function unitHasSyndrome(u,s_name)
     return false
 end
 
+local ki=dfhack.script_environment('dragonball/ki')
+
+local transformation=dfhack.script_environment('dragonball/transformation')
+
 dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=function(unit_id,action)
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
-    local ki=dfhack.script_environment('dragonball/ki')
     local kiInvestment,kiType=ki.get_ki_investment(unit_id)
     if kiInvestment>0 then
         if action.type==df.unit_action_type.Attack and unitInDeadlyCombat(unit_id) then
             local unit=df.unit.find(unit_id)
-            forceSuperSaiyan(unit)
-            local attack=action.data.attack
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
+            transformation.transform_ai(unit,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
+            transformation.transform_ai(enemy,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
+            local attack=action.data.attack
 			enemyKiInvestment=math.max(enemyKiInvestment,1)
             local kiRatio=kiInvestment/enemyKiInvestment
             local worldKiMode=ki.getWorldKiMode()

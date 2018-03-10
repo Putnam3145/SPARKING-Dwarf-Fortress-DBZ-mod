@@ -5,6 +5,7 @@ local transformations={}
 function load_transformation_file(file_name)
     local new_transformation_file=dfhack.script_environment(file_name)
     for k,v in pairs(file_name.transformations) do
+        v.identifier=k
         transformations[k]=v
     end
 end
@@ -26,6 +27,10 @@ function get_active_transformations(unit_id)
         end
     end
     return active_transformations
+end
+
+function get_all_transformations(unit_id)
+    return dfhack.persistent.get_all('DRAGONBALL/TRANSFORMATIONS/'..unit_id,true)
 end
 
 function transformation_tick(unit_id)
@@ -70,4 +75,25 @@ function transform(unit_id,transformation,transforming)
     return persist
 end
 
+function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
+    local ratio=enemyKiInvestment/kiInvestment
+    local activeTransformations=get_active_transformations(unit_id)
+    if ratio<1 then return false end --can stay in base if enemy is weaker than us
+    local unitTransformation=get_all_transformations(unit_id)
+    local transformationInformation={}
+    local unit=df.unit.find(unit_id)
+    for k,transformation in pairs(unit_transformations) do
+        local properTransformation=transformations[transformation.value]
+        table.insert(transformationInformation,properTransformation)
+    end
+    table.sort(transformationInformation,function(a,b) return a.cost(unit)<b.cost(unit) end)
+    for k,transformation in ipairs(transformationInformation) do
+        if transformation.benefit(unit)>=ratio or k==#transformationInformation then --either as soon as transformation is sufficient OR most powerful if desperate
+            transform(unit,transformation,true)
+            return true
+        end
+    end
+end
+
 load_transformation_file('dragonball/transformations/super_saiyan')
+load_transformation_file('dragonball/transformations/other')

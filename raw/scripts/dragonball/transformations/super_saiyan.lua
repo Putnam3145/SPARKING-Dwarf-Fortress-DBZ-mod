@@ -2,7 +2,7 @@
 
 --Not all transformation properties have to be defined, but I will do so for "Super Saiyan" as an example.    
 
-local transformation_funcs=dfhack.script_environment('dragonball/transformation')
+local get_transformation=dfhack.script_environment('dragonball/transformation').get_transformation
 
 transformations={}
 
@@ -54,6 +54,10 @@ transformations['Super Saiyan'].can_add=function(unit)
     return true
 end
 
+--transformations['Super Saiyan'].on_attacked=function(attacker,defender,attack) end
+
+--transformations['Super Saiyan'].on_attack=function(attacker,defender,attack) end
+
 -- transformations['Super Saiyan'].overlaps={} --transformations that can overlap with this one, will replace otherwise
 
 transformations['Berserker Super Saiyan']={}
@@ -63,18 +67,18 @@ transformations['Berserker Super Saiyan'].ki_mult=function(unit)
 end
 
 transformations['Berserker Super Saiyan'].ki_boost=function(unit)
-    return transformation_funcs.get_transformation(unit.id,'Berserker Super Saiyan').ints[2]*20
+    return get_transformation(unit.id,'Berserker Super Saiyan').ints[2]*20
 end
 
 transformations['Berserker Super Saiyan'].on_tick=function(unit)
-    local persist=transformation_funcs.get_transformation(unit.id,'Berserker Super Saiyan')
+    local persist=get_transformation(unit.id,'Berserker Super Saiyan')
     unit.counts2.exhaustion=unit.counters2.exhaustion-10
     persist.ints[2]=persist.ints[2]+1
     persist:save()
 end
 
 transformations['Berserker Super Saiyan'].on_transform=function(unit)
-    local persist=transformation_funcs.get_transformation(unit.id,'Berserker Super Saiyan')
+    local persist=get_transformation(unit.id,'Berserker Super Saiyan')
     persist.ints[2]=0
     persist:save()
 end
@@ -88,7 +92,7 @@ transformations['Berserker Super Saiyan'].benefit=function(unit)
 end
 
 transformations['Berserker Super Saiyan'].on_attacked=function(attacker,defender,attack)
-    local persist=transformation_funcs.get_transformation(unit.id,'Berserker Super Saiyan')
+    local persist=get_transformation(unit.id,'Berserker Super Saiyan')
     persist.ints[2]=persist.ints[2]+attack.attack_velocity
     persist.ints[2]:save()
 end
@@ -216,5 +220,35 @@ transformations['Super Saiyan Blue'].can_add=function(unit)
 end
 
 transformations['Super Saiyan Blue'].overlaps={
+    'Kaioken'
+}
+
+transformations['Beyond Super Saiyan Blue']={}
+
+transformations['Beyond Super Saiyan Blue'].ki_mult=function(unit)
+    return transformations['Super Saiyan 2'].ki_mult(unit)
+end
+
+transformations['Beyond Super Saiyan Blue'].ki_type=function(unit) 
+    return 'God' 
+end
+
+transformations['Beyond Super Saiyan Blue'].on_tick=function(unit)
+    unit.counts2.exhaustion=unit.counters2.exhaustion+(500000/unit.body.physical_attrs.ENDURANCE)
+end
+
+transformations['Beyond Super Saiyan Blue'].cost=function(unit)
+    return transformations['Super Saiyan'].cost*5
+end
+
+transformations['Beyond Super Saiyan Blue'].benefit=function(unit)
+    return transformations['Super Saiyan'].benefit*2000
+end
+
+transformations['Beyond Super Saiyan Blue'].can_add=function(unit)
+    return get_transformation(unit.id,'Super Saiyan Blue') --complicated addition procedure elsewhere
+end
+
+transformations['Beyond Super Saiyan Blue'].overlaps={
     'Kaioken'
 }
