@@ -65,6 +65,18 @@ end
 function transform(unit_id,transformation,transforming)
     local persist=get_transformation(transformation)
     if transforming then
+        local transformations=get_active_transformations(unit_id)
+        for active_transformation in transformations do
+            local can_overlap=false
+            for k,overlap in pairs(active_transformation.overlaps) do
+                if overlap==transformation then
+                    can_overlap=true
+                end
+            end
+            if not can_overlap then
+                transform(unit_id,active_transformation,false)
+            end
+        end
         persist.ints[1]=1
         local _=transformations[transformation].on_transform and transformations[transformation].on_transform(df.unit.find(unit))
     else
@@ -75,10 +87,15 @@ function transform(unit_id,transformation,transforming)
     return persist
 end
 
+function revert_to_base(unit_id)
+    for transformation in get_active_transformations(unit_id) do
+        transform(unit_id,transformation,false)
+    end
+end
+
 function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
-    local ratio=enemyKiInvestment/kiInvestment
     local activeTransformations=get_active_transformations(unit_id)
-    if ratio<1 then return false end --can stay in base if enemy is weaker than us
+    if kiInvestment>enemyKiInvestment then return false end --can stay in base if enemy is weaker than us
     local unitTransformation=get_all_transformations(unit_id)
     local transformationInformation={}
     local unit=df.unit.find(unit_id)
@@ -87,9 +104,21 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
         table.insert(transformationInformation,properTransformation)
     end
     table.sort(transformationInformation,function(a,b) return a.cost(unit)<b.cost(unit) end)
+    local mostPowerful
+    local mostPowerfulNumber=-1000000
     for k,transformation in ipairs(transformationInformation) do
-        if transformation.benefit(unit)>=ratio or k==#transformationInformation then --either as soon as transformation is sufficient OR most powerful if desperate
+        local transformInvestment=(kiInvestment+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
+        local benefitMult=transformation.benefit and transformation.benefit(unit)
+        local totalPower=benefitMult*transformInvestment
+        if totalPower>mostPowerfulNumber then 
+            mostPowerful=transformation
+            mostPowerfulNumber=totalPower
+        end
+        if (transformInvestment*benefitMult)>=enemyKiInvestment then --either as soon as transformation is sufficient
             transform(unit,transformation,true)
+            return true
+        elseif k==#transformationInformation then --most powerful if desparate
+            transform(unit,mostPowerful,true)
             return true
         end
     end
