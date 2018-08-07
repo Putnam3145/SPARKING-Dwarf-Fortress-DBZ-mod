@@ -25,7 +25,7 @@ validArgs = validArgs or utils.invert({
 
 local args = utils.processArgs({...}, validArgs)
 
-function runSuperSaiyanChecksExtremeEmotion(unit_id)
+function runSuperSaiyanChecksExtremeEmotion(unit_id) --TODO: update to new transformation system, shouldn't be too difficult
     local unit = df.unit.find(unit_id)
     if df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
     local powerLevel=getPowerLevel(unit)

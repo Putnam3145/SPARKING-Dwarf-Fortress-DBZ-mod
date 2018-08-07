@@ -87,7 +87,7 @@ transformations['Berserker Super Saiyan'].benefit=function(unit)
 end
 
 transformations['Berserker Super Saiyan'].on_attacked=function(attacker,defender,attack)
-    local persist=get_transformation(unit.id,'Berserker Super Saiyan')
+    local persist=get_transformation(defender.id,'Berserker Super Saiyan')
     persist.ints[2]=persist.ints[2]+attack.attack_velocity
     persist.ints[2]:save()
 end

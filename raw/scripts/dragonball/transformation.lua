@@ -41,6 +41,26 @@ function transformation_tick(unit_id)
     end
 end
 
+function transformations_on_attack(attacker,defender,attack)
+    for k,active_transformation in pairs(get_active_transformations(attacker.id)) do
+        active_transformation.on_attack and active_transformation.on_attack(attacker,defender,attack)
+    end
+    return true
+end
+
+function transformations_on_attacked(attacker,defender,attack)
+    for k,active_transformation in pairs(get_active_transformations(defender.id)) do
+        active_transformation.on_attacked and active_transformation.on_attacked(attacker,defender,attack)
+    end
+    return true
+end
+
+function transformation_ticks(unit_id)
+    for k,active_transformation in pairs(get_active_transformations(unit_id)) do
+        active_transformation.on_tick and active_transformation.on_tick(df.unit.find(unit))
+    end
+end
+
 function get_transformation_boosts(unit_id)
     local boost,mult=0,1
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
