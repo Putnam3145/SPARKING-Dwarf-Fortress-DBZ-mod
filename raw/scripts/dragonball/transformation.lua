@@ -43,21 +43,21 @@ end
 
 function transformations_on_attack(attacker,defender,attack)
     for k,active_transformation in pairs(get_active_transformations(attacker.id)) do
-        active_transformation.on_attack and active_transformation.on_attack(attacker,defender,attack)
+        local _=active_transformation.on_attack and active_transformation.on_attack(attacker,defender,attack)
     end
     return true
 end
 
 function transformations_on_attacked(attacker,defender,attack)
     for k,active_transformation in pairs(get_active_transformations(defender.id)) do
-        active_transformation.on_attacked and active_transformation.on_attacked(attacker,defender,attack)
+        local _=active_transformation.on_attacked and active_transformation.on_attacked(attacker,defender,attack)
     end
     return true
 end
 
 function transformation_ticks(unit_id)
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
-        active_transformation.on_tick and active_transformation.on_tick(df.unit.find(unit))
+        local _=active_transformation.on_tick and active_transformation.on_tick(df.unit.find(unit))
     end
 end
 
@@ -72,7 +72,7 @@ function get_transformation_boosts(unit_id)
 end
 
 function add_transformation(unit_id,transformation)
-    if transformations[transformation].can_add(unit_id) then
+    if transformations[transformation].can_add(unit_id) and not dfhack.persistent.get('DRAGONBALL/TRANSFORMATIONS/'..unit_id..'/'..transformation) then
         local persist=dfhack.persistent.save('DRAGONBALL/TRANSFORMATIONS/'..unit_id..'/'..transformation)
         persist.value=transformation
         persist.ints[1]=0 -- 1: transformed; 0: not
@@ -80,28 +80,38 @@ function add_transformation(unit_id,transformation)
         persist:save()
         return persist
     end
+    return false
 end
 
 function transform(unit_id,transformation,transforming)
     local persist=get_transformation(transformation)
+    local unit=df.unit.find(unit_id)
+    local isAdventurer=df.global.gamemode == df.game_mode.ADVENTURE and unit == df.global.world.units.active[0]
     if transforming then
-        local transformations=get_active_transformations(unit_id)
-        for active_transformation in transformations do
+        local unit_transformations=get_active_transformations(unit_id)
+        for active_transformation in unit_transformations do
             local can_overlap=false
-            for k,overlap in pairs(active_transformation.overlaps) do
-                if overlap==transformation then
-                    can_overlap=true
+            local transformation_info=transformations[active_transformation.value]
+            if transformation_info.overlaps then
+                for k,overlap in pairs(transformation_info.overlaps) do
+                    if overlap==transformation then
+                        can_overlap=true
+                    end
                 end
             end
             if not can_overlap then
                 transform(unit_id,active_transformation,false)
             end
         end
-        persist.ints[1]=1
-        local _=transformations[transformation].on_transform and transformations[transformation].on_transform(df.unit.find(unit))
+        if (not transformations[transformation].can_transform) or transformations[transformation].can_transform(unit) then
+            persist.ints[1]=1
+            local _=transformations[transformation].on_transform and transformations[transformation].on_transform(unit)
+            dfhack.gui.showAutoAnnouncement(df.announcement_type.INTERACTION_ACTOR,(unit.pos,isAdventurer and "You have" or (dfhack.gui.getVisibleName(unit).." has")..transformations[transformation].transform_string(unit))
+        end
     else
         persist.ints[1]=0
-        local _=transformations[transformation].on_untransform and transformations[transformation].on_untransform(df.unit.find(unit))
+        local _=transformations[transformation].on_untransform and transformations[transformation].on_untransform(unit)
+        dfhack.gui.showAutoAnnouncement(df.announcement_type.INTERACTION_ACTOR,(unit.pos,isAdventurer and "You have " or (dfhack.gui.getVisibleName(unit).." has "))..transformations[transformation].get_name(unit))
     end
     persist:save()
     return persist

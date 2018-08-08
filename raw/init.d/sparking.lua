@@ -143,7 +143,7 @@ local function unitWithHighestPowerLevel()
             end
         end
     end
-    return highestUnit
+    return highestUnit,highestPowerLevel
 end
 
 local function combinedSaiyanPowerLevel()
@@ -456,6 +456,7 @@ function regularUnitChecks(unit)
     if unit.body.blood_count<unit.body.blood_max*.75 then 
         dbEvents.onUnitGravelyInjured(unit)
     end
+    local power=
     checkIfUnitStillGravelyInjuredForZenkai(unit)
     checkOverflows(unit)
     local super_saiyan_trigger=dfhack.script_environment('dragonball/super_saiyan_trigger')
@@ -465,6 +466,12 @@ function regularUnitChecks(unit)
     end
     renameUnitIfApplicable(unit)
     transformation.transformation_ticks(unit)
+    if not unitInDeadlyCombat(unit.id) or unit.counters.unconscious>0 then
+        transformation.revert_to_base(unit.id)
+    end
+    if dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit) and getPowerLevel(unit)>49000000 then
+        dfhack.run_script('dragonball/whis_event')
+    end
 end
 
 local function checkEveryUnitRegularlyForEvents()
@@ -560,18 +567,15 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
                 kiInvestment=enemyKiType<kiType-1 and kiInvestment or kiInvestment/enemyKiInvestment
             else
                 if kiType==0 and enemyKiType==1 then 
-                    if kiRatio<1000 then
+                    if kiRatio<100 then
                         attack.attack_accuracy=0
                     else
-                        kiRatio=kiRatio/5000 --you need to be WAY stronger to hit them and even stronger to do any damage
+                        kiRatio=kiRatio/500 --you need to be WAY stronger to hit them and even stronger to do any damage
                     end
                 end
             end
             attack.attack_velocity=math.min(math.floor(attack.attack_velocity*sqrt(kiRatio)+.5),2000000000)
             attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*sqrt(kiRatio)+.5),2000000000)
-            if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
-                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.attack_velocity/100))
-            end
             local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
             if caste_id=='GLACIUS' and kiInvestment<35000000 then
                 unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510 --approximately absolute zero
@@ -587,6 +591,8 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
             local enemy=df.unit.find(attack.target_unit_id)
             transformation.transform_ai(unit,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
             transformation.transform_ai(enemy,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
+            transformation.transformations_on_attack(unit,enemy,attack)
+            transformation.transformations_on_attacked(unit,enemy,attack)
             attack.attack_velocity=math.max(attack.attack_velocity-enemyKiInvestment,0)
             local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
             if caste_id=='GLACIUS' then

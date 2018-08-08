@@ -18,6 +18,15 @@ function get_S_cells(unit)
     return persist:save()
 end
 
+function get_god_training(unit)
+    local persist=dfhack.persistent.save('DRAGONBALL/GOD_TRAINING/'..unit.id)
+    for i=1,7 do
+        if persist.ints[i]<0 then persist.ints[i]=0 end
+    end
+    --ints[1] is blue training level
+    return persist:save()
+end
+
 transformations['Super Saiyan']={}
 
 transformations['Super Saiyan'].ki_mult=function(unit)
@@ -48,6 +57,10 @@ end
 
 transformations['Super Saiyan'].can_add=function(unit)
     return true
+end
+
+transformations['Super Saiyan'].transform_string=function(unit)
+    return ' transformed into a Super Saiyan!'
 end
 
 --transformations['Super Saiyan'].on_attacked=function(attacker,defender,attack) end
@@ -100,6 +113,10 @@ transformations['Berserker Super Saiyan'].can_add=function(unit)
     return true
 end
 
+transformations['Berserker Super Saiyan'].transform_string=function(unit)
+    return ' transformed into a Berserker Super Saiyan!'
+end
+
 transformations['Super Saiyan 2']={}
 
 transformations['Super Saiyan 2'].ki_mult=function(unit)
@@ -127,20 +144,29 @@ end
 
 transformations['Super Saiyan 2'].ki_type=function(unit) 
     local S_cells=get_S_cells(unit)
-    return (S_cells.ints[2]>10000 and S_cells.ints[3]==1) and 'God'
+    return S_cells.ints[3]==1 and 'God'
+end
+
+transformations['Super Saiyan 2'].benefit=function(unit)
+    local S_cells=get_S_cells(unit)
+    return (S_cells.ints[3]==1) and 1000
 end
 
 transformations['Super Saiyan 2'].get_name=function(unit)
     local S_cells=get_S_cells(unit)
-    if S_cells.ints[2]>10000 then
+    if S_cells.ints[2]>1000 then
         if S_cells.ints[3]==1 then
-            return 'Strengthened Super Saiyan 2'
-        else
             return 'Super Saiyan Anger'
+        else
+            return 'Strengthened Super Saiyan 2'
         end
     else
         return 'Super Saiyan 2'
     end
+end
+
+transformations['Super Saiyan 2'].transform_string=function(unit)
+    return ' transformed into a '..transformations['Super Saiyan 2'].get_name(unit)
 end
 
 transformations['Super Saiyan 3']={}
@@ -162,6 +188,10 @@ transformations['Super Saiyan 3'].can_add=function(unit)
     return S_cells>20000
 end
 
+transformations['Super Saiyan 3'].transform_string=function(unit)
+    return ' transformed into a Super Saiyan 3!'
+end
+
 transformations['Super Saiyan God']={}
 
 transformations['Super Saiyan God'].ki_type=function(unit) 
@@ -180,6 +210,10 @@ transformations['Super Saiyan God'].benefit=function(unit)
     return 1000
 end
 
+transformations['Super Saiyan God'].transform_string=function(unit)
+    return ' transformed into a Super Saiyan God!'
+end
+
 transformations['Super Saiyan Blue']={}
 
 transformations['Super Saiyan Blue'].ki_mult=function(unit)
@@ -191,6 +225,11 @@ transformations['Super Saiyan Blue'].ki_type=function(unit)
 end
 
 transformations['Super Saiyan Blue'].on_tick=function(unit)
+    local god_training=get_god_training(unit)
+    god_training.ints[1]=god_training.ints[1]+1+math.floor(unit.counters2.exhaustion/1000)
+    god_training:save()
+    S_cells.ints[1]=S_cells.ints[1]+1+math.floor(unit.counters2.exhaustion/500)
+    S_cells:save()
     unit.counts2.exhaustion=unit.counters2.exhaustion+(2000000/unit.body.physical_attrs.ENDURANCE)
 end
 
@@ -203,12 +242,19 @@ transformations['Super Saiyan Blue'].benefit=function(unit)
 end
 
 transformations['Super Saiyan Blue'].can_add=function(unit)
-    return (get_transformation(unit.id,'Super Saiyan God') and get_S_cells(unit).ints[1]>10000) or get_S_cells(unit).ints[4]==1
+    return get_transformation(unit.id,'Super Saiyan God') and (get_S_cells(unit).ints[1]>10000 or get_S_cells(unit).ints[4]==1)
 end
 
 transformations['Super Saiyan Blue'].overlaps={
-    'Kaioken'
+    'Kaioken',
+    'Kaioken x5',
+    'Kaioken x10',
+    'Kaioken x20'
 }
+
+transformations['Super Saiyan Blue'].transform_string=function(unit)
+    return ' transformed into a Super Saiyan God Super Saiyan!'
+end
 
 transformations['Beyond Super Saiyan Blue']={}
 
@@ -221,6 +267,11 @@ transformations['Beyond Super Saiyan Blue'].ki_type=function(unit)
 end
 
 transformations['Beyond Super Saiyan Blue'].on_tick=function(unit)
+    god_training.ints[1]=god_training.ints[1]+1+math.floor(unit.counters2.exhaustion/1000)
+    god_training:save()
+    S_cells.ints[1]=S_cells.ints[1]+2+math.floor(unit.counters2.exhaustion/250)
+    S_cells.ints[2]=S_cells.ints[2]+2+math.floor(unit.counters2.exhaustion/500)
+    S_cells:save()
     unit.counts2.exhaustion=unit.counters2.exhaustion+(2000000/unit.body.physical_attrs.ENDURANCE)
 end
 
@@ -237,5 +288,12 @@ transformations['Beyond Super Saiyan Blue'].can_add=function(unit)
 end
 
 transformations['Beyond Super Saiyan Blue'].overlaps={
-    'Kaioken'
+    'Kaioken',
+    'Kaioken x5',
+    'Kaioken x10',
+    'Kaioken x20'
 }
+
+transformations['Super Saiyan Blue'].transform_string=function(unit)
+    return ' transformed beyond Super Saiyan God Super Saiyan!'
+end
