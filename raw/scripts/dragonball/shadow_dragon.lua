@@ -46,8 +46,7 @@ local function summonEternal()
     eternal.flags1.active_invader=true
     eternal.flags2.visitor_uninvited=true
     eternal.flags3.no_meandering=true
-    local message=[[The Eternal has arrived!]]
-    dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,RECENTER=true,PAUSE=true},eternal.pos,message,COLOR_LIGHTRED)
+    dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,RECENTER=true,PAUSE=true},eternal.pos,'The Eternal has arrived!',COLOR_LIGHTRED)
     local shadow_dragon_persist=dfhack.persistent.save({key='DRAGONBALL_WISH_COUNT'})
     shadow_dragon_persist.ints[4]=eternal.id
     shadow_dragon_persist:save()
@@ -138,8 +137,15 @@ shadow_dragon_action[7]=function()
     shenron.flags2.visitor_uninvited=true
     shenron.flags3.no_meandering=true
     shenron.flags1.active_invader=true
-    local message=[["What does it take?! Does the afterlife just hate you and refuse you entry, or what?! ...Hh. I apologize. Genuinely. I let myself get carried away. I don't resent you at all. I mean, I'll still kill you since you insist on fighting, but please rest assured I feel nothing but respect for any of you. You see, my philosophy is simple. I believe that we were all created for a purpose. There are, of course, the creators and destroyers of worlds, or of universes. Simple enough. Then myself and the other Shadow Dragonswe are the Eternal's creatures, and our purpose is to enact its supreme will. As, you'll notice, I am doing so now. You, on the other hand..."]]
-    dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,RECENTER=true,PAUSE=true},shenron.pos,message,COLOR_LIGHTCYAN)
+    local messages={
+    [["What does it take?! Does the afterlife just hate you and refuse you entry, or what?! ...Hh. I apologize. Genuinely. I let myself get carried away.]],
+    [[I don't resent you at all. I mean, I'll still kill you since you insist on fighting, but please rest assured I feel nothing but respect for any of you.]],
+    [[You see, my philosophy is simple. I believe that we were all created for a purpose. There are, of course, the creators and destroyers of worlds, or of universes.]],
+    [[Simple enough. Then myself and the other Shadow Dragonswe are the Eternal's creatures, and our purpose is to enact its supreme will. As, you'll notice, I am doing so now.]],
+    [[You, on the other hand..."]]}
+    for k,message in ipairs(messages) do
+        dfhack.gui.makeAnnouncement(df.announcement_type.ERA_CHANGE,{DO_MEGA=true,RECENTER=true,PAUSE=true},shenron.pos,message,COLOR_LIGHTCYAN)
+    end
     local shadow_dragon_persist=dfhack.persistent.save({key='DRAGONBALL_WISH_COUNT'})
     shadow_dragon_persist.ints[4]=shenron.id
     shadow_dragon_persist:save()
@@ -180,7 +186,7 @@ shadow_dragon_action[10]=function()
 end
 
 shadow_dragon_action[11]=function()
-    local soldier=dfhack.script_environment('dragonball/spawn-unit').place({position=someReasonableLocation(),race='ENTROPY_SOLDIERS_DB',caste=3,age=1000000,name='Ignis',civ_id=-1})
+    local soldier=dfhack.script_environment('dragonball/spawn-unit').place({position=someReasonableLocation(),race='ENTROPY_SOLDIERS_DB',caste=3,age=1000000,name='Mortis',civ_id=-1})
     soldier.flags1.invades=true
     soldier.flags1.marauder=true
     soldier.flags2.visitor_uninvited=true

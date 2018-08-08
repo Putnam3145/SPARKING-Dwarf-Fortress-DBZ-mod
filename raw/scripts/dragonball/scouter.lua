@@ -6,7 +6,8 @@ validArgs = utils.invert({
  'legacy',
  'all',
  'citizens',
- 'ignoreGod'
+ 'ignoreGod',
+ 'potential'
 })
 
 local args = utils.processArgs({...}, validArgs)
@@ -33,7 +34,7 @@ local function getExhaustion(unit)
     return 1
 end
 
-function getPowerLevel(saiyan,legacy,ignoreGod)
+function getPowerLevel(saiyan,legacy,ignoreGod,potential)
     if not saiyan then return 'nothing' end
     if legacy then
 		local strength,endurance,toughness,spatialsense,kinestheticsense,willpower
@@ -64,7 +65,11 @@ function getPowerLevel(saiyan,legacy,ignoreGod)
 		end
 		return math.floor(powerlevel)
     else
-        local powerLevel,kiLevel=dfhack.script_environment('dragonball/ki').get_ki_investment(saiyan.id)
+        local powerLevel,kiLevel=potential and dfhack.script_environment('dragonball/ki').get_max_ki(saiyan.id) or dfhack.script_environment('dragonball/ki').get_ki_investment(saiyan.id)
+        if not kiLevel then
+            local _=nil
+            _,kiLevel=dfhack.script_environment('dragonball/ki').get_ki_investment(saiyan.id)
+        end
         if kiLevel>1 then 
             if ignoreGod then
                 local kiLevelStr=kiLevel==1 and 'demigod' or kiLevel==2 and 'god' or kiLevel==3 and 'one infinity core' or kiLevel<11 and tostring(kiLevel-2)..' infinity cores' or "the culmination"
@@ -79,21 +84,32 @@ function getPowerLevel(saiyan,legacy,ignoreGod)
 end
 
 if args.all then
+    local unitList={}
 	for k,v in ipairs(df.global.world.units.active) do
-        local powerlevel,powerNum=getPowerLevel(v,args.legacy,args.ignoreGod)
+        local powerlevel,powerNum=getPowerLevel(v,args.legacy,args.ignoreGod,args.potential)
         if powerNum and powerNum>0 or powerlevel>0 then
-            print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..powerlevel)
+            table.insert(unitList,{power=powerlevel,str=dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power '..(args.potential and 'potential' or 'level') .. ' of '..powerlevel})
         end
 	end
+    table.sort(unitList,function(a,b) return a.power>b.power end)
+    for k,v in ipairs(unitList) do
+        print(v.str)
+    end
 elseif args.citizens then
+    local unitList={}
 	for k,v in ipairs(df.global.world.units.active) do
-		if dfhack.units.isCitizen(v) then
-			print(dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power level of '..getPowerLevel(v,args.legacy,args.ignoreGod))
-		end
+        local powerlevel,powerNum=getPowerLevel(v,args.legacy,args.ignoreGod,args.potential)
+        if dfhack.units.isCitizen(v) then
+            table.insert(unitList,{power=powerlevel,str=dfhack.TranslateName(dfhack.units.getVisibleName(v))..' has a power '..(args.potential and 'potential' or 'level') .. ' of '..powerlevel})
+        end
 	end
+    table.sort(unitList,function(a,b) return a.power>b.power end)
+    for k,v in ipairs(unitList) do
+        print(v.str)
+    end
 else
     local unit=dfhack.gui.getSelectedUnit(true)
     if unit then
-        dfhack.gui.showPopupAnnouncement("The scouter says " .. getPowerLevel(dfhack.gui.getSelectedUnit(true),args.legacy,args.ignoreGod) .. "!",11)
+        dfhack.gui.showPopupAnnouncement("The scouter says " .. getPowerLevel(dfhack.gui.getSelectedUnit(true),args.legacy,args.ignoreGod,args.potential) .. "!",11)
     end
 end

@@ -188,6 +188,123 @@ function DungeonScouter:onGetSelectedUnit()
    return self._native.parent.unit 
 end
 
+local UnitListScouter=defclass(UnitListScouter,TransparentViewscreen)
+
+function UnitListScouter:changeMode()
+    self.display=not self.display
+end
+
+local TransformationList=defclass(TransformationList,require('gui.dialogs').MessageBox)
+
+function TransformationList:getWantedFrameSize()
+    local width = math.max(self.frame_width or 0, 20, #(self.frame_title or '') + 4)
+    local largest_text_width=-100000
+    for k,v in ipairs(self.subviews) do
+        local curWidth=#v.text
+        if curWidth>largest_text_width then largest_text_width=curWidth end
+    end
+    return math.max(width, largest_text_width), #self.subviews
+end
+
+function TransformationList:init(args)
+    self.unit=args.unit
+    local transformation=dfhack.script_environment('dragonball/transformation')
+    local all=transformation.get_all_transformations(self.unit.id)
+    local render_table={}
+    local widgets=require('gui.widgets')
+    if not all then
+        table.insert(render_table,widgets.Label{view_id='whoops',text='No transformations known!',text_pen={bg=COLOR_BLACK,fg=COLOR_WHITE},frame={l=0,t=0},auto_height=true})
+    else
+        for k,v in ipairs(all) do
+            table.insert(render_table,widgets.Label{view_id=v.value,text=v.value,text_pen={bg=COLOR_BLACK,fg=v.ints[1] and COLOR_LIGHTGREEN or COLOR_WHITE},frame={l=0,t=k-1},auto_height=true})
+        end
+    end
+    self.subviews=render_table
+end
+
+function UnitListScouter:onInput(keys)
+    self:inputToSubviews(keys)
+    self:sendInputToParent(keys)
+    if keys.CUSTOM_F then
+        self:changeMode()
+    elseif keys.CUSTOM_T then
+        TransformationList{unit=dfhack.gui.getSelectedUnit()}:show()
+    end
+    if keys.LEAVESCREEN or keys.UNITVIEW_RELATIONSHIPS_ZOOM then
+        self:dismiss()
+    end
+end
+
+function UnitListScouter:onGetSelectedUnit()
+    local parent=self._native.parent
+    return parent.units[parent.page][parent.cursor_pos[parent.page]]
+end
+
+function UnitListScouter:onResize(w,h)
+    self.jobX=math.floor(w/2)
+    self.pageY=h-9
+    self.buttonDisplayX=12
+    self.recalculateButtonDisplay=true --putting this code into the onResize function results in utterly screwy results, best put it in once the rendering's back to normal
+end
+
+function UnitListScouter:onRender()
+    self._native.parent:render()
+    self.buttonDisplayTimeout=self.buttonDisplayTimeout and self.buttonDisplayTimeout-1 or 10
+    if self.buttonDisplayTimeout<=0 then
+        self.recalculateButtonDisplay=true
+    end
+    if self._native.parent._type~=df.viewscreen_unitlistst then self:dismiss() return end
+    if self.recalculateButtonDisplay then
+        local old_x=self.buttonDisplayX
+        local old_y=self.buttonDisplayY
+        local h=df.global.gps.dimy
+        for i=2,df.global.gps.dimx do
+            local tile1,tile2=dfhack.screen.readTile(i,h-2),dfhack.screen.readTile(i+1,h-2)
+            if (tile1.ch==0 or tile1.ch==32 or tile1.bg==tile1.fg) then
+                if (tile2.ch==0 or tile2.ch==32 or tile2.bg==tile2.fg) then
+                    self.buttonDisplayX=i+1
+                    self.recalculateButtonDisplay=false
+                    break
+                end
+            end
+        end
+        self.buttonDisplayTimeout=math.ceil(df.global.enabler.gfps/30)
+    end
+    if self.display then
+        local parent=self._native.parent
+        local stupidWorkaround='                                      '
+        local curPage=math.floor(parent.cursor_pos[parent.page]/self.pageY)
+        for k,v in ipairs(self.powerLevels[parent.page]) do
+            if math.floor((k-1)/self.pageY)==curPage and v[1] then
+                local yPos=((k-1)%self.pageY)+4
+                local pRatio=v[1]/v[2]
+                local plevelcolor=v[1]==2250 and COLOR_LIGHTMAGENTA or pRatio<0.1 and COLOR_LIGHTRED or pRatio<0.35 and COLOR_RED or pRatio<0.6 and COLOR_WHITE or pRatio<0.85 and COLOR_GREEN or pRatio<1 and COLOR_LIGHTGREEN or COLOR_LIGHTCYAN
+                if parent.cursor_pos[parent.page]==k-1 then
+                    dfhack.screen.paintString({fg=COLOR_BLACK,bg=COLOR_GREY},self.jobX,yPos,v[1]..'/'..v[2]..stupidWorkaround)
+                else
+                    dfhack.screen.paintString({fg=plevelcolor,bg=COLOR_BLACK},self.jobX,yPos,v[1])
+                    dfhack.screen.paintString({fg=COLOR_LIGHTCYAN,bg=COLOR_BLACK},self.jobX+#tostring(v[1]),yPos,'/'..v[2]..stupidWorkaround)
+                end
+            end
+        end
+    end
+    dfhack.screen.paintString({fg=COLOR_LIGHTRED,bg=COLOR_BLACK},self.buttonDisplayX,df.global.gps.dimy-2,'f')
+    dfhack.screen.paintString({fg=COLOR_WHITE,bg=COLOR_BLACK},self.buttonDisplayX+1,df.global.gps.dimy-2,': scouter')
+    dfhack.screen.paintString({fg=COLOR_LIGHTRED,bg=COLOR_BLACK},self.buttonDisplayX+11,df.global.gps.dimy-2,'t')
+    dfhack.screen.paintString({fg=COLOR_WHITE,bg=COLOR_BLACK},self.buttonDisplayX+12,df.global.gps.dimy-2,': transformations')
+end
+
+function UnitListScouter:init(args)
+    self.display=false
+    self.powerLevels={}
+    for k,unitList in ipairs(args.parent.units) do
+        self.powerLevels[k]={}
+        for kk,unit in ipairs(unitList) do
+            table.insert(self.powerLevels[k],{getPowerLevel(unit)})
+        end
+    end
+end
+
 local viewscreenActions={}
 
 viewscreenActions[df.viewscreen_layer_militaryst]=function() --yeah that works
@@ -205,6 +322,11 @@ end
 viewscreenActions[df.viewscreen_dungeon_monsterstatusst]=function()
     local scouter=DungeonScouter()
     scouter:show()
+end
+
+viewscreenActions[df.viewscreen_unitlistst]=function()
+    local extraUnitListScreen=UnitListScouter{parent=dfhack.gui.getCurViewscreen()}
+    extraUnitListScreen:show()
 end
 
 dfhack.onStateChange.dwarf_scouter=function(code)

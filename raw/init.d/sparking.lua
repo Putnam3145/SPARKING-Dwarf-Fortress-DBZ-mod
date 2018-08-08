@@ -115,37 +115,16 @@ local function getSubClassValue(unit,class)
     return false
 end
 
-local function superSaiyanGodSyndrome()
-    for syn_id,syndrome in ipairs(df.global.world.raws.syndromes.all) do
-        if syndrome.syn_name == "Super Saiyan God" then return syndrome end
-    end
-    qerror("Super saiyan god syndrome not found.")
-end
-
 local function getPowerLevel(saiyan)
-    return dfhack.script_environment('dragonball/ki').get_max_ki_pre_boost(saiyan)
+    return dfhack.script_environment('dragonball/ki').get_max_ki_pre_boost(saiyan.id)
 end
 
-local function getSuperSaiyanLevel(saiyan)
-    local superSaiyanLevel=0
-    for k,syn in ipairs(saiyan.syndromes.active) do
-        local syn_name=df.syndrome.find(syn.type).syn_name
-        if syn_name=='can super saiyan blue 4' then return 7 
-            elseif syn_name=='can super saiyan blue' then superSaiyanLevel=6
-            elseif syn_name=='can super saiyan 4' then superSaiyanLevel=math.max(superSaiyanLevel,5)
-            elseif syn_name=='can legendary super saiyan' then superSaiyanLevel=math.max(superSaiyanLevel,4)
-            elseif syn_name=='can super saiyan 3' then superSaiyanLevel=math.max(superSaiyanLevel,3)
-            elseif syn_name=='can super saiyan 2' then superSaiyanLevel=math.max(superSaiyanLevel,2)
-            elseif syn_name=='can super saiyan' then superSaiyanLevel=math.max(superSaiyanLevel,1)
-        end
-    end
-    return superSaiyanLevel
-end
+local transformation=dfhack.script_environment('dragonball/transformation')
 
 local function getSuperSaiyanCount()
     local superSaiyanCount = 0
     for _,unit in ipairs(df.global.world.units.active) do
-        if dfhack.units.isCitizen(unit) and getSuperSaiyanLevel(unit)>0 then
+        if dfhack.units.isCitizen(unit) and transformation.get_transformation(unit.id,'Super Saiyan') then
             superSaiyanCount = superSaiyanCount + 1
         end
     end
@@ -164,7 +143,7 @@ local function unitWithHighestPowerLevel()
             end
         end
     end
-    return highestUnit
+    return highestUnit,highestPowerLevel
 end
 
 local function combinedSaiyanPowerLevel()
@@ -173,18 +152,6 @@ local function combinedSaiyanPowerLevel()
         if dfhack.units.isCitizen(unit) then totalPowerLevel = totalPowerLevel + getPowerLevel(unit) end
     end
     return totalPowerLevel
-end
-
-local function applySuperSaiyanGodSyndrome()
-    local syndromeUtil = require 'syndrome-util'
-    if df.global.gamemode==0 and df.creature_raw.find(df.global.ui.race_id).creature_id=='SAIYAN' then
-        if getSuperSaiyanCount()<6 then return nil end
-        local superSaiyanGod = unitWithHighestPowerLevel()
-        if superSaiyanGod and getPowerLevel(superSaiyanGod) > 10000000 and superSaiyanLevel(superSaiyanGod)<6 then 
-            dfhack.gui.showPopupAnnouncement(dfhack.gui.showPopupAnnouncement(dfhack.TranslateName(dfhack.units.getVisibleName(superSaiyanGod))..' has become a Super Saiyan God!',COLOR_CYAN,true))
-            syndromeUtil.infectWithSyndromeIfValidTarget(superSaiyanGod,superSaiyanGodSyndrome(),syndromeUtil.ResetPolicy.DoNothing)
-        end
-    end
 end
 
 local function stopMegabeastAttacks()
@@ -454,16 +421,15 @@ end
 
 dbEvents.onUnitGravelyInjured.zenkai=function(unit)
     if not unitHasCreatureClass(unit,'ZENKAI') or unitHasZenkaiAlready(unit) then return false end
-    local zenkaiMultiplier=averageTo1(averageTo1(math.sqrt((unit.body.blood_max*.75)/unit.body.blood_count)))
+    local zenkaiBoost=math.min(10,5500-unit.body.blood_count)
     local endurance=unit.body.physical_attrs.ENDURANCE
-    endurance.value=math.min(dbRound(endurance.value*zenkaiMultiplier),endurance.max_value)
+    endurance.value=math.min(dbRound(endurance.value+zenkaiBoost),endurance.max_value)
     unitHasZenkaiAlready(unit,true)
 end
 
 dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
     if df.creature_raw.find(unit.race).creature_id=='SAIYAN' then
         dfhack.run_script('dragonball/super_saiyan_trigger','-unit',unit.id)
-        applySuperSaiyanGodSyndrome()
     end
 end
 
@@ -486,7 +452,19 @@ local function renameUnitIfApplicable(unit)
     end
 end
 
+local function unitInDeadlyCombat(unit_id)
+    local unit=df.unit.find(unit_id)
+    if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return true end
+    if not unit.status.current_soul then return false end
+    for k,v in ipairs(unit.status.current_soul.personality.emotions) do
+        if (v.thought==df.unit_thought_type.Conflict or v.thought==df.unit_thought_type.JoinConflict) and math.abs(df.global.cur_year_tick-v.year_tick)<50 then return true end
+    end
+    return false
+end
+
+
 function regularUnitChecks(unit)
+    if not unit or not df.unit.find(unit.id) then return false end
     if unit.body.blood_count<unit.body.blood_max*.75 then 
         dbEvents.onUnitGravelyInjured(unit)
     end
@@ -498,44 +476,19 @@ function regularUnitChecks(unit)
         super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(unit.id)
     end
     renameUnitIfApplicable(unit)
+    transformation.transformation_ticks(unit.id)
+    if not unitInDeadlyCombat(unit.id) or unit.counters.unconscious>0 then
+        transformation.revert_to_base(unit.id)
+    end
+    if dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit) and getPowerLevel(unit)>49000000 then
+        dfhack.run_script('dragonball/whis_event')
+    end
 end
 
 local function checkEveryUnitRegularlyForEvents()
-    applySuperSaiyanGodSyndrome()
     for k,v in ipairs(df.global.world.units.active) do
-        regularUnitChecks(v)
+        dfhack.timeout((k%9)+1,'ticks',function() regularUnitChecks(v) end)
     end
-end
-
-local function forceSuperSaiyan(unit)
-    if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return end
-    local superSaiyanLevel=getSuperSaiyanLevel(unit)
-    if superSaiyanLevel==7 then
-        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan Blue 4','-resetPolicy','DoNothing','-target',unit.id)
-    elseif superSaiyanLevel==6 then
-        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan Blue','-resetPolicy','DoNothing','-target',unit.id)
-    elseif superSaiyanLevel==5 then
-        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan 4','-resetPolicy','DoNothing','-target',unit.id)
-    elseif superSaiyanLevel==4 then
-        dfhack.run_script('modtools/add-syndrome','-syndrome','Legendary Super Saiyan','-resetPolicy','DoNothing','-target',unit.id)
-    elseif superSaiyanLevel==3 then
-        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan 3','-resetPolicy','DoNothing','-target',unit.id)
-    elseif superSaiyanLevel==2 then
-        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan 2','-resetPolicy','DoNothing','-target',unit.id)
-    elseif superSaiyanLevel==1 then
-        dfhack.run_script('modtools/add-syndrome','-syndrome','Super Saiyan','-resetPolicy','DoNothing','-target',unit.id)
-    end
-    return superSaiyanLevel
-end
-
-local function unitInDeadlyCombat(unit_id)
-    local unit=df.unit.find(unit_id)
-    if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return true end
-    if not unit.status.current_soul then return false end
-    for k,v in ipairs(unit.status.current_soul.personality.emotions) do
-        if (v.thought==df.unit_thought_type.Conflict or v.thought==df.unit_thought_type.JoinConflict) and math.abs(df.global.cur_year_tick-v.year_tick)<50 then return true end
-    end
-    return false
 end
 
 local function slowEveryoneElseDown(unit_id,action,kiAmount)
@@ -594,18 +547,21 @@ local function unitHasSyndrome(u,s_name)
     return false
 end
 
+local ki=dfhack.script_environment('dragonball/ki')
+
 dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=function(unit_id,action)
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
-    local ki=dfhack.script_environment('dragonball/ki')
     local kiInvestment,kiType=ki.get_ki_investment(unit_id)
     if kiInvestment>0 then
         if action.type==df.unit_action_type.Attack and unitInDeadlyCombat(unit_id) then
-            local unit=df.unit.find(unit_id)
-            forceSuperSaiyan(unit)
             local attack=action.data.attack
-            dfhack.script_environment('modtools/putnam_events').doSomethingToEveryActionNextTick(unit_id,action.id,slowEveryoneElseDown,{kiInvestment})
+            local unit=df.unit.find(unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
+            transformation.transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
+            transformation.transform_ai(enemy.id,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
+            transformation.transformations_on_attack(unit,enemy,attack)
+            transformation.transformations_on_attacked(unit,enemy,attack)
 			enemyKiInvestment=math.max(enemyKiInvestment,1)
             local kiRatio=kiInvestment/enemyKiInvestment
             local worldKiMode=ki.getWorldKiMode()
@@ -613,18 +569,15 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
                 kiInvestment=enemyKiType<kiType-1 and kiInvestment or kiInvestment/enemyKiInvestment
             else
                 if kiType==0 and enemyKiType==1 then 
-                    if kiRatio<1000/1 then --representing ratio as ratio because ratio should be ratio. Clarity.
+                    if kiRatio<100 then
                         attack.attack_accuracy=0
                     else
-                        kiRatio=kiRatio/5000 --you need to be WAY stronger to hit them and even stronger to do any damage
+                        kiRatio=kiRatio/500 --you need to be WAY stronger to hit them and even stronger to do any damage
                     end
                 end
             end
-            attack.attack_velocity=math.min(math.floor(attack.attack_velocity*kiRatio+.5),2000000000)
-            attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*averageTo1(kiRatio,5),2000000000))
-            if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
-                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.attack_velocity/100))
-            end
+            attack.attack_velocity=math.min(math.floor(attack.attack_velocity*math.sqrt(kiRatio)+.5),2000000000)
+            attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*math.sqrt(kiRatio)+.5),2000000000)
             local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
             if caste_id=='GLACIUS' and kiInvestment<35000000 then
                 unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510 --approximately absolute zero
@@ -636,13 +589,13 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
     else
         if action.type==df.unit_action_type.Attack and unitInDeadlyCombat(unit_id) then
             local attack=action.data.attack
-            forceSuperSaiyan(df.unit.find(attack.target_unit_id))
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
+            transformation.transform_ai(unit,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
+            transformation.transform_ai(enemy,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
+            transformation.transformations_on_attack(unit,enemy,attack)
+            transformation.transformations_on_attacked(unit,enemy,attack)
             attack.attack_velocity=math.max(attack.attack_velocity-enemyKiInvestment,0)
-            if unitHasSyndrome(enemy,'Legendary Super Saiyan') then
-                ki.adjust_ki_boost_persist(attack.target_unit_id,'LEGENDARY',dbRound(attack.attack_velocity/100))
-            end
             local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
             if caste_id=='GLACIUS' then
                 unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510
@@ -820,7 +773,7 @@ function onStateChange(op)
         local putnamEvents=dfhack.script_environment('modtools/putnam_events')
         putnamEvents.enableEvent(putnamEvents.eventTypes.ON_ACTION)
 		dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
-        require('repeat-util').scheduleEvery('DBZ Event Check',50,'ticks',checkEveryUnitRegularlyForEvents)
+        require('repeat-util').scheduleEvery('DBZ Event Check',10,'ticks',checkEveryUnitRegularlyForEvents)
         eventful.enableEvent(eventful.eventType.UNIT_ATTACK,5)
         eventful.enableEvent(eventful.eventType.UNIT_DEATH,5)
         if dfhack.persistent.save({key='DRAGONBALL_WISH_COUNT'}).ints[2]==1 then require('repeat-util').scheduleEvery('shadow dragons',100,'ticks',dfhack.script_environment('dragonball/shadow_dragon').shadow_dragon_loop) end

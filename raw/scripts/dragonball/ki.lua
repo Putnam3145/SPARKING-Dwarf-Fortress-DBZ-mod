@@ -1,79 +1,15 @@
 local function unitCanUseKi(unit_id)
     local unit = df.unit.find(unit_id)
-    if not unit then return false end
-    local creature_classes=df.creature_raw.find(unit.race).caste[unit.caste].creature_class
-    for _,class in ipairs(creature_classes) do
-        if class.value=='NATURAL_KI' then return true end
-    end
-    local active_syndromes=unit.syndromes.active
-    for _,c_syndrome in ipairs(active_syndromes) do
-        local syndrome_classes=df.syndrome.find(c_syndrome.type).syn_class
-        for _,synclass in ipairs(syndrome_classes) do
-            if synclass.value == "KI" then return true end
-        end
-    end
-    return false
+    return unit and df.creature_raw.find(unit.race).caste[unit.caste].flags.CAN_LEARN
 end
 
-function adjust_ki_mult_persist(unit_id,persist_key,amount,linear)
-    if not persist_key then return false end
-    local persist=dfhack.persistent.save({key='DBZ_KI/'..persist_key..'/'..unit_id})
-    persist:save()
-    persist.ints[1]=persist.ints[1]<0 and (linear and amount+1 or amount)  or (linear and persist.ints[1]+amount or persist.ints[1]*amount)
-    persist:save()
-    return persist.ints[1]
-end
-
-function adjust_ki_boost_persist(unit_id,persist_key,amount)
-    if not persist_key then return false end
-    local persist=dfhack.persistent.save({key='DBZ_KI/'..persist_key..'/'..unit_id})
-    persist:save()
-    persist.ints[2]=persist.ints[2]<0 and amount or persist.ints[2]+amount
-    persist:save()
-    return persist.ints[2]
-end
-
-function get_ki_mult_persist(unit_id,persist_key)
-    if not persist_key then return 1 end
-    local persist=dfhack.persistent.get('DBZ_KI/'..persist_key..'/'..unit_id)
-    if persist then return persist.ints[1] else return 1 end
-end
-
-function get_ki_boost_persist(unit_id,persist_key)
-    if not persist_key then return 0 end
-    local persist=dfhack.persistent.get('DBZ_KI/'..persist_key..'/'..unit_id)
-    if persist then return persist.ints[2] else return 0 end
-end
-
-local function get_ki_boost(unit)
-    local multiplier,boost=1,0
-    local unit_id=unit.id
-    for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
-        if class.value:find('KI_MULTIPLIER_') then 
-            multiplier=multiplier*(tonumber(class.value:sub(15)) or get_ki_mult_persist(unit_id,class.value:sub(15)) or 1)
-        elseif class.value:find('KI_BOOST_') then
-            boost=boost+(tonumber(class.value:sub(10)) or get_ki_boost_persist(synclass.value:sub(10)) or 0)
-        end
-    end
-    for _,syndrome in ipairs(unit.syndromes.active) do
-        for __,synclass in ipairs(df.syndrome.find(syndrome.type).syn_class) do
-            if synclass.value:find('KI_MULTIPLIER_') then 
-                multiplier=multiplier*(tonumber(synclass.value:sub(15)) or get_ki_mult_persist(unit_id,synclass.value:sub(15)) or 1)
-            elseif synclass.value:find('KI_BOOST_') then
-                boost=boost+(tonumber(synclass.value:sub(10)) or get_ki_boost_persist(synclass.value:sub(10)) or 0)
-            end
-        end
-    end
-    multiplier=multiplier*get_ki_mult_persist(unit_id,'BASE')
-    boost=boost+get_ki_boost_persist(unit_id,'BASE')
-    return multiplier,boost
-end
+local transformation=dfhack.script_environment('dragonball/transformation')
 
 function calculate_max_ki_portions(unit)
     local willpower = (unit.status.current_soul.mental_attrs.WILLPOWER.value+unit.body.physical_attrs.TOUGHNESS.value+unit.status.current_soul.mental_attrs.PATIENCE.value)/3
     local focus = (unit.status.current_soul.mental_attrs.FOCUS.value+unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value+unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+unit.status.current_soul.mental_attrs.ANALYTICAL_ABILITY.value+unit.status.current_soul.mental_attrs.MEMORY.value)/5
     local endurance = (unit.body.physical_attrs.ENDURANCE.value+unit.body.physical_attrs.AGILITY.value+unit.body.physical_attrs.STRENGTH.value)/3
-    local multiplier,boost=get_ki_boost(unit)
+    local boost,multiplier=transformation.get_transformation_boosts(unit.id)
     return boost,willpower,focus,endurance,multiplier
 end
 
