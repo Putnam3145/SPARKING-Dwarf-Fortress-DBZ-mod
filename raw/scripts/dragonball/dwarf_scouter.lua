@@ -188,7 +188,7 @@ function DungeonScouter:onGetSelectedUnit()
    return self._native.parent.unit 
 end
 
-local UnitListScouter=defclass(UnitListScouter,TransparentScreen)
+local UnitListScouter=defclass(UnitListScouter,TransparentViewscreen)
 
 function UnitListScouter:changeMode()
     self.display=not self.display
@@ -196,16 +196,30 @@ end
 
 local TransformationList=defclass(TransformationList,require('gui.dialogs').MessageBox)
 
-function TransformationList:init(unit)
-    self.unit=unit
+function TransformationList:getWantedFrameSize()
+    local width = math.max(self.frame_width or 0, 20, #(self.frame_title or '') + 4)
+    local largest_text_width=-100000
+    for k,v in ipairs(self.subviews) do
+        local curWidth=#v.text
+        if curWidth>largest_text_width then largest_text_width=curWidth end
+    end
+    return math.max(width, largest_text_width), #self.subviews
+end
+
+function TransformationList:init(args)
+    self.unit=args.unit
     local transformation=dfhack.script_environment('dragonball/transformation')
-    local all=transformation.get_all_transformations(unit.id)
+    local all=transformation.get_all_transformations(self.unit.id)
     local render_table={}
     local widgets=require('gui.widgets')
-    for k,v in ipairs(all) do
-        table.insert(render_table,widgets.Label{view_id=v.value,text=v.value,text_pen={bg=COLOR_BLACK,fg=v.ints[1] and COLOR_LIGHTGREEN or COLOR_WHITE},frame={l=0,t=k-1},auto_height=true})
+    if not all then
+        table.insert(render_table,widgets.Label{view_id='whoops',text='No transformations known!',text_pen={bg=COLOR_BLACK,fg=COLOR_WHITE},frame={l=0,t=0},auto_height=true})
+    else
+        for k,v in ipairs(all) do
+            table.insert(render_table,widgets.Label{view_id=v.value,text=v.value,text_pen={bg=COLOR_BLACK,fg=v.ints[1] and COLOR_LIGHTGREEN or COLOR_WHITE},frame={l=0,t=k-1},auto_height=true})
+        end
     end
-    self:addviews(render_table)
+    self.subviews=render_table
 end
 
 function UnitListScouter:onInput(keys)
@@ -214,7 +228,7 @@ function UnitListScouter:onInput(keys)
     if keys.CUSTOM_F then
         self:changeMode()
     elseif keys.CUSTOM_T then
-        TransformationList(dfhack.gui.getSelectedUnit()):show()
+        TransformationList{unit=dfhack.gui.getSelectedUnit()}:show()
     end
     if keys.LEAVESCREEN or keys.UNITVIEW_RELATIONSHIPS_ZOOM then
         self:dismiss()
@@ -261,23 +275,23 @@ function UnitListScouter:onRender()
         local stupidWorkaround='                                      '
         local curPage=math.floor(parent.cursor_pos[parent.page]/self.pageY)
         for k,v in ipairs(self.powerLevels[parent.page]) do
-            if math.floor((k-1)/self.pageY)==curPage and v[0] then
+            if math.floor((k-1)/self.pageY)==curPage and v[1] then
                 local yPos=((k-1)%self.pageY)+4
-                local pRatio=v[0]/v[1]
-                local plevelcolor=v[0]==2250 and COLOR_LIGHTMAGENTA or pRatio<0.1 and COLOR_LIGHTRED or pRatio<0.35 and COLOR_RED or pRatio<0.6 and COLOR_WHITE or pRatio<0.85 and COLOR_GREEN or pRatio<1 and COLOR_LIGHTGREEN or COLOR_LIGHTCYAN
+                local pRatio=v[1]/v[2]
+                local plevelcolor=v[1]==2250 and COLOR_LIGHTMAGENTA or pRatio<0.1 and COLOR_LIGHTRED or pRatio<0.35 and COLOR_RED or pRatio<0.6 and COLOR_WHITE or pRatio<0.85 and COLOR_GREEN or pRatio<1 and COLOR_LIGHTGREEN or COLOR_LIGHTCYAN
                 if parent.cursor_pos[parent.page]==k-1 then
-                    dfhack.screen.paintString({fg=COLOR_BLACK,bg=COLOR_GREY},self.jobX,yPos,v[0]..'/'..v[1])
+                    dfhack.screen.paintString({fg=COLOR_BLACK,bg=COLOR_GREY},self.jobX,yPos,v[1]..'/'..v[2]..stupidWorkaround)
                 else
-                    dfhack.screen.paintString({fg=plevelcolor,bg=COLOR_BLACK},self.jobX,yPos,v[0])
-                    dfhack.screen.paintString({fg=COLOR_LIGHTCYAN,bg=COLOR_BLACK,self.jobX+#tostring(v[0]),yPos,'/'..v[1])
+                    dfhack.screen.paintString({fg=plevelcolor,bg=COLOR_BLACK},self.jobX,yPos,v[1])
+                    dfhack.screen.paintString({fg=COLOR_LIGHTCYAN,bg=COLOR_BLACK},self.jobX+#tostring(v[1]),yPos,'/'..v[2]..stupidWorkaround)
                 end
             end
         end
     end
     dfhack.screen.paintString({fg=COLOR_LIGHTRED,bg=COLOR_BLACK},self.buttonDisplayX,df.global.gps.dimy-2,'f')
     dfhack.screen.paintString({fg=COLOR_WHITE,bg=COLOR_BLACK},self.buttonDisplayX+1,df.global.gps.dimy-2,': scouter')
-    dfhack.screen.paintString({fg=COLOR_LIGHTRED,bg=COLOR_BLACK},self.buttonDisplayX+10,df.global.gps.dimy-2,'t')
-    dfhack.screen.paintString({fg=COLOR_WHITE,bg=COLOR_BLACK},self.buttonDisplayX+11,df.global.gps.dimy-2,': transformations')
+    dfhack.screen.paintString({fg=COLOR_LIGHTRED,bg=COLOR_BLACK},self.buttonDisplayX+11,df.global.gps.dimy-2,'t')
+    dfhack.screen.paintString({fg=COLOR_WHITE,bg=COLOR_BLACK},self.buttonDisplayX+12,df.global.gps.dimy-2,': transformations')
 end
 
 function UnitListScouter:init(args)
@@ -308,6 +322,11 @@ end
 viewscreenActions[df.viewscreen_dungeon_monsterstatusst]=function()
     local scouter=DungeonScouter()
     scouter:show()
+end
+
+viewscreenActions[df.viewscreen_unitlistst]=function()
+    local extraUnitListScreen=UnitListScouter{parent=dfhack.gui.getCurViewscreen()}
+    extraUnitListScreen:show()
 end
 
 dfhack.onStateChange.dwarf_scouter=function(code)

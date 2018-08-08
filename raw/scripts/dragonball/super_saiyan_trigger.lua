@@ -6,7 +6,7 @@ end
 local transformation=dfhack.script_environment('dragonball/transformation')
 
 local function get_S_cells(unit)
-    local persist=dfhack.persistent.save('DRAGONBALL/S_CELLS/'..unit.id)
+    local persist=dfhack.persistent.save{key='DRAGONBALL/S_CELLS/'..unit.id}
     for i=1,7 do
         if persist.ints[i]<0 then persist.ints[i]=0 end
     end
@@ -18,7 +18,7 @@ local function get_S_cells(unit)
 end
 
 function get_god_training(unit)
-    local persist=dfhack.persistent.save('DRAGONBALL/GOD_TRAINING/'..unit.id)
+    local persist=dfhack.persistent.save{key='DRAGONBALL/GOD_TRAINING/'..unit.id}
     for i=1,7 do
         if persist.ints[i]<0 then persist.ints[i]=0 end
     end
@@ -93,8 +93,9 @@ end
 
 function runSuperSaiyanChecks(unit_id)
     local unit=df.unit.find(unit_id)
-    if df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
+    if not unit or df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
     local powerLevel=getPowerLevel(unit)
+    local S_cells=get_S_cells(unit)
     local god_training=get_god_training(unit)
     if god_training.ints[1]>3000 and S_cells.ints[1]>40000 then
         if not transformation.get_transformation(unit_id,"Beyond Super Saiyan Blue") then

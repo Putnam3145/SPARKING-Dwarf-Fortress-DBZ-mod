@@ -7,7 +7,7 @@ local get_transformation=dfhack.script_environment('dragonball/transformation').
 transformations={}
 
 function get_S_cells(unit)
-    local persist=dfhack.persistent.save('DRAGONBALL/S_CELLS/'..unit.id)
+    local persist=dfhack.persistent.save{key='DRAGONBALL/S_CELLS/'..unit.id}
     for i=1,7 do
         if persist.ints[i]<0 then persist.ints[i]=0 end
     end
@@ -19,7 +19,7 @@ function get_S_cells(unit)
 end
 
 function get_god_training(unit)
-    local persist=dfhack.persistent.save('DRAGONBALL/GOD_TRAINING/'..unit.id)
+    local persist=dfhack.persistent.save{key='DRAGONBALL/GOD_TRAINING/'..unit.id}
     for i=1,7 do
         if persist.ints[i]<0 then persist.ints[i]=0 end
     end

@@ -98,9 +98,9 @@ function createArtifact(itemType,itemSubtype,name,material,entityFilter,siteFilt
     local rng=dfhack.random.new(os.time(),df.global.artifact_next_id)
     local eligibleSites={}
     for _,site in ipairs(df.global.world.world_data.sites) do
-        if site.civ_id~=-1 then
+        if site and site.civ_id~=-1 then
             local thisSiteType=df.site_type[site.type]
-            if thisSiteType and (not entityFilter or entityFilter[df.historical_entity.find(site.civ_id).entity_raw.code]) and (not siteFilter or siteFilter[thisSiteType]) then
+            if thisSiteType and ((not entityFilter) or entityFilter[df.historical_entity.find(site.civ_id).entity_raw.code]) and ((not siteFilter) or siteFilter[thisSiteType]) then
                 table.insert(eligibleSites,site.id)
             end
         end

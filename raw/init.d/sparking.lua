@@ -116,7 +116,7 @@ local function getSubClassValue(unit,class)
 end
 
 local function getPowerLevel(saiyan)
-    return dfhack.script_environment('dragonball/ki').get_max_ki_pre_boost(saiyan)
+    return dfhack.script_environment('dragonball/ki').get_max_ki_pre_boost(saiyan.id)
 end
 
 local transformation=dfhack.script_environment('dragonball/transformation')
@@ -452,11 +452,22 @@ local function renameUnitIfApplicable(unit)
     end
 end
 
+local function unitInDeadlyCombat(unit_id)
+    local unit=df.unit.find(unit_id)
+    if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return true end
+    if not unit.status.current_soul then return false end
+    for k,v in ipairs(unit.status.current_soul.personality.emotions) do
+        if (v.thought==df.unit_thought_type.Conflict or v.thought==df.unit_thought_type.JoinConflict) and math.abs(df.global.cur_year_tick-v.year_tick)<50 then return true end
+    end
+    return false
+end
+
+
 function regularUnitChecks(unit)
+    if not unit or not df.unit.find(unit.id) then return false end
     if unit.body.blood_count<unit.body.blood_max*.75 then 
         dbEvents.onUnitGravelyInjured(unit)
     end
-    local power=
     checkIfUnitStillGravelyInjuredForZenkai(unit)
     checkOverflows(unit)
     local super_saiyan_trigger=dfhack.script_environment('dragonball/super_saiyan_trigger')
@@ -465,7 +476,7 @@ function regularUnitChecks(unit)
         super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(unit.id)
     end
     renameUnitIfApplicable(unit)
-    transformation.transformation_ticks(unit)
+    transformation.transformation_ticks(unit.id)
     if not unitInDeadlyCombat(unit.id) or unit.counters.unconscious>0 then
         transformation.revert_to_base(unit.id)
     end
@@ -476,17 +487,8 @@ end
 
 local function checkEveryUnitRegularlyForEvents()
     for k,v in ipairs(df.global.world.units.active) do
-        dfhack.timeout((k%9)+1,'ticks',regularUnitChecks(v))
+        dfhack.timeout((k%9)+1,'ticks',function() regularUnitChecks(v) end)
     end
-end
-local function unitInDeadlyCombat(unit_id)
-    local unit=df.unit.find(unit_id)
-    if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return true end
-    if not unit.status.current_soul then return false end
-    for k,v in ipairs(unit.status.current_soul.personality.emotions) do
-        if (v.thought==df.unit_thought_type.Conflict or v.thought==df.unit_thought_type.JoinConflict) and math.abs(df.global.cur_year_tick-v.year_tick)<50 then return true end
-    end
-    return false
 end
 
 local function slowEveryoneElseDown(unit_id,action,kiAmount)
@@ -552,12 +554,12 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
     local kiInvestment,kiType=ki.get_ki_investment(unit_id)
     if kiInvestment>0 then
         if action.type==df.unit_action_type.Attack and unitInDeadlyCombat(unit_id) then
+            local attack=action.data.attack
             local unit=df.unit.find(unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
-            transformation.transform_ai(unit,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
-            transformation.transform_ai(enemy,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
-            local attack=action.data.attack
+            transformation.transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
+            transformation.transform_ai(enemy.id,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
             transformation.transformations_on_attack(unit,enemy,attack)
             transformation.transformations_on_attacked(unit,enemy,attack)
 			enemyKiInvestment=math.max(enemyKiInvestment,1)
@@ -574,8 +576,8 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
                     end
                 end
             end
-            attack.attack_velocity=math.min(math.floor(attack.attack_velocity*sqrt(kiRatio)+.5),2000000000)
-            attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*sqrt(kiRatio)+.5),2000000000)
+            attack.attack_velocity=math.min(math.floor(attack.attack_velocity*math.sqrt(kiRatio)+.5),2000000000)
+            attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*math.sqrt(kiRatio)+.5),2000000000)
             local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
             if caste_id=='GLACIUS' and kiInvestment<35000000 then
                 unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510 --approximately absolute zero

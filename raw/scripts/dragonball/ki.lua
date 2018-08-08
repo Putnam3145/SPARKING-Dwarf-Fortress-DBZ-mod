@@ -1,6 +1,6 @@
 local function unitCanUseKi(unit_id)
     local unit = df.unit.find(unit_id)
-    return unit and creature_classes=df.creature_raw.find(unit.race).caste[unit.caste].flags.CAN_LEARN
+    return unit and df.creature_raw.find(unit.race).caste[unit.caste].flags.CAN_LEARN
 end
 
 local transformation=dfhack.script_environment('dragonball/transformation')

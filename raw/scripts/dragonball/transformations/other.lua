@@ -1,7 +1,7 @@
 local get_transformation=dfhack.script_environment('dragonball/transformation').get_transformation
 
 function get_god_training(unit)
-    local persist=dfhack.persistent.save('DRAGONBALL/GOD_TRAINING/'..unit.id)
+    local persist=dfhack.persistent.save{key='DRAGONBALL/GOD_TRAINING/'..unit.id}
     for i=1,7 do
         if persist.ints[i]<0 then persist.ints[i]=0 end
     end
@@ -19,7 +19,7 @@ transformations['Kaioken'].ki_mult=function(unit)
 end
 
 transformations['Kaioken'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
-    unit.counters2.exhaustion=unit.counters2.exhaustion+math.floor((50000/unit.body.physical_attrs.ENDURANCE)
+    unit.counters2.exhaustion=unit.counters2.exhaustion+math.floor(50000/unit.body.physical_attrs.ENDURANCE)
 end
 
 transformations['Kaioken'].cost=function(unit) --how much cost the transformation has, in various ways, for use in AI
@@ -128,7 +128,7 @@ end
 
 transformations['Ultra Instinct "Sign"'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
     local god_training=get_god_training(unit)
-    unit.counters2.exhaustion=unit.counters2.exhaustion+math.floor((1000000/unit.body.physical_attrs.ENDURANCE)
+    unit.counters2.exhaustion=unit.counters2.exhaustion+math.floor(1000000/unit.body.physical_attrs.ENDURANCE)
     god_training.ints[2]=god_training.ints[2]+1
 end
 
@@ -167,7 +167,7 @@ transformations['Ultra Instinct'].ki_type=function(unit)
 end
 
 transformations['Ultra Instinct'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
-    unit.counters2.exhaustion=unit.counters2.exhaustion+math.floor((1000000/unit.body.physical_attrs.ENDURANCE)
+    unit.counters2.exhaustion=unit.counters2.exhaustion+math.floor(1000000/unit.body.physical_attrs.ENDURANCE)
 end
 
 transformations['Ultra Instinct'].cost=function(unit)

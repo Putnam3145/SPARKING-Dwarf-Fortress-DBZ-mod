@@ -9,6 +9,10 @@ reaction_dragonball_adv
 [REACTION:INSTANT_TRANSMISSION_INSTRUCTIONS_1]
 	[NAME:Ctrl+t for instant transmission]
 	[ADVENTURE_MODE_ENABLED]
+
+[REACTION:TRANSFORMATION_INSTRUCTIONS]
+	[NAME:Alt+t for transformations]
+	[ADVENTURE_MODE_ENABLED]
     	
 [REACTION:SPECIAL_ATTACK_CAPSULE_ADV]
 	[NAME:+-Special Attacks-+]

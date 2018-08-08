@@ -4,7 +4,7 @@ local transformations={}
 
 function load_transformation_file(file_name)
     local new_transformation_file=dfhack.script_environment(file_name)
-    for k,v in pairs(file_name.transformations) do
+    for k,v in pairs(new_transformation_file.transformations) do
         v.identifier=k
         transformations[k]=v
     end
@@ -20,6 +20,7 @@ end
 
 function get_active_transformations(unit_id)
     local persists=dfhack.persistent.get_all('DRAGONBALL/TRANSFORMATIONS/'..unit_id,true)
+    if not persists then return {} end
     local active_transformations={}
     for k,v in ipairs(persists) do
         if v.ints[1]==1 then 
@@ -63,17 +64,18 @@ end
 
 function get_transformation_boosts(unit_id)
     local boost,mult=0,1
+    local unit=df.unit.find(unit_id)
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
         local transformation_table=transformations[active_transformation.value]
-        boost=boost+transformation_table.ki_boost and transformation_table.ki_boost() or 0
-        mult=mult*transformation_table.ki_mult and transformation_table.ki_mult() or 1
+        boost=boost+(transformation_table.ki_boost and transformation_table.ki_boost(unit) or 0)
+        mult=mult*(transformation_table.ki_mult and transformation_table.ki_mult(unit) or 1)
     end
     return boost,mult
 end
 
 function add_transformation(unit_id,transformation)
-    if transformations[transformation].can_add(unit_id) and not dfhack.persistent.get('DRAGONBALL/TRANSFORMATIONS/'..unit_id..'/'..transformation) then
-        local persist=dfhack.persistent.save('DRAGONBALL/TRANSFORMATIONS/'..unit_id..'/'..transformation)
+    if transformations[transformation].can_add(df.unit.find(unit_id)) and not dfhack.persistent.get('DRAGONBALL/TRANSFORMATIONS/'..unit_id..'/'..transformation) then
+        local persist=dfhack.persistent.save{key='DRAGONBALL/TRANSFORMATIONS/'..unit_id..'/'..transformation}
         persist.value=transformation
         persist.ints[1]=0 -- 1: transformed; 0: not
         --every other int can be used, of course
@@ -84,12 +86,13 @@ function add_transformation(unit_id,transformation)
 end
 
 function transform(unit_id,transformation,transforming)
-    local persist=get_transformation(transformation)
+    local persist=get_transformation(unit_id,transformation)
+    if not persist then return false end
     local unit=df.unit.find(unit_id)
     local isAdventurer=df.global.gamemode == df.game_mode.ADVENTURE and unit == df.global.world.units.active[0]
     if transforming then
         local unit_transformations=get_active_transformations(unit_id)
-        for active_transformation in unit_transformations do
+        for active_transformation in pairs(unit_transformations) do
             local can_overlap=false
             local transformation_info=transformations[active_transformation.value]
             if transformation_info.overlaps then
@@ -106,19 +109,29 @@ function transform(unit_id,transformation,transforming)
         if (not transformations[transformation].can_transform) or transformations[transformation].can_transform(unit) then
             persist.ints[1]=1
             local _=transformations[transformation].on_transform and transformations[transformation].on_transform(unit)
-            dfhack.gui.showAutoAnnouncement(df.announcement_type.INTERACTION_ACTOR,(unit.pos,isAdventurer and "You have" or (dfhack.gui.getVisibleName(unit).." has")..transformations[transformation].transform_string(unit))
+            dfhack.gui.showAutoAnnouncement(df.announcement_type.INTERACTION_ACTOR,
+            unit.pos,
+            (isAdventurer and "You have" or (dfhack.TranslateName(dfhack.units.getVisibleName(unit)).." has"))..transformations[transformation].transform_string(unit),
+            COLOR_CYAN,
+            true,
+            unit)
         end
     else
         persist.ints[1]=0
         local _=transformations[transformation].on_untransform and transformations[transformation].on_untransform(unit)
-        dfhack.gui.showAutoAnnouncement(df.announcement_type.INTERACTION_ACTOR,(unit.pos,isAdventurer and "You have " or (dfhack.gui.getVisibleName(unit).." has "))..transformations[transformation].get_name(unit))
+        dfhack.gui.showAutoAnnouncement(df.announcement_type.INTERACTION_ACTOR,
+        unit.pos,
+        (isAdventurer and "You have " or (dfhack.TranslateName(dfhack.units.getVisibleName(unit)).." has ")).."stopped using "..transformations[transformation].get_name(unit)..'.',
+        COLOR_CYAN,
+        true,
+        unit)
     end
     persist:save()
     return persist
 end
 
 function revert_to_base(unit_id)
-    for transformation in get_active_transformations(unit_id) do
+    for transformation in pairs(get_active_transformations(unit_id)) do
         transform(unit_id,transformation,false)
     end
 end
@@ -127,6 +140,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
     local activeTransformations=get_active_transformations(unit_id)
     if kiInvestment>enemyKiInvestment then return false end --can stay in base if enemy is weaker than us
     local unitTransformation=get_all_transformations(unit_id)
+    if not unitTransformation then return false end
     local transformationInformation={}
     local unit=df.unit.find(unit_id)
     for k,transformation in pairs(unit_transformations) do
