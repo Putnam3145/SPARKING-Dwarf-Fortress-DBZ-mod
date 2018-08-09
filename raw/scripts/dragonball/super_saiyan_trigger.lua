@@ -96,17 +96,25 @@ function runSuperSaiyanChecks(unit_id)
     if not unit or df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
     local powerLevel=getPowerLevel(unit)
     local S_cells=get_S_cells(unit)
-    local god_training=get_god_training(unit)
-    if god_training.ints[1]>3000 and S_cells.ints[1]>40000 then
-        if not transformation.get_transformation(unit_id,"Beyond Super Saiyan Blue") then
-            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has learned a way to go beyond Super Saiyan Blue!',11)
+    if tranformation.get_transformation("Super Saiyan God") then
+        local god_training=get_god_training(unit)
+        if god_training.ints[1]>3000 and S_cells.ints[1]>40000 then
+            if not transformation.get_transformation(unit_id,"Beyond Super Saiyan Blue") then
+                dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has learned a way to go beyond Super Saiyan Blue!',11)
+            end
+            transformation.add_transformation(unit_id,"Beyond Super Saiyan Blue")
         end
-        transformation.add_transformation(unit_id,"Beyond Super Saiyan Blue")
-    end
-    if not transformation.get_transformation(unit_id,"Super Saiyan Blue") then
-        local can_transform=transformation.add_transformation(unit_id,"Super Saiyan Blue")
-        if can_transform then
-            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has learned to combine Super Saiyan and Super Saiyan God into Super Saiyan Blue!',11)
+        if not transformation.get_transformation(unit_id,"Super Saiyan Blue") then
+            local can_transform=transformation.add_transformation(unit_id,"Super Saiyan Blue")
+            if can_transform then
+                dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has learned to combine Super Saiyan and Super Saiyan God into Super Saiyan Blue!',11)
+            end
+        end
+        if not transformation.get_transformation(unit_id,"Super Saiyan God Super Saiyan 4") then
+            local can_transform=transformation.add_transformation(unit_id,"Super Saiyan God Super Saiyan 4")
+            if can_transform then
+                dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has learned to combine Super Saiyan 4 and Super Saiyan God into Super Saiyan God Super Saiyan 4!',11)
+            end
         end
     end
     if S_cells.ints[4]==1 and powerLevel>49000000 then
@@ -115,6 +123,7 @@ function runSuperSaiyanChecks(unit_id)
             transformation.add_transformation(unit_id,"Super Saiyan God")
         end
     end
+    --don't worry, super saiyan 4 is still implemented, just elsewhere
     if powerLevel>49000000 then
         if not transformation.get_transformation(unit_id,"Super Saiyan 3") then
             local can_transform=transformation.add_transformation(unit_id,"Super Saiyan 3")
@@ -131,6 +140,7 @@ function runSuperSaiyanChecks(unit_id)
             end
         end
     end
+    transformation.add_transformation(unit_id,'Oozaru') --lol whoops
 end
 
 if args.unit then

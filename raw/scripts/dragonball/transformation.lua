@@ -151,21 +151,22 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
     local mostPowerful
     local mostPowerfulNumber=-1000000
     for k,transformation in ipairs(transformationInformation) do
-        local transformInvestment=(kiInvestment+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
-        local benefitMult=transformation.benefit and transformation.benefit(unit)
-        local totalPower=benefitMult*transformInvestment
-        if totalPower>mostPowerfulNumber then 
-            mostPowerful=transformation
-            mostPowerfulNumber=totalPower
-        end
-        if (transformInvestment*benefitMult)>=enemyKiInvestment then --either as soon as transformation is sufficient
-            transform(unit,transformation,true)
-            return true
-        elseif k==#transformationInformation then --most powerful if desparate
-            transform(unit,mostPowerful,true)
-            return true
+        if (not transformations[transformation].can_transform) or transformations[transformation].can_transform(unit) then
+            local transformInvestment=(kiInvestment+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
+            local benefitMult=transformation.benefit and transformation.benefit(unit)
+            local totalPower=benefitMult*transformInvestment
+            if totalPower>mostPowerfulNumber then 
+                mostPowerful=transformation
+                mostPowerfulNumber=totalPower
+            end
+            if (transformInvestment*benefitMult)>=enemyKiInvestment then --either as soon as transformation is sufficient
+                transform(unit,transformation,true)
+                return true
+            end
         end
     end
+    transform(unit,mostPowerful,true)
+    return true
 end
 
 load_transformation_file('dragonball/transformations/super_saiyan')

@@ -63,6 +63,10 @@ transformations['Super Saiyan'].transform_string=function(unit)
     return ' transformed into a Super Saiyan!'
 end
 
+transformations['Super Saiyan'].overlaps=function(unit)
+    return {'Oozaru'}
+end
+
 --transformations['Super Saiyan'].on_attacked=function(attacker,defender,attack) end
 
 --transformations['Super Saiyan'].on_attack=function(attacker,defender,attack) end
@@ -192,6 +196,28 @@ transformations['Super Saiyan 3'].transform_string=function(unit)
     return ' transformed into a Super Saiyan 3!'
 end
 
+transformations['Super Saiyan 4']={}
+
+transformations['Super Saiyan 4'].ki_mult=function(unit)
+    return 4000
+end
+
+transformations['Super Saiyan 4'].on_tick=function(unit)
+    unit.counts2.exhaustion=unit.counters2.exhaustion+(50000/unit.body.physical_attrs.ENDURANCE)
+end
+
+transformations['Super Saiyan 4'].cost=function(unit)
+    return 5000/unit.body.physical_attrs.ENDURANCE
+end
+
+transformations['Super Saiyan 4'].can_add=function(unit)
+    return true
+end
+
+transformations['Super Saiyan 4'].transform_string=function(unit)
+    return ' transformed into a Super Saiyan 4!'
+end
+
 transformations['Super Saiyan God']={}
 
 transformations['Super Saiyan God'].ki_type=function(unit) 
@@ -256,6 +282,48 @@ transformations['Super Saiyan Blue'].transform_string=function(unit)
     return ' transformed into a Super Saiyan God Super Saiyan!'
 end
 
+transformations['Super Saiyan God Super Saiyan 4']={}
+
+transformations['Super Saiyan God Super Saiyan 4'].ki_mult=function(unit)
+    return 4000
+end
+
+transformations['Super Saiyan God Super Saiyan 4'].ki_type=function(unit) 
+    return 'God' 
+end
+
+transformations['Super Saiyan God Super Saiyan 4'].on_tick=function(unit)
+    local god_training=get_god_training(unit)
+    god_training.ints[1]=god_training.ints[1]+1+math.floor(unit.counters2.exhaustion/1000)
+    god_training:save()
+    S_cells.ints[1]=S_cells.ints[1]+1+math.floor(unit.counters2.exhaustion/500)
+    S_cells:save()
+    unit.counts2.exhaustion=unit.counters2.exhaustion+(2000000/unit.body.physical_attrs.ENDURANCE)
+end
+
+transformations['Super Saiyan God Super Saiyan 4'].cost=function(unit)
+    return 100000/unit.body.physical_attrs.ENDURANCE
+end
+
+transformations['Super Saiyan God Super Saiyan 4'].benefit=function(unit)
+    return 1000
+end
+
+transformations['Super Saiyan God Super Saiyan 4'].can_add=function(unit)
+    return get_transformation(unit.id,'Super Saiyan God') and get_transformation(unit.id,'Super Saiyan 4')
+end
+
+transformations['Super Saiyan God Super Saiyan 4'].overlaps={
+    'Kaioken',
+    'Kaioken x5',
+    'Kaioken x10',
+    'Kaioken x20'
+}
+
+transformations['Super Saiyan God Super Saiyan 4'].transform_string=function(unit)
+    return ' transformed into a Super Saiyan God Super Saiyan 4!'
+end
+
 transformations['Beyond Super Saiyan Blue']={}
 
 transformations['Beyond Super Saiyan Blue'].ki_mult=function(unit)
@@ -294,6 +362,6 @@ transformations['Beyond Super Saiyan Blue'].overlaps={
     'Kaioken x20'
 }
 
-transformations['Super Saiyan Blue'].transform_string=function(unit)
+transformations['Beyond Super Saiyan Blue'].transform_string=function(unit)
     return ' transformed beyond Super Saiyan God Super Saiyan!'
 end

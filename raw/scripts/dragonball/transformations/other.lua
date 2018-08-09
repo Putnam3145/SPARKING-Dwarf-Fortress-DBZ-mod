@@ -12,6 +12,49 @@ end
 
 transformations={}
 
+transformations['Oozaru']={}
+
+transformations['Oozaru'].ki_mult=function(unit)
+    return 10
+end
+
+transformations['Oozaru'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
+    local is_golden=get_transformation(unit.id,'Super Saiyan').ints[1]==1
+    if df.global.world_data.moon_phase%27~=0 then
+        local transformation_funcs=dfhack.script_environment('dragonball/transform')
+        transformation_funcs.transform(unit.id,'Oozaru',false)
+        if is_golden then
+            transformation_funcs.add_transformation(unit.id,'Super Saiyan 4')
+            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has turned into a Super Saiyan 4!',11)
+            transformation_funcs.transform(unit.id,'Super Saiyan 4',true)
+        end
+    end
+end
+
+transformations['Oozaru'].cost=function(unit) --how much cost the transformation has, in various ways, for use in AI
+    return 0
+end
+
+transformations['Oozaru'].get_name=function(unit)
+    return get_transformation(unit.id,'Super Saiyan').ints[1]==1 and 'Golden Oozaru' or 'Oozaru'
+end
+
+transformations['Oozaru'].can_add=function(unit)
+    return true
+end
+
+transformations['Oozaru'].transform_string=function(unit)
+    return ' transformed into the mighty Oozaru!'
+end
+
+transformations['Oozaru'].can_transform=function(unit)
+    return df.global.world_data.moon_phase%27==0
+end
+
+transformations['Oozaru'].overlaps=function(unit)
+    return {'Super Saiyan'}
+end
+
 transformations['Kaioken']={}
 
 transformations['Kaioken'].ki_mult=function(unit)
