@@ -131,8 +131,8 @@ function transform(unit_id,transformation,transforming)
 end
 
 function revert_to_base(unit_id)
-    for transformation in pairs(get_active_transformations(unit_id)) do
-        transform(unit_id,transformation,false)
+    for k,transformation in pairs(get_active_transformations(unit_id)) do
+        transform(unit_id,transformation.value,false)
     end
 end
 
