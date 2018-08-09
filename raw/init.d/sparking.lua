@@ -591,8 +591,8 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
             local attack=action.data.attack
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
-            transformation.transform_ai(unit,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
-            transformation.transform_ai(enemy,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
+            transformation.transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
+            transformation.transform_ai(enemy.id,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
             transformation.transformations_on_attack(unit,enemy,attack)
             transformation.transformations_on_attacked(unit,enemy,attack)
             attack.attack_velocity=math.max(attack.attack_velocity-enemyKiInvestment,0)
