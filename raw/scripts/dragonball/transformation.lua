@@ -159,7 +159,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
         transform(unit,bestSpar.identifier,true)
     else
         table.sort(transformationInformation,function(a,b) return a.cost(unit)<b.cost(unit) end)
-        local mostPowerful
+        local mostPowerful={identifier='bepis'}
         local mostPowerfulNumber=-1000000
         for k,transformation in ipairs(transformationInformation) do
             if (not transformations[transformation.identifier].can_transform) or transformations[transformation.identifier].can_transform(unit) then

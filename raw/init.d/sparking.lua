@@ -555,7 +555,7 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
     if kiInvestment>0 then
         if action.type==df.unit_action_type.Attack then
             local attack=action.data.attack
-            local sparring=attack.flags[11]
+            local sparring=attack.flags[11] or attack.flags[14] --flags[11] is "is it a tap", flags[14] is "is it sparring [for reports]"
             local unit=df.unit.find(unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
