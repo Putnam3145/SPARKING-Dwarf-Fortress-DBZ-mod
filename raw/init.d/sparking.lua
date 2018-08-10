@@ -462,6 +462,14 @@ local function unitInDeadlyCombat(unit_id)
     return false
 end
 
+local function unitInCombat(unit)
+    for k,v in pairs(unit.reports.last_year_tick) do
+        if math.abs(v-df.global.cur_year_tick)%403100<100 then
+            return true
+        end
+    end
+    return false
+end
 
 function regularUnitChecks(unit)
     if not unit or not df.unit.find(unit.id) then return false end
@@ -477,7 +485,7 @@ function regularUnitChecks(unit)
     end
     renameUnitIfApplicable(unit)
     transformation.transformation_ticks(unit.id)
-    if not unitInDeadlyCombat(unit.id) or unit.counters.unconscious>0 then
+    if not unitInCombat(unit) or unit.counters.unconscious>0 then
         transformation.revert_to_base(unit.id)
     end
     if dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit) and getPowerLevel(unit)>49000000 then
