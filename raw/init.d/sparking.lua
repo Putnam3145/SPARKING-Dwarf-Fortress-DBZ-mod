@@ -555,11 +555,12 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
     if kiInvestment>0 then
         if action.type==df.unit_action_type.Attack then
             local attack=action.data.attack
+            local sparring=attack.flags[11]
             local unit=df.unit.find(unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
-            transformation.transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,unit.flags2.sparring)
-            transformation.transform_ai(enemy.id,enemyKiInvestment,enemyKiType,kiInvestment,kiType,enemy.flags2.sparring)
+            transformation.transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,sparring)
+            transformation.transform_ai(enemy.id,enemyKiInvestment,enemyKiType,kiInvestment,kiType,sparring)
             transformation.transformations_on_attack(unit,enemy,attack)
             transformation.transformations_on_attacked(unit,enemy,attack)
 			enemyKiInvestment=math.max(enemyKiInvestment,1)
@@ -576,7 +577,7 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
                     end
                 end
             end
-            if unitInDeadlyCombat(unit_id) then
+            if not sparring then
                 attack.attack_velocity=math.min(math.floor(attack.attack_velocity*math.sqrt(kiRatio)+.5),2000000000)
                 attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*math.sqrt(kiRatio)+.5),2000000000)
                 local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id

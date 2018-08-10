@@ -176,7 +176,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
                 end
             end
         end
-        transform(unit,mostPowerful,true)
+        transform(unit,mostPowerful.identifier,true)
         return true
     end
 end

@@ -47,8 +47,16 @@ transformations['Oozaru'].transform_string=function(unit)
     return ' transformed into the mighty Oozaru!'
 end
 
+local function has_tail(unit)
+    local tail
+    for k,v in ipairs(unit.body.body_plan.body_parts) do
+        if v.token=='TAIL' then tail=k break end
+    end
+    return not unit.body.components.body_part_status[tail].missing
+end
+
 transformations['Oozaru'].can_transform=function(unit)
-    return df.global.world.world_data.moon_phase%27==0
+    return df.global.world.world_data.moon_phase%27==0 and has_tail(unit)
 end
 
 transformations['Oozaru'].overlaps=function(unit)
