@@ -176,7 +176,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
                 bestSparNumber=curSparNumber
             end
         end
-        for k,transformation in ipairs(activeTransformations) do
+        for k,transformation in ipairs(activeTransformationInformation) do
             local curSparNumber=transformation.spar and transformation.spar(unit)
             if curSparNumber and curSparNumber>bestActiveSparNumber then
                 bestActiveSparNumber=curSparNumber
@@ -200,14 +200,14 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
         end
         for k,transformation in ipairs(transformationInformation) do
             if (not transformations[transformation.identifier].can_transform) or transformations[transformation.identifier].can_transform(unit) then
-                local can_overlap=false
+                local canOverlap=false
                 for kk,overlap in ipairs(totalOverlaps) do
                     if overlap==transformation.identifier then
-                        can_overlap=true
+                        canOverlap=true
                         break
                     end
                 end
-                local transformInvestment=(baseKi+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
+                local transformInvestment=((canOverlap and kiInvestment or baseKi)+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
                 local benefitMult=transformation.benefit and transformation.benefit(unit)
                 local totalPower=benefitMult*transformInvestment
                 if totalPower>mostPowerfulNumber then 

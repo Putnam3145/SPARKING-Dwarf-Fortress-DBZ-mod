@@ -63,9 +63,7 @@ transformations['Super Saiyan'].transform_string=function(unit)
     return ' transformed into a Super Saiyan!'
 end
 
-transformations['Super Saiyan'].overlaps=function(unit)
-    return {'Oozaru'}
-end
+transformations['Super Saiyan'].overlaps={'Oozaru'}
 
 transformations['Super Saiyan'].spar=function(unit)
     return 1
