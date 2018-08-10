@@ -216,7 +216,7 @@ function TransformationList:init(args)
         table.insert(render_table,widgets.Label{view_id='whoops',text='No transformations known!',text_pen={bg=COLOR_BLACK,fg=COLOR_WHITE},frame={l=0,t=0},auto_height=true})
     else
         for k,v in ipairs(all) do
-            table.insert(render_table,widgets.Label{view_id=v.value,text=v.value,text_pen={bg=COLOR_BLACK,fg=v.ints[1] and COLOR_LIGHTGREEN or COLOR_WHITE},frame={l=0,t=k-1},auto_height=true})
+            table.insert(render_table,widgets.Label{view_id=v.value,text=v.value,text_pen={bg=COLOR_BLACK,fg=v.ints[1]==1 and COLOR_LIGHTGREEN or COLOR_WHITE},frame={l=0,t=k-1},auto_height=true})
         end
     end
     self.subviews=render_table
