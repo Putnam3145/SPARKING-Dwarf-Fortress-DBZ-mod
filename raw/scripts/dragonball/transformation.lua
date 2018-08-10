@@ -156,7 +156,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
                 bestSparNumber=curSparNumber
             end
         end
-        transform(unit,bestSpar.identifier,true)
+        transform(unit_id,bestSpar.identifier,true)
     else
         table.sort(transformationInformation,function(a,b) return a.cost(unit)<b.cost(unit) end)
         local mostPowerful={identifier='bepis'}
@@ -171,12 +171,12 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
                     mostPowerfulNumber=totalPower
                 end
                 if (transformInvestment*benefitMult)>=enemyKiInvestment then --either as soon as transformation is sufficient
-                    transform(unit,transformation.identifier,true)
+                    transform(unit_id,transformation.identifier,true)
                     return true
                 end
             end
         end
-        transform(unit,mostPowerful.identifier,true)
+        transform(unit_id,mostPowerful.identifier,true)
         return true
     end
 end
