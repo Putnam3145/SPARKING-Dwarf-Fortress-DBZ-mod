@@ -93,7 +93,7 @@ function transform(unit_id,transformation,transforming)
     if transforming then
         local unit_transformations=get_active_transformations(unit_id)
         for k,active_transformation in pairs(unit_transformations) do
-            if active_transformation.identifier~=transformation then
+            if active_transformation.value~=transformation then
                 local can_overlap=false
                 local transformation_info=transformations[active_transformation.value]
                 if transformation_info.overlaps then
@@ -104,7 +104,7 @@ function transform(unit_id,transformation,transforming)
                     end
                 end
                 if not can_overlap then
-                    transform(unit_id,active_transformation.identifier,false)
+                    transform(unit_id,active_transformation.value,false)
                 end
             end
         end
