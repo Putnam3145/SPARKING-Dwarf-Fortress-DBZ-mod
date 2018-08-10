@@ -148,7 +148,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
         table.insert(transformationInformation,properTransformation)
     end
     if sparring then
-        local bestSpar,bestSparNumber=false,-10000000
+        local bestSpar,bestSparNumber={identifier='bepis'},-10000000
         for k,transformation in ipairs(transformationInformation) do
             local curSparNumber=transformation.spar and transformation.spar(unit)
             if curSparNumber and curSparNumber>bestSparNumber then
