@@ -162,7 +162,7 @@ end
 transformations['Ultra Instinct "Sign"']={}
 
 transformations['Ultra Instinct "Sign"'].ki_mult=function(unit)
-    return 100
+    return 5000
 end
 
 transformations['Ultra Instinct "Sign"'].ki_type=function(unit) 
@@ -202,7 +202,7 @@ end
 transformations['Ultra Instinct']={}
 
 transformations['Ultra Instinct'].ki_mult=function(unit)
-    return 100
+    return 5000
 end
 
 transformations['Ultra Instinct'].ki_type=function(unit) 

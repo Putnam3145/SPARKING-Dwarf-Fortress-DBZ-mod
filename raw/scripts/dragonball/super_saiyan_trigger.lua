@@ -75,10 +75,10 @@ function runSuperSaiyanChecksExtremeEmotion(unit_id)
             end
         end
     end
-    if powerLevel>4000000 and unit.status.current_soul.personality.traits.ANGER_PROPENSITY>=90 and unit.status.current_soul.personality.traits.HATE_PROPENSITY>=60 then
-        if not transformation.get_transformation(unit_id,"Berserker Super Saiyan") then
-            transformation.add_transformation(unit_id,"Berserker Super Saiyan")
-            transformation.transform(unit_id,"Berserker Super Saiyan",true)
+    if powerLevel>100000 and unit.status.current_soul.personality.traits.ANGER_PROPENSITY>=90 and unit.status.current_soul.personality.traits.HATE_PROPENSITY>=60 then
+        if not transformation.get_transformation(unit_id,"Legendary Super Saiyan") then
+            transformation.add_transformation(unit_id,"Legendary Super Saiyan")
+            transformation.transform(unit_id,"Legendary Super Saiyan",true)
             dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has transformed into the Legendary Super Saiyan in a bout of extreme emotion!',11)
         end
     end
