@@ -34,7 +34,7 @@ function get_active_transformations(unit_id)
     return active_transformations
 end
 
-function get_inactive_transformations()
+function get_inactive_transformations(unit_id)
     local persists=get_all_transformations(unit_id)
     if not persists then return {} end
     local inactive_transformations={}
@@ -151,13 +151,12 @@ function revert_to_base(unit_id)
 end
 
 function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,sparring)
-    local activeTransformations=get_active_transformations(unit_id)
     if kiInvestment>enemyKiInvestment then return false end --can stay in base if enemy is weaker than us
     local unitTransformation=get_inactive_transformations(unit_id)
     if not unitTransformation then return false end
     local transformationInformation={}
     local unit=df.unit.find(unit_id)
-    for k,transformation in pairs(unitTransformation) do --how the hell?
+    for k,transformation in pairs(unitTransformation) do
         local properTransformation=transformations[transformation.value]
         table.insert(transformationInformation,properTransformation)
     end
