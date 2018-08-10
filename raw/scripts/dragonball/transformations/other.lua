@@ -59,9 +59,7 @@ transformations['Oozaru'].can_transform=function(unit)
     return df.global.world.world_data.moon_phase%27==0 and has_tail(unit)
 end
 
-transformations['Oozaru'].overlaps=function(unit)
-    return {'Super Saiyan'}
-end
+transformations['Oozaru'].overlaps={'Super Saiyan'}
 
 transformations['Kaioken']={}
 
