@@ -18,8 +18,12 @@ function get_transformation(unit_id,transformation,force)
     end
 end
 
+function get_all_transformations(unit_id)
+    return dfhack.persistent.get_all('DRAGONBALL/TRANSFORMATIONS/'..unit_id,true)
+end
+
 function get_active_transformations(unit_id)
-    local persists=dfhack.persistent.get_all('DRAGONBALL/TRANSFORMATIONS/'..unit_id,true)
+    local persists=get_all_transformations(unit_id)
     if not persists then return {} end
     local active_transformations={}
     for k,v in ipairs(persists) do
@@ -30,8 +34,16 @@ function get_active_transformations(unit_id)
     return active_transformations
 end
 
-function get_all_transformations(unit_id)
-    return dfhack.persistent.get_all('DRAGONBALL/TRANSFORMATIONS/'..unit_id,true)
+function get_inactive_transformations()
+    local persists=get_all_transformations(unit_id)
+    if not persists then return {} end
+    local inactive_transformations={}
+    for k,v in ipairs(persists) do
+        if v.ints[1]==0 then 
+            table.insert(inactive_transformations,v)
+        end
+    end
+    return inactive_transformations
 end
 
 function transformation_tick(unit_id)
@@ -141,7 +153,7 @@ end
 function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,sparring)
     local activeTransformations=get_active_transformations(unit_id)
     if kiInvestment>enemyKiInvestment then return false end --can stay in base if enemy is weaker than us
-    local unitTransformation=get_all_transformations(unit_id)
+    local unitTransformation=get_inactive_transformations(unit_id)
     if not unitTransformation then return false end
     local transformationInformation={}
     local unit=df.unit.find(unit_id)
