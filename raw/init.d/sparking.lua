@@ -593,6 +593,7 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
         if action.type==df.unit_action_type.Attack then
             local attack=action.data.attack
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
+            local unit=df.unit.find(unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
             transformation.transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
             transformation.transform_ai(enemy.id,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
