@@ -154,13 +154,20 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
     if kiInvestment>enemyKiInvestment then return false end --can stay in base if enemy is weaker than us
     local unitTransformation=get_inactive_transformations(unit_id)
     if not unitTransformation then return false end
+    local activeTransformations=get_active_transformations(unit_id)
     local transformationInformation={}
+    local activeTransformationInformation={}
     local unit=df.unit.find(unit_id)
     for k,transformation in pairs(unitTransformation) do
         local properTransformation=transformations[transformation.value]
         table.insert(transformationInformation,properTransformation)
     end
+    for k,transformation in pairs(activeTransformations) do
+        local properTransformation=transformations[transformation.value]
+        table.insert(activeTransformationInformation,properTransformation)
+    end
     if sparring then
+        local bestActiveSparNumber=-10000000
         local bestSpar,bestSparNumber={identifier='bepis'},-10000000
         for k,transformation in ipairs(transformationInformation) do
             local curSparNumber=transformation.spar and transformation.spar(unit)
@@ -169,14 +176,38 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
                 bestSparNumber=curSparNumber
             end
         end
-        transform(unit_id,bestSpar.identifier,true)
+        for k,transformation in ipairs(activeTransformations) do
+            local curSparNumber=transformation.spar and transformation.spar(unit)
+            if curSparNumber and curSparNumber>bestActiveSparNumber then
+                bestActiveSparNumber=curSparNumber
+            end
+        end
+        if bestSparNumber>bestActiveSparNumber then
+            transform(unit_id,bestSpar.identifier,true)
+        end
     else
         table.sort(transformationInformation,function(a,b) return a.cost(unit)<b.cost(unit) end)
         local mostPowerful={identifier='bepis'}
         local mostPowerfulNumber=-1000000
+        local baseKi=dfhack.script_environment("dragonball/ki").get_max_ki_pre_boost(unit_id)
+        local totalOverlaps={}
+        for k,transformation in ipairs(activeTransformations) do
+            if transformation.overlaps then
+                for k,v in ipairs(transformation.overlaps) do
+                    table.insert(totalOverlaps,v)
+                end
+            end
+        end
         for k,transformation in ipairs(transformationInformation) do
             if (not transformations[transformation.identifier].can_transform) or transformations[transformation.identifier].can_transform(unit) then
-                local transformInvestment=(kiInvestment+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
+                local can_overlap=false
+                for kk,overlap in ipairs(totalOverlaps) do
+                    if overlap==transformation.identifier then
+                        can_overlap=true
+                        break
+                    end
+                end
+                local transformInvestment=(baseKi+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
                 local benefitMult=transformation.benefit and transformation.benefit(unit)
                 local totalPower=benefitMult*transformInvestment
                 if totalPower>mostPowerfulNumber then 
