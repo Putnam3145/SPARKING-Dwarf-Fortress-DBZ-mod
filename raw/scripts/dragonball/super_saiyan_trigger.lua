@@ -96,7 +96,7 @@ function runSuperSaiyanChecks(unit_id)
     if not unit or df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
     local powerLevel=getPowerLevel(unit)
     local S_cells=get_S_cells(unit)
-    if tranformation.get_transformation("Super Saiyan God") then
+    if transformation.get_transformation("Super Saiyan God") then
         local god_training=get_god_training(unit)
         if god_training.ints[1]>3000 and S_cells.ints[1]>40000 then
             if not transformation.get_transformation(unit_id,"Beyond Super Saiyan Blue") then
