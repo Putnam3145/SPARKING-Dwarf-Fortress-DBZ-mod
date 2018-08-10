@@ -92,7 +92,7 @@ function transform(unit_id,transformation,transforming)
     local isAdventurer=df.global.gamemode == df.game_mode.ADVENTURE and unit == df.global.world.units.active[0]
     if transforming then
         local unit_transformations=get_active_transformations(unit_id)
-        for active_transformation in pairs(unit_transformations) do
+        for k,active_transformation in pairs(unit_transformations) do
             local can_overlap=false
             local transformation_info=transformations[active_transformation.value]
             if transformation_info.overlaps then
