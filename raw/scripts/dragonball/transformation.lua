@@ -103,7 +103,7 @@ function transform(unit_id,transformation,transforming)
                 end
             end
             if not can_overlap then
-                transform(unit_id,active_transformation,false)
+                transform(unit_id,active_transformation.identifier,false)
             end
         end
         if (not transformations[transformation].can_transform) or transformations[transformation].can_transform(unit) then
