@@ -162,7 +162,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
         local mostPowerful
         local mostPowerfulNumber=-1000000
         for k,transformation in ipairs(transformationInformation) do
-            if (not transformations[transformation].can_transform) or transformations[transformation].can_transform(unit) then
+            if (not transformations[transformation.identifier].can_transform) or transformations[transformation.identifier].can_transform(unit) then
                 local transformInvestment=(kiInvestment+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
                 local benefitMult=transformation.benefit and transformation.benefit(unit)
                 local totalPower=benefitMult*transformInvestment
