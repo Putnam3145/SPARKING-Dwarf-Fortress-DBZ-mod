@@ -143,7 +143,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
     if not unitTransformation then return false end
     local transformationInformation={}
     local unit=df.unit.find(unit_id)
-    for k,transformation in pairs(unit_transformations) do
+    for k,transformation in pairs(unitTransformation) do --how the hell?
         local properTransformation=transformations[transformation.value]
         table.insert(transformationInformation,properTransformation)
     end
