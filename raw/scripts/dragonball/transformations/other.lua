@@ -20,7 +20,7 @@ end
 
 transformations['Oozaru'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
     local is_golden=get_transformation(unit.id,'Super Saiyan').ints[1]==1
-    if df.global.world_data.moon_phase%27~=0 then
+    if df.global.world.world_data.moon_phase%27~=0 then
         local transformation_funcs=dfhack.script_environment('dragonball/transform')
         transformation_funcs.transform(unit.id,'Oozaru',false)
         if is_golden then
@@ -48,7 +48,7 @@ transformations['Oozaru'].transform_string=function(unit)
 end
 
 transformations['Oozaru'].can_transform=function(unit)
-    return df.global.world_data.moon_phase%27==0
+    return df.global.world.world_data.moon_phase%27==0
 end
 
 transformations['Oozaru'].overlaps=function(unit)
