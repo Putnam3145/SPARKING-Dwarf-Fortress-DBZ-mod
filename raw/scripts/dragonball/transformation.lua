@@ -208,7 +208,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
                     end
                 end
                 local transformInvestment=((canOverlap and kiInvestment or baseKi)+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
-                local benefitMult=transformation.benefit and transformation.benefit(unit)
+                local benefitMult=transformation.benefit and transformation.benefit(unit) or 1
                 local totalPower=benefitMult*transformInvestment
                 if totalPower>mostPowerfulNumber then 
                     mostPowerful=transformation
