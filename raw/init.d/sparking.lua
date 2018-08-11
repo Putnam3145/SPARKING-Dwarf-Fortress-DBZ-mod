@@ -471,6 +471,8 @@ local function unitInCombat(unit)
     return false
 end
 
+has_whis_event_called_this_round=false
+
 function regularUnitChecks(unit)
     if not unit or not df.unit.find(unit.id) then return false end
     if unit.body.blood_count<unit.body.blood_max*.75 then 
@@ -488,12 +490,14 @@ function regularUnitChecks(unit)
     if not unitInCombat(unit) or unit.counters.unconscious>0 then
         transformation.revert_to_base(unit.id)
     end
-    if dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit) and getPowerLevel(unit)>49000000 then
+    if dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit) and getPowerLevel(unit)>49000000 and not has_whis_event_called_this_round then
         dfhack.run_script('dragonball/whis_event')
+        has_whis_event_called_this_round=true
     end
 end
 
 local function checkEveryUnitRegularlyForEvents()
+    has_whis_event_called_this_round=false
     for k,v in ipairs(df.global.world.units.active) do
         dfhack.timeout((k%9)+1,'ticks',function() regularUnitChecks(v) end)
     end

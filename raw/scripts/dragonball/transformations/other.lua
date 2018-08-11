@@ -36,7 +36,7 @@ transformations['Oozaru'].cost=function(unit) --how much cost the transformation
 end
 
 transformations['Oozaru'].get_name=function(unit)
-    return get_transformation(unit.id,'Super Saiyan').ints[1]==1 and 'Golden Oozaru' or 'Oozaru'
+    return get_transformation(unit.id,'Super Saiyan') and (get_transformation(unit.id,'Super Saiyan').ints[1]==1 and 'Golden Oozaru' or 'Oozaru') or 'Oozaru'
 end
 
 transformations['Oozaru'].can_add=function(unit)

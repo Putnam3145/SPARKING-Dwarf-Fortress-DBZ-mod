@@ -86,7 +86,7 @@ function get_transformation_boosts(unit_id)
 end
 
 function add_transformation(unit_id,transformation)
-    if transformations[transformation].can_add(df.unit.find(unit_id)) and not dfhack.persistent.get('DRAGONBALL/TRANSFORMATIONS/'..unit_id..'/'..transformation) then
+    if (not transformations[transformation].can_add or transformations[transformation].can_add(df.unit.find(unit_id))) and not dfhack.persistent.get('DRAGONBALL/TRANSFORMATIONS/'..unit_id..'/'..transformation) then
         local persist=dfhack.persistent.save{key='DRAGONBALL/TRANSFORMATIONS/'..unit_id..'/'..transformation}
         persist.value=transformation
         persist.ints[1]=0 -- 1: transformed; 0: not
