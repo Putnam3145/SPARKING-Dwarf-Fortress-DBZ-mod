@@ -66,7 +66,7 @@ function runSuperSaiyanChecksExtremeEmotion(unit_id)
         dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has undergone a startling transformation! This is Super Saiyan 2, but?!',11)
         transformation.transform(unit_id,"Super Saiyan 2",true)
     end
-    if powerLevel>10000000 then
+    if powerLevel>56250000 then
         if not transformation.get_transformation(unit_id,"Super Saiyan 2") then
             local can_transform=transformation.add_transformation(unit_id,"Super Saiyan 2")
             if can_transform then
@@ -117,14 +117,14 @@ function runSuperSaiyanChecks(unit_id)
             end
         end
     end
-    if S_cells.ints[4]==1 and powerLevel>49000000 then
+    if S_cells.ints[4]==1 and powerLevel>625000000 then
         if not transformation.get_transformation(unit_id,"Super Saiyan God") then
             dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has learned to use Super Saiyan God with the help of Whis!',11)
             transformation.add_transformation(unit_id,"Super Saiyan God")
         end
     end
     --don't worry, super saiyan 4 is still implemented, just elsewhere
-    if powerLevel>49000000 then
+    if powerLevel>625000000 then --~10 years of training
         if not transformation.get_transformation(unit_id,"Super Saiyan 3") then
             local can_transform=transformation.add_transformation(unit_id,"Super Saiyan 3")
             if can_transform then
@@ -132,7 +132,7 @@ function runSuperSaiyanChecks(unit_id)
             end
         end
     end
-    if powerLevel>16000000 then
+    if powerLevel>76562500 then --calculated at ~3.5 years of training
         if not transformation.get_transformation(unit_id,"Super Saiyan 2") then
             local can_transform=transformation.add_transformation(unit_id,"Super Saiyan 2")
             if can_transform then

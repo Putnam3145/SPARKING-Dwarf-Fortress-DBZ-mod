@@ -5,6 +5,24 @@ end
 
 local transformation=dfhack.script_environment('dragonball/transformation')
 
+ki_attrs={
+    willpower={
+        coefficient=1/3,
+        phys={'TOUGHNESS'},
+        ment={'WILLPOWER','PATIENCE'}
+    },
+    focus={
+        coefficient=1/5,
+        phys={},
+        ment={'FOCUS','SPATIAL_SENSE','KINESTHETIC_SENSE','ANALYTICAL_ABILITY','MEMORY'}
+    },
+    health={
+        coefficient=1/3,
+        phys={'ENDURANCE','AGILITY','STRENGTH'}
+        ment={}
+    }
+}
+
 function calculate_max_ki_portions(unit)
     local willpower = (unit.status.current_soul.mental_attrs.WILLPOWER.value+unit.body.physical_attrs.TOUGHNESS.value+unit.status.current_soul.mental_attrs.PATIENCE.value)/3
     local focus = (unit.status.current_soul.mental_attrs.FOCUS.value+unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value+unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+unit.status.current_soul.mental_attrs.ANALYTICAL_ABILITY.value+unit.status.current_soul.mental_attrs.MEMORY.value)/5

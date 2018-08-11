@@ -135,7 +135,7 @@ function transform(unit_id,transformation,transforming)
         local _=transformations[transformation].on_untransform and transformations[transformation].on_untransform(unit)
         dfhack.gui.showAutoAnnouncement(df.announcement_type.INTERACTION_ACTOR,
         unit.pos,
-        (isAdventurer and "You have " or (dfhack.TranslateName(dfhack.units.getVisibleName(unit)).." has ")).."stopped using "..transformations[transformation].get_name(unit)..'.',
+        (isAdventurer and "You have " or (dfhack.TranslateName(dfhack.units.getVisibleName(unit)).." has ")).."stopped using "..(transformations[transformation].get_name and transformations[transformation].get_name(unit) or transformation)..'.',
         COLOR_CYAN,
         true,
         unit)

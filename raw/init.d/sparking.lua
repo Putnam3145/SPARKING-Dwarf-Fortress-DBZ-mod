@@ -342,27 +342,7 @@ end
 
 local function fixStrengthBug(unit)
     local strength = unit.body.physical_attrs.STRENGTH
-    strength.value=math.min(strength.value,1000000)
-end
-
-local function checkOverflows(unit)
-    for _,attribute in ipairs(unit.body.physical_attrs) do
-        attribute.value=fixOverflow(attribute.value)
-    end
-    for _,soul in ipairs(unit.status.souls) do --soul[0] is a pointer to the current soul
-        for _,attribute in ipairs(soul.mental_attrs) do
-            attribute.value=fixOverflow(attribute.value)
-        end
-    end
-    unit.body.blood_max=fixOverflow(unit.body.blood_max)
-    unit.body.blood_count=fixOverflow(unit.body.blood_count)
-    fixStrengthBug(unit)
-end
-
-local function fixAllOverflows()
-    for _,unit in ipairs(df.global.world.units.active) do
-        checkOverflows(unit)
-    end
+    strength.max_value=math.min(strength.max_value,1000000)
 end
 
 local projectileFunctionsImpact,projectileFunctionsMove={},{}
@@ -397,40 +377,9 @@ local function dbRound(num)
     return math.floor(num+0.5)
 end
 
-local function checkIfUnitStillGravelyInjuredForZenkai(unit)
-    if unit.body.blood_count>unit.body.blood_max*.75 then
-        dfhack.persistent.save({key='ZENKAI_'..unit.id,value='false'})
-    end
-end
-
-local function unitHasZenkaiAlready(unit,set)
-    if set then 
-        dfhack.persistent.save({key='ZENKAI_'..unit.id,value='true'})
-    else
-        if dfhack.persistent.get('ZENKAI_'..unit.id) and dfhack.persistent.get('ZENKAI_'..unit.id).value=='true' then
-            checkIfUnitStillGravelyInjuredForZenkai(unit)
-            return true
-        end
-    end
-end
-
 local function averageTo1(num,howMany)
     howMany=tonumber(howMany) or 1
     return (howMany+num)/(howMany+1)
-end
-
-dbEvents.onUnitGravelyInjured.zenkai=function(unit)
-    if not unitHasCreatureClass(unit,'ZENKAI') or unitHasZenkaiAlready(unit) then return false end
-    local zenkaiBoost=math.min(10,5500-unit.body.blood_count)
-    local endurance=unit.body.physical_attrs.ENDURANCE
-    endurance.value=math.min(dbRound(endurance.value+zenkaiBoost),endurance.max_value)
-    unitHasZenkaiAlready(unit,true)
-end
-
-dbEvents.onUnitGravelyInjured.super_saiyan=function(unit)
-    if df.creature_raw.find(unit.race).creature_id=='SAIYAN' then
-        dfhack.run_script('dragonball/super_saiyan_trigger','-unit',unit.id)
-    end
 end
 
 local function unitUndergoingSSJEmotion(unit)
@@ -452,14 +401,8 @@ local function renameUnitIfApplicable(unit)
     end
 end
 
-local function unitInDeadlyCombat(unit_id)
-    local unit=df.unit.find(unit_id)
-    if df.global.gamemode==df.game_mode.ADVENTURE and unit == df.global.world.units.active[0] then return true end
-    if not unit.status.current_soul then return false end
-    for k,v in ipairs(unit.status.current_soul.personality.emotions) do
-        if (v.thought==df.unit_thought_type.Conflict or v.thought==df.unit_thought_type.JoinConflict) and math.abs(df.global.cur_year_tick-v.year_tick)<50 then return true end
-    end
-    return false
+local function unitInDeadlyCombat(unit)
+    return math.abs(unit.reports.last_year_tick.Combat-df.global.cur_year_tick)%403100<100
 end
 
 local function unitInCombat(unit)
@@ -471,14 +414,35 @@ local function unitInCombat(unit)
     return false
 end
 
+local function doZenkai(unit)
+    local zenkai_persist=dfhack.persistent.save{key="DRAGONBALL/ZENKAI/"..unit.id}
+    if zenka_persist.ints[1]<=0 then
+        return false
+    end
+    local totalBoost=zenkai_persist.ints[1]/3
+    for ki_type,ki_table in pairs(ki.ki_attrs) do
+        local boostActual=ki_table.coefficient*totalBoost
+        for _,attribute_name in ki_table.phys do
+            local attribute=unit.body.physical_attrs[attribute_name]
+            attribute.value=math.min(attribute.max_value,dbRound(attribute.value+boostActual))
+        end
+        for _,attribute_name in ki_table.ment do
+            local attribute=unit.status.current_soul.mental_attrs[attribute_name]
+            attribute.value=math.min(attribute.max_value,dbRound(attribute.value+boostActual))
+        end
+    end
+    zenkai_persist.ints[1]=0
+    zenkai_persist:save()
+    return true
+end
+
 has_whis_event_called_this_round=false
 
 function regularUnitChecks(unit)
     if not unit or not df.unit.find(unit.id) then return false end
-    if unit.body.blood_count<unit.body.blood_max*.75 then 
-        dbEvents.onUnitGravelyInjured(unit)
+    if unitHasCreatureClass('ZENKAI') and not unitInDeadlyCombat(unit) then
+        doZenkai(unit)
     end
-    checkIfUnitStillGravelyInjuredForZenkai(unit)
     checkOverflows(unit)
     local super_saiyan_trigger=dfhack.script_environment('dragonball/super_saiyan_trigger')
     super_saiyan_trigger.runSuperSaiyanChecks(unit.id)
@@ -490,7 +454,7 @@ function regularUnitChecks(unit)
     if not unitInCombat(unit) or unit.counters.unconscious>0 then
         transformation.revert_to_base(unit.id)
     end
-    if dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit) and getPowerLevel(unit)>49000000 and not has_whis_event_called_this_round then
+    if dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit) and getPowerLevel(unit)>900000000 and not has_whis_event_called_this_round then --12 years of training, approx.
         dfhack.run_script('dragonball/whis_event')
         has_whis_event_called_this_round=true
     end
@@ -784,6 +748,30 @@ eventful.onUnitAttack.special_unit_attack_db=function(attackerId,defenderId,woun
     if caste_func then caste_func(attackerId,defenderId,woundId) end
 end
 
+local getWound(unit,woundId)
+    for k,wound in ipairs(unit.body.wounds) do
+        if wound.id==woundId then return wound end
+    end
+end
+
+eventful.onUnitAttack.zenkai=function(attackerId,defenderId,woundId)
+    local attacker=df.unit.find(attackerId)
+    local defender=df.unit.find(defender)
+    local wound=getWound(defender,woundId)
+    local zenkaiBoost=0
+    for k,v in ipairs(wound.parts) do
+        local curBoost=v.contact_area*v.cur_penetration_perc
+        curBoost=curBoost*(v.flags1.artery and 4 or 1)
+        curBoost=curBoost*(v.flags1.major_artery and 20 or 1)
+        zenkaiBoost=zenkaiBoost+curBoost
+    end
+    zenkaiBoost=zenkaiBoost*(wound.flags.mortal_wound and 10 or 1)
+    zenkaiBoost=zenkaiBoost*(wound.flags.severed_part and 10 or 1)
+    local zenkai_persist=dfhack.persistent.save{key="DRAGONBALL/ZENKAI/"..defenderId}
+    zenkai_persist.ints[1]=math.max(0,zenkai_persist.ints[1])+zenkaiBoost
+    zenkai_persist:save()
+end
+
 function onStateChange(op)
     if op==SC_MAP_LOADED or op==SC_WORLD_LOADED then
         local putnamEvents=dfhack.script_environment('modtools/putnam_events')
@@ -792,6 +780,9 @@ function onStateChange(op)
         require('repeat-util').scheduleEvery('DBZ Event Check',10,'ticks',checkEveryUnitRegularlyForEvents)
         eventful.enableEvent(eventful.eventType.UNIT_ATTACK,5)
         eventful.enableEvent(eventful.eventType.UNIT_DEATH,5)
+        for k,v in ipairs(df.global.world.units.all) do
+            fixStrengthBug(v)
+        end
         if dfhack.persistent.save({key='DRAGONBALL_WISH_COUNT'}).ints[2]==1 then require('repeat-util').scheduleEvery('shadow dragons',100,'ticks',dfhack.script_environment('dragonball/shadow_dragon').shadow_dragon_loop) end
     end
 end
