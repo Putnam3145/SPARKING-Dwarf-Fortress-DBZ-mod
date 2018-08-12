@@ -416,7 +416,7 @@ end
 
 local function doZenkai(unit)
     local zenkai_persist=dfhack.persistent.save{key="DRAGONBALL/ZENKAI/"..unit.id}
-    if zenka_persist.ints[1]<=0 then
+    if zenkai_persist.ints[1]<=0 then
         return false
     end
     local totalBoost=zenkai_persist.ints[1]/3
@@ -440,10 +440,9 @@ has_whis_event_called_this_round=false
 
 function regularUnitChecks(unit)
     if not unit or not df.unit.find(unit.id) then return false end
-    if unitHasCreatureClass('ZENKAI') and not unitInDeadlyCombat(unit) then
+    if unitHasCreatureClass(unit,'ZENKAI') and not unitInDeadlyCombat(unit) then
         doZenkai(unit)
     end
-    checkOverflows(unit)
     local super_saiyan_trigger=dfhack.script_environment('dragonball/super_saiyan_trigger')
     super_saiyan_trigger.runSuperSaiyanChecks(unit.id)
     if unitUndergoingSSJEmotion(unit) then
@@ -748,7 +747,7 @@ eventful.onUnitAttack.special_unit_attack_db=function(attackerId,defenderId,woun
     if caste_func then caste_func(attackerId,defenderId,woundId) end
 end
 
-local getWound(unit,woundId)
+local function getWound(unit,woundId)
     for k,wound in ipairs(unit.body.wounds) do
         if wound.id==woundId then return wound end
     end
@@ -760,7 +759,7 @@ eventful.onUnitAttack.zenkai=function(attackerId,defenderId,woundId)
     local wound=getWound(defender,woundId)
     local zenkaiBoost=0
     for k,v in ipairs(wound.parts) do
-        local curBoost=v.contact_area*v.cur_penetration_perc
+        local curBoost=v.contact_area*math.max(1,v.cur_penetration_perc)
         curBoost=curBoost*(v.flags1.artery and 4 or 1)
         curBoost=curBoost*(v.flags1.major_artery and 20 or 1)
         zenkaiBoost=zenkaiBoost+curBoost

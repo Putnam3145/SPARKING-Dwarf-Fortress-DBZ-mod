@@ -18,7 +18,7 @@ ki_attrs={
     },
     health={
         coefficient=1/3,
-        phys={'ENDURANCE','AGILITY','STRENGTH'}
+        phys={'ENDURANCE','AGILITY','STRENGTH'},
         ment={}
     }
 }
@@ -111,7 +111,9 @@ function getKiType(unit,totalKi)
 end
 
 function ki_func(num)
-    if num>51882 then --this is the second intersection point of the two functions
+    if num<12187 then
+        return num
+    elseif num>51882 then --this is the second intersection point of the two functions
         return (num^2)/900
     else
         return (2^(num/5000))*2250
@@ -129,9 +131,9 @@ function get_ki_investment(unit_id)
     if not unitCanUseKi(unit_id) then return 0,0 end
     local unit = df.unit.find(unit_id)
     local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
-    local genkiPerc=math.min(1,((unit.body.blood_count/unit.body.blood_max)*dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)/5)/2)
-    local yukiPerc=math.min(1,(getYukiPerc(unit)*dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5)/2)
-    local shokiPerc=math.min(1,(getShokiPerc(unit)*dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)/5)/2)
+    local genkiPerc=math.min(1,((unit.body.blood_count/unit.body.blood_max)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)+1)/5)/2)
+    local yukiPerc=math.min(1,(getYukiPerc(unit)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)+1)/5)/2)
+    local shokiPerc=math.min(1,(getShokiPerc(unit)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)+1)/5)/2)
     local boostPerc
     do
         local totalKi=yuki+shoki+genki
