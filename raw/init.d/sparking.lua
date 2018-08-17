@@ -755,8 +755,9 @@ end
 
 eventful.onUnitAttack.zenkai=function(attackerId,defenderId,woundId)
     local attacker=df.unit.find(attackerId)
-    local defender=df.unit.find(defender)
+    local defender=df.unit.find(defenderId)
     local wound=getWound(defender,woundId)
+    if not wound then return false end
     local zenkaiBoost=0
     for k,v in ipairs(wound.parts) do
         local curBoost=v.contact_area*math.max(1,v.cur_penetration_perc)
