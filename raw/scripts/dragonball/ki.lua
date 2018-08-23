@@ -23,12 +23,26 @@ ki_attrs={
     }
 }
 
+local function get_species_boosts(unit)
+    local multiplier,boost=1,0
+    local unit_id=unit.id
+    for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
+        if class.value:find('KI_MULTIPLIER_') then 
+            multiplier=multiplier*(tonumber(class.value:sub(15)) or 1)
+        elseif class.value:find('KI_BOOST_') then
+            boost=boost+(tonumber(class.value:sub(10)) or 0)
+        end
+    end
+    return boost,multiplier
+end
+
 function calculate_max_ki_portions(unit)
     local willpower = (unit.status.current_soul.mental_attrs.WILLPOWER.value+unit.body.physical_attrs.TOUGHNESS.value+unit.status.current_soul.mental_attrs.PATIENCE.value)/3
     local focus = (unit.status.current_soul.mental_attrs.FOCUS.value+unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value+unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+unit.status.current_soul.mental_attrs.ANALYTICAL_ABILITY.value+unit.status.current_soul.mental_attrs.MEMORY.value)/5
     local endurance = (unit.body.physical_attrs.ENDURANCE.value+unit.body.physical_attrs.AGILITY.value+unit.body.physical_attrs.STRENGTH.value)/3
     local boost,multiplier=transformation.get_transformation_boosts(unit.id)
-    return boost,willpower,focus,endurance,multiplier
+    local spec_boost,spec_multiplier=get_species_boosts(unit)
+    return boost+spec_boost,willpower,focus,endurance,multiplier*spec_multiplier
 end
 
 local isPositiveWillpowerEmotion={
@@ -106,14 +120,19 @@ function getKiType(unit,totalKi)
         end
         if kiType<1.6 then return 0 else return math.floor(kiType) end
     else
-        return tonumber(getSubClassValue(unit,'KI_TYPE')) or 0
+        return tonumber(getSubClassValue(unit,'KI_TYPE')) or transformation.get_ki_type(unit.id) or 0
     end
 end
 
 function ki_func(num)
+    --[[
+        linear makes it grow faster before 12187, makes the minimum much lower than the 2250 it originally was. This also mimicks the growth shown before the namek arc.
+        below and equal to 51882, it grows exponentially, mimicking the growth shown during the namek arc.
+        above 51882, it's quadratic, which is rather slow but not slow enough to be unsatisfying.
+    ]]
     if num<12187 then
         return num
-    elseif num>51882 then --this is the second intersection point of the two functions
+    elseif num>51882 then
         return (num^2)/900
     else
         return (2^(num/5000))*2250
@@ -127,11 +146,15 @@ function get_max_ki_pre_boost(unit_id)
     return math.floor(ki_func(yuki+shoki+genki)+0.5)
 end
 
+local function get_health_value(unit)
+    return (unit.body.blood_count/unit.body.blood_max)*(((-1/6000)*unit.counters2.endurance)+1)
+end
+
 function get_ki_investment(unit_id)
     if not unitCanUseKi(unit_id) then return 0,0 end
     local unit = df.unit.find(unit_id)
     local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
-    local genkiPerc=math.min(1,((unit.body.blood_count/unit.body.blood_max)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)+1)/5)/2)
+    local genkiPerc=math.min(1,(get_health_value(unit)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)+1)/5)/2)
     local yukiPerc=math.min(1,(getYukiPerc(unit)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)+1)/5)/2)
     local shokiPerc=math.min(1,(getShokiPerc(unit)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)+1)/5)/2)
     local boostPerc
