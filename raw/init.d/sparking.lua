@@ -1,3 +1,5 @@
+local ki=dfhack.script_environment('dragonball/ki')
+
 local function heal_and_revive_unit(unit) --literally just full-heal copied into a function
     if unit then
         if unit.flags1.dead then
@@ -409,7 +411,7 @@ local function unitInCombat(unit)
     for k,v in pairs(unit.reports.last_year_tick) do
         if math.abs(v-df.global.cur_year_tick)%403100<100 then
             return true
-        end
+        end 
     end
     return false
 end
@@ -521,8 +523,6 @@ local function unitHasSyndrome(u,s_name)
     end
     return false
 end
-
-local ki=dfhack.script_environment('dragonball/ki')
 
 dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=function(unit_id,action)
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
