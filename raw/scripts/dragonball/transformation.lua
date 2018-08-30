@@ -1,6 +1,6 @@
 --@ module = true
 
-local transformations={}
+transformations={}
 
 function load_transformation_file(file_name)
     local new_transformation_file=dfhack.script_environment(file_name)
@@ -74,15 +74,26 @@ function transformation_ticks(unit_id)
     end
 end
 
+function get_ki_type(unit_id)
+    local unit=df.unit.find(unit_id)
+    local max_ki_type=0
+    for k,active_transformation in pairs(get_active_transformations(unit_id)) do
+        local ki_type=active_transformation.ki_type and active_transformation.ki_type(unit)
+        if ki_type and ki_type>max_ki_type then max_ki_type=ki_type end
+    end
+    return max_ki_type
+end
+
 function get_transformation_boosts(unit_id)
-    local boost,mult=0,1
+    local boost,mult,potential_boost=0,1,0
     local unit=df.unit.find(unit_id)
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
         local transformation_table=transformations[active_transformation.value]
         boost=boost+(transformation_table.ki_boost and transformation_table.ki_boost(unit) or 0)
+        potential_boost=potential_boost+(transformation_table.potential_boost and transformation_table.potential_boost(unit) or 0)
         mult=mult*(transformation_table.ki_mult and transformation_table.ki_mult(unit) or 1)
     end
-    return boost,mult
+    return boost,mult,potential_boost
 end
 
 function add_transformation(unit_id,transformation)
@@ -151,7 +162,8 @@ function revert_to_base(unit_id)
 end
 
 function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,sparring)
-    if kiInvestment>enemyKiInvestment then return false end --can stay in base if enemy is weaker than us
+    if kiInvestment>enemyKiInvestment or (df.global.gamemode==df.game_mode.ADVENTURE and unit_id==df.global.world.units.active[0].id) then return false end
+    --can stay in base if enemy is weaker than us; adventurers are exempt
     local unitTransformation=get_inactive_transformations(unit_id)
     if not unitTransformation then return false end
     local activeTransformations=get_active_transformations(unit_id)
@@ -189,11 +201,13 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
         table.sort(transformationInformation,function(a,b) return a.cost(unit)<b.cost(unit) end)
         local mostPowerful={identifier='bepis'}
         local mostPowerfulNumber=-1000000
-        local baseKi=dfhack.script_environment("dragonball/ki").get_max_ki_pre_boost(unit_id)
+        local ki=dfhack.script_environment('dragonball/ki')
+        local baseKi=ki.get_max_ki_pre_boost(unit_id)
+        local trueBase=ki.get_true_base_ki(unit_id)
         local totalOverlaps={}
         for k,transformation in ipairs(activeTransformations) do
             if transformation.overlaps then
-                for k,v in ipairs(transformation.overlaps) do
+                for kk,v in ipairs(transformation.overlaps) do
                     table.insert(totalOverlaps,v)
                 end
             end
@@ -207,7 +221,14 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
                         break
                     end
                 end
-                local transformInvestment=((canOverlap and kiInvestment or baseKi)+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
+                local transformInvestment=canOverlap and kiInvestment or baseKi
+                local actualPotentialBoost=0
+                if transformation.potential_boost then
+                    actualPotentialBoost=ki.kiFunc(trueBase+transformation.potential_boost(unit))-ki.kiFunc(trueBase)
+                end
+                transformInvestment=transformInvestment+actualPotentialBoost
+                transformInvestment=transformInvestment+(transformation.ki_boost and transformation.ki_boost(unit) or 0)
+                transformInvestment=transformInvestment*(transformation.ki_mult and transformation.ki_mult(unit) or 1)
                 local benefitMult=transformation.benefit and transformation.benefit(unit) or 1
                 local totalPower=benefitMult*transformInvestment
                 if totalPower>mostPowerfulNumber then 
