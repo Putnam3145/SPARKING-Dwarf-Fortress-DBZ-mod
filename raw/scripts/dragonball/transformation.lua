@@ -79,7 +79,7 @@ function get_ki_type(unit_id)
     local max_ki_type=0
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
         local ki_type=active_transformation.ki_type and active_transformation.ki_type(unit)
-        if ki_type>max_ki_type then max_ki_type=ki_type end
+        if ki_type and ki_type>max_ki_type then max_ki_type=ki_type end
     end
     return max_ki_type
 end
