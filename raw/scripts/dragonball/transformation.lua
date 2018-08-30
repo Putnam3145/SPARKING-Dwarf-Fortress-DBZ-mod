@@ -162,7 +162,8 @@ function revert_to_base(unit_id)
 end
 
 function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,sparring)
-    if kiInvestment>enemyKiInvestment then return false end --can stay in base if enemy is weaker than us
+    if kiInvestment>enemyKiInvestment or (df.global.gamemode==df.game_mode.ADVENTURE and unit_id==df.global.world.units.active[0].id) then return false end
+    --can stay in base if enemy is weaker than us; adventurers are exempt
     local unitTransformation=get_inactive_transformations(unit_id)
     if not unitTransformation then return false end
     local activeTransformations=get_active_transformations(unit_id)
