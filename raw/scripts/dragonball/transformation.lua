@@ -200,11 +200,13 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
         table.sort(transformationInformation,function(a,b) return a.cost(unit)<b.cost(unit) end)
         local mostPowerful={identifier='bepis'}
         local mostPowerfulNumber=-1000000
-        local baseKi=dfhack.script_environment("dragonball/ki").get_max_ki_pre_boost(unit_id)
+        local ki=dfhack.script_environment('dragonball/ki')
+        local baseKi=ki.get_max_ki_pre_boost(unit_id)
+        local trueBase=ki.get_true_base_ki(unit_id)
         local totalOverlaps={}
         for k,transformation in ipairs(activeTransformations) do
             if transformation.overlaps then
-                for k,v in ipairs(transformation.overlaps) do
+                for kk,v in ipairs(transformation.overlaps) do
                     table.insert(totalOverlaps,v)
                 end
             end
@@ -218,7 +220,14 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
                         break
                     end
                 end
-                local transformInvestment=((canOverlap and kiInvestment or baseKi)+(transformation.ki_boost and transformation.ki_boost(unit) or 0)*(transformation.ki_mult and transformation.ki_mult(unit) or 1))
+                local transformInvestment=canOverlap and kiInvestment or baseKi
+                local actualPotentialBoost=0
+                if transformation.potential_boost then
+                    actualPotentialBoost=ki.kiFunc(trueBase+transformation.potential_boost(unit))-ki.kiFunc(trueBase)
+                end
+                transformInvestment=transformInvestment+actualPotentialBoost
+                transformInvestment=transformInvestment+(transformation.ki_boost and transformation.ki_boost(unit) or 0)
+                transformInvestment=transformInvestment*(transformation.ki_mult and transformation.ki_mult(unit) or 1)
                 local benefitMult=transformation.benefit and transformation.benefit(unit) or 1
                 local totalPower=benefitMult*transformInvestment
                 if totalPower>mostPowerfulNumber then 

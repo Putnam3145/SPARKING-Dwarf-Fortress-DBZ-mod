@@ -147,6 +147,13 @@ function get_max_ki_pre_boost(unit_id)
     return math.floor(ki_func(yuki+shoki+genki)+0.5)
 end
 
+function get_true_base_ki(unit_id)
+    if not unitCanUseKi(unit_id) then return 0 end
+    local unit=df.unit.find(unit_id)
+    local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
+    return math.floor(yuki+shoki+genki+0.5)
+end
+
 local function get_health_value(unit)
     return (unit.body.blood_count/unit.body.blood_max)*(((-1/6000)*unit.counters2.exhaustion)+1)
 end

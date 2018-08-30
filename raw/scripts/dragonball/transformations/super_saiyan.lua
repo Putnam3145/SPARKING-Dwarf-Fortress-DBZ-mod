@@ -32,23 +32,23 @@ end
 transformations['Super Saiyan']={}
 
 transformations['Super Saiyan'].potential_boost=function(unit)
-    return 314980+get_S_cells(unit).ints[1]*70 --magic number is exactly amount required to make it 50x at 3,000,000 BP
+    return 314980+get_S_cells(unit).ints[1]*0.7 --magic number is exactly amount required to make it 50x at 3,000,000 BP, 7 just looks nice
 end
 
 transformations['Super Saiyan'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
     local persist=get_S_cells(unit)
-    unit.counts2.exhaustion=unit.counters2.exhaustion+math.floor((100000/unit.body.physical_attrs.ENDURANCE)/math.min(100,math.max(1,persist.ints[1]/100))+0.5)
-    persist.ints[1]=persist.ints[1]+1+math.floor(unit.counters2.exhaustion/100)
+    unit.counts2.exhaustion=unit.counters2.exhaustion+math.floor((100000/unit.body.physical_attrs.ENDURANCE)/math.min(100,math.max(1,persist.ints[1]/10000))+0.5)
+    persist.ints[1]=persist.ints[1]+100+unit.counters2.exhaustion
     persist:save()
 end
 
 transformations['Super Saiyan'].cost=function(unit) --how much cost the transformation has, in various ways, for use in AI
-    return 0.1*math.floor((100000/unit.body.physical_attrs.ENDURANCE)/math.min(100,math.max(1,get_S_cells(unit).ints[1]/100))+0.5)
+    return 0.1*math.floor((100000/unit.body.physical_attrs.ENDURANCE)/math.min(100,math.max(1,get_S_cells(unit).ints[1]/10000))+0.5)
 end
 
 transformations['Super Saiyan'].get_name=function(unit)
     local persist=get_S_cells(unit)
-    return persist.ints[1]<10000 and 'Super Saiyan' or 'Super Saiyan Full Power'
+    return persist.ints[1]<1000000 and 'Super Saiyan' or 'Super Saiyan Full Power'
 end
 
 --units will use the transformation with the least cost unless they're up against bad odds; base form is assumed to have 0 cost, 0 benefit
@@ -81,13 +81,14 @@ transformations['Legendary Super Saiyan'].ki_mult=function(unit)
 end
 
 transformations['Legendary Super Saiyan'].potential_boost=function(unit)
-
+    local persist=get_transformation(unit.id,'Legendary Super Saiyan')
+    return 400000+persist.ints[2]
 end
 
 transformations['Legendary Super Saiyan'].on_tick=function(unit)
     local persist=get_transformation(unit.id,'Legendary Super Saiyan')
     unit.counts2.exhaustion=unit.counters2.exhaustion-10
-    persist.ints[2]=persist.ints[2]+1
+    persist.ints[2]=persist.ints[2]+10
     persist:save()
 end
 
@@ -124,14 +125,14 @@ end
 transformations['Super Saiyan 2']={}
 
 transformations['Super Saiyan 2'].potential_boost=function(unit)
-    return (transformations['Super Saiyan'].potential_boost(unit)*1.4142)+persist.ints[2]*1500
+    return (transformations['Super Saiyan'].potential_boost(unit)*1.4142)+persist.ints[2]*15
 end
 
 transformations['Super Saiyan 2'].on_tick=function(unit)
     unit.counts2.exhaustion=unit.counters2.exhaustion+(250000/unit.body.physical_attrs.ENDURANCE)
     local persist=get_S_cells(unit)
-    persist.ints[1]=persist.ints[1]+2+math.floor(unit.counters2.exhaustion/500)
-    persist.ints[2]=persist.ints[2]+1+math.floor(unit.counters2.exhaustion/1000) --literally just super saiyan 2 progress for strengthened and anger forms
+    persist.ints[1]=persist.ints[1]+200+math.floor(unit.counters2.exhaustion/5)
+    persist.ints[2]=persist.ints[2]+100+math.floor(unit.counters2.exhaustion/10) --literally just super saiyan 2 progress for strengthened and anger forms
     persist:save()
 end
 
@@ -141,7 +142,7 @@ end
 
 transformations['Super Saiyan 2'].can_add=function(unit)
     local S_cells=get_S_cells(unit).ints[1]
-    return S_cells>10000
+    return S_cells>1000000
 end
 
 transformations['Super Saiyan 2'].ki_type=function(unit) 
@@ -156,7 +157,7 @@ end
 
 transformations['Super Saiyan 2'].get_name=function(unit)
     local S_cells=get_S_cells(unit)
-    if S_cells.ints[2]>1000 then
+    if S_cells.ints[2]>100000 then
         if S_cells.ints[3]==1 then
             return 'Super Saiyan Anger'
         else
@@ -191,7 +192,7 @@ end
 
 transformations['Super Saiyan 3'].can_add=function(unit)
     local S_cells=get_S_cells(unit).ints[1]
-    return S_cells>20000
+    return S_cells>2000000
 end
 
 transformations['Super Saiyan 3'].transform_string=function(unit)
@@ -274,7 +275,7 @@ transformations['Super Saiyan Blue'].benefit=function(unit)
 end
 
 transformations['Super Saiyan Blue'].can_add=function(unit)
-    return get_transformation(unit.id,'Super Saiyan God') and (get_S_cells(unit).ints[1]>10000 or get_S_cells(unit).ints[4]==1)
+    return get_transformation(unit.id,'Super Saiyan God') and (get_S_cells(unit).ints[1]>1000000 or get_S_cells(unit).ints[4]==1)
 end
 
 
@@ -312,7 +313,7 @@ transformations['Super Saiyan God Super Saiyan 4'].on_tick=function(unit)
     local god_training=get_god_training(unit)
     god_training.ints[1]=god_training.ints[1]+1+math.floor(unit.counters2.exhaustion/1000)
     god_training:save()
-    S_cells.ints[1]=S_cells.ints[1]+1+math.floor(unit.counters2.exhaustion/500)
+    S_cells.ints[1]=S_cells.ints[1]+100+math.floor(unit.counters2.exhaustion/5)
     S_cells:save()
     unit.counts2.exhaustion=unit.counters2.exhaustion+(2000000/unit.body.physical_attrs.ENDURANCE)
 end
@@ -351,10 +352,12 @@ transformations['Beyond Super Saiyan Blue'].ki_type=function(unit)
 end
 
 transformations['Beyond Super Saiyan Blue'].on_tick=function(unit)
+    local S_cells=get_S_cells(unit)
+    local god_training=get_god_training(unit)
     god_training.ints[1]=god_training.ints[1]+1+math.floor(unit.counters2.exhaustion/1000)
     god_training:save()
-    S_cells.ints[1]=S_cells.ints[1]+2+math.floor(unit.counters2.exhaustion/250)
-    S_cells.ints[2]=S_cells.ints[2]+2+math.floor(unit.counters2.exhaustion/500)
+    S_cells.ints[1]=S_cells.ints[1]+200+math.floor(unit.counters2.exhaustion/2.5)
+    S_cells.ints[2]=S_cells.ints[2]+200+math.floor(unit.counters2.exhaustion/5)
     S_cells:save()
     unit.counts2.exhaustion=unit.counters2.exhaustion+(2000000/unit.body.physical_attrs.ENDURANCE)
 end
