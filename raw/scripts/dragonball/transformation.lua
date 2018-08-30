@@ -75,14 +75,15 @@ function transformation_ticks(unit_id)
 end
 
 function get_transformation_boosts(unit_id)
-    local boost,mult=0,1
+    local boost,mult,potential_boost=0,1,0
     local unit=df.unit.find(unit_id)
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
         local transformation_table=transformations[active_transformation.value]
         boost=boost+(transformation_table.ki_boost and transformation_table.ki_boost(unit) or 0)
+        potential_boost=potential_boost+(transformation_table.potential_boost and transformation_table.potential_boost(unit) or 0)
         mult=mult*(transformation_table.ki_mult and transformation_table.ki_mult(unit) or 1)
     end
-    return boost,mult
+    return boost,mult,potential_boost
 end
 
 function add_transformation(unit_id,transformation)

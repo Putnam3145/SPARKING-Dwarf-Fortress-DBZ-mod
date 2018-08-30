@@ -24,13 +24,14 @@ ki_attrs={
 }
 
 local function get_species_boosts(unit)
-    local multiplier,boost=1,0
-    local unit_id=unit.id
+    local multiplier,boost,potential_boost=1,0,0
     for _,class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
-        if class.value:find('KI_MULTIPLIER_') then 
+        if class.value:find('KI_MULTIPLIER_') then
             multiplier=multiplier*(tonumber(class.value:sub(15)) or 1)
         elseif class.value:find('KI_BOOST_') then
             boost=boost+(tonumber(class.value:sub(10)) or 0)
+        elseif class.value:find('KI_POTENTIAL_BOOST_') then
+            potential_boost=potential_boost+((tonumber(class.value:sub(20)) or 0))
         end
     end
     return boost,multiplier
@@ -40,9 +41,9 @@ function calculate_max_ki_portions(unit)
     local willpower = (unit.status.current_soul.mental_attrs.WILLPOWER.value+unit.body.physical_attrs.TOUGHNESS.value+unit.status.current_soul.mental_attrs.PATIENCE.value)/3
     local focus = (unit.status.current_soul.mental_attrs.FOCUS.value+unit.status.current_soul.mental_attrs.SPATIAL_SENSE.value+unit.status.current_soul.mental_attrs.KINESTHETIC_SENSE.value+unit.status.current_soul.mental_attrs.ANALYTICAL_ABILITY.value+unit.status.current_soul.mental_attrs.MEMORY.value)/5
     local endurance = (unit.body.physical_attrs.ENDURANCE.value+unit.body.physical_attrs.AGILITY.value+unit.body.physical_attrs.STRENGTH.value)/3
-    local boost,multiplier=transformation.get_transformation_boosts(unit.id)
-    local spec_boost,spec_multiplier=get_species_boosts(unit)
-    return boost+spec_boost,willpower,focus,endurance,multiplier*spec_multiplier
+    local boost,multiplier,potential_boost=transformation.get_transformation_boosts(unit.id)
+    local spec_boost,spec_multiplier,spec_potential=get_species_boosts(unit)
+    return boost+spec_boost,willpower,focus,endurance,multiplier*spec_multiplier,potential_boost+spec_potential
 end
 
 local isPositiveWillpowerEmotion={
@@ -153,7 +154,7 @@ end
 function get_ki_investment(unit_id)
     if not unitCanUseKi(unit_id) then return 0,0 end
     local unit = df.unit.find(unit_id)
-    local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
+    local boost,yuki,shoki,genki,multiplier,potential_boost=calculate_max_ki_portions(unit)
     local genkiPerc=math.min(1,(get_health_value(unit)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.MELEE_COMBAT)+1)/5)/2)
     local yukiPerc=math.min(1,(getYukiPerc(unit)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)+1)/5)/2)
     local shokiPerc=math.min(1,(getShokiPerc(unit)*(dfhack.units.getEffectiveSkill(unit,df.job_skill.DISCIPLINE)+1)/5)/2)
@@ -163,13 +164,13 @@ function get_ki_investment(unit_id)
         local genkiFraction,yukiFraction,shokiFraction=genki/totalKi,yuki/totalKi,shoki/totalKi
         boostPerc=(genkiPerc*genkiFraction)+(yukiPerc*yukiFraction)+(shokiPerc*shokiFraction)
     end
-    local totalKi=boost*boostPerc+ki_func(genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc)
+    local totalKi=boost*boostPerc+ki_func(genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc+potential_boost*boostPerc)
     return math.floor(totalKi*multiplier+.5),getKiType(unit,math.floor(totalKi*multiplier+.5))
 end
 
 function get_max_ki(unit_id)
     if not unitCanUseKi(unit_id) then return 0 end
     local unit=df.unit.find(unit_id)
-    local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
-    return math.floor((((ki_func(yuki+shoki+genki))+boost)*multiplier)+0.5)
+    local boost,yuki,shoki,genki,multiplier,potential_boost=calculate_max_ki_portions(unit)
+    return math.floor((((ki_func(yuki+shoki+genki+potential_boost))+boost)*multiplier)+0.5)
 end

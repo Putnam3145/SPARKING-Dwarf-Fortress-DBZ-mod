@@ -2,6 +2,8 @@
 
 --Not all transformation properties have to be defined, but I will do so for "Super Saiyan" as an example.    
 
+local ki=dfhack.script_environment('dragonball/ki')
+
 local get_transformation=dfhack.script_environment('dragonball/transformation').get_transformation
 
 transformations={}
@@ -29,18 +31,14 @@ end
 
 transformations['Super Saiyan']={}
 
-transformations['Super Saiyan'].ki_mult=function(unit)
-    return 50
-end
-
-transformations['Super Saiyan'].ki_boost=function(unit)
-    return math.min(10000000,2^(get_S_cells(unit).ints[1]/500))
+transformations['Super Saiyan'].potential_boost=function(unit)
+    return 314980+get_S_cells(unit).ints[1]*70 --magic number is exactly amount required to make it 50x at 3,000,000 BP
 end
 
 transformations['Super Saiyan'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
     local persist=get_S_cells(unit)
     unit.counts2.exhaustion=unit.counters2.exhaustion+math.floor((100000/unit.body.physical_attrs.ENDURANCE)/math.min(100,math.max(1,persist.ints[1]/100))+0.5)
-    persist.ints[1]=persist.ints[1]+1+math.floor(unit.counters2.exhaustion/1000)
+    persist.ints[1]=persist.ints[1]+1+math.floor(unit.counters2.exhaustion/100)
     persist:save()
 end
 
@@ -82,8 +80,8 @@ transformations['Legendary Super Saiyan'].ki_mult=function(unit)
     return 50+(persist.ints[2]/1000)
 end
 
-transformations['Legendary Super Saiyan'].ki_boost=function(unit)
-    return 0
+transformations['Legendary Super Saiyan'].potential_boost=function(unit)
+
 end
 
 transformations['Legendary Super Saiyan'].on_tick=function(unit)
@@ -125,11 +123,9 @@ end
 
 transformations['Super Saiyan 2']={}
 
-transformations['Super Saiyan 2'].ki_mult=function(unit)
-    return transformations['Super Saiyan'].ki_mult(unit)*math.min(8,2+0.004*get_S_cells(unit).ints[2])
+transformations['Super Saiyan 2'].potential_boost=function(unit)
+    return (transformations['Super Saiyan'].potential_boost(unit)*1.4142)+persist.ints[2]*1500
 end
-
-transformations['Super Saiyan 2'].ki_boost=transformations['Super Saiyan'].ki_boost
 
 transformations['Super Saiyan 2'].on_tick=function(unit)
     unit.counts2.exhaustion=unit.counters2.exhaustion+(250000/unit.body.physical_attrs.ENDURANCE)
@@ -150,7 +146,7 @@ end
 
 transformations['Super Saiyan 2'].ki_type=function(unit) 
     local S_cells=get_S_cells(unit)
-    return S_cells.ints[3]==1 and 'God'
+    return S_cells.ints[3]==1 and 1
 end
 
 transformations['Super Saiyan 2'].benefit=function(unit)
@@ -181,8 +177,8 @@ end
 
 transformations['Super Saiyan 3']={}
 
-transformations['Super Saiyan 3'].ki_mult=function(unit)
-    return transformations['Super Saiyan'].ki_mult(unit)*8
+transformations['Super Saiyan 3'].potential_boost=function(unit)
+    return transformations['Super Saiyan 2'].potential_boost(unit)*2 --square root of 4, don't worry
 end
 
 transformations['Super Saiyan 3'].on_tick=function(unit)
@@ -205,7 +201,11 @@ end
 transformations['Super Saiyan 4']={}
 
 transformations['Super Saiyan 4'].ki_mult=function(unit)
-    return 4000
+    return 10
+end
+
+transformations['Super Saiyan 4'].potential_boost=function(unit)
+    return transformations['Super Saiyan 2'].potential_boost(unit)*2
 end
 
 transformations['Super Saiyan 4'].on_tick=function(unit)
@@ -248,12 +248,12 @@ end
 
 transformations['Super Saiyan Blue']={}
 
-transformations['Super Saiyan Blue'].ki_mult=function(unit)
-    return transformations['Super Saiyan'].ki_mult(unit)
+transformations['Super Saiyan Blue'].potential_boost=function(unit)
+    return transformations['Super Saiyan'].potential_boost(unit)
 end
 
 transformations['Super Saiyan Blue'].ki_type=function(unit) 
-    return 'God' 
+    return 1
 end
 
 transformations['Super Saiyan Blue'].on_tick=function(unit)
@@ -297,11 +297,15 @@ end
 transformations['Super Saiyan God Super Saiyan 4']={}
 
 transformations['Super Saiyan God Super Saiyan 4'].ki_mult=function(unit)
-    return 4000
+    return 10
 end
 
 transformations['Super Saiyan God Super Saiyan 4'].ki_type=function(unit) 
-    return 'God' 
+    return 1
+end
+
+transformations['Super Saiyan Blue'].potential_boost=function(unit)
+    return transformations['Super Saiyan 2'].potential_boost(unit)*2
 end
 
 transformations['Super Saiyan God Super Saiyan 4'].on_tick=function(unit)
@@ -343,7 +347,7 @@ transformations['Beyond Super Saiyan Blue'].ki_mult=function(unit)
 end
 
 transformations['Beyond Super Saiyan Blue'].ki_type=function(unit) 
-    return 'God' 
+    return 1
 end
 
 transformations['Beyond Super Saiyan Blue'].on_tick=function(unit)
