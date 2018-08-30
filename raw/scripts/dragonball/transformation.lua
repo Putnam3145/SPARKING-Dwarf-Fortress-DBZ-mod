@@ -74,6 +74,16 @@ function transformation_ticks(unit_id)
     end
 end
 
+function get_ki_type(unit_id)
+    local unit=df.unit.find(unit_id)
+    local max_ki_type=0
+    for k,active_transformation in pairs(get_active_transformations(unit_id)) do
+        local ki_type=active_transformation.ki_type and active_transformation.ki_type(unit)
+        if ki_type>max_ki_type then max_ki_type=ki_type end
+    end
+    return max_ki_type
+end
+
 function get_transformation_boosts(unit_id)
     local boost,mult,potential_boost=0,1,0
     local unit=df.unit.find(unit_id)
