@@ -148,7 +148,7 @@ function get_max_ki_pre_boost(unit_id)
 end
 
 local function get_health_value(unit)
-    return (unit.body.blood_count/unit.body.blood_max)*(((-1/6000)*unit.counters2.endurance)+1)
+    return (unit.body.blood_count/unit.body.blood_max)*(((-1/6000)*unit.counters2.exhaustion)+1)
 end
 
 function get_ki_investment(unit_id)
