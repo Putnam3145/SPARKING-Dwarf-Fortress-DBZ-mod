@@ -22,6 +22,8 @@ while ki.get_max_ki(unit.id)<1000000000 do
     unit.body.physical_attrs.STRENGTH.value=unit.body.physical_attrs.STRENGTH.value+10
 end
 
+print('testing transformations...')
+
 transformation.transformations={}
 
 transformation.load_transformation_file('dragonball/transformations/super_saiyan')
@@ -41,3 +43,5 @@ for k,transformation_table in pairs(transformation.transformations) do
     end
     print('test succeded, no issues')
 end
+
+print('transformations tested.')
