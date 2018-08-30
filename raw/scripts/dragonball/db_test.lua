@@ -1,8 +1,8 @@
 local unit
 
-local ki=dragonball.script_environment('dragonball/ki')
+local ki=dfhack.script_environment('dragonball/ki')
 
-local transformation=dragonball.script_environment('dragonball/transformation')
+local transformation=dfhack.script_environment('dragonball/transformation')
 
 for k,v in ipairs(df.global.world.units.active) do
     if df.creature_raw.find(unit.race).creature_id=='SAIYAN' then unit=v end
