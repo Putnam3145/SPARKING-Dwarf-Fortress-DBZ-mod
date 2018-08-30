@@ -1,6 +1,6 @@
 --@ module = true
 
-local transformations={}
+transformations={}
 
 function load_transformation_file(file_name)
     local new_transformation_file=dfhack.script_environment(file_name)

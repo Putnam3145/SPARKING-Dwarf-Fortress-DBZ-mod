@@ -34,7 +34,7 @@ local function get_species_boosts(unit)
             potential_boost=potential_boost+((tonumber(class.value:sub(20)) or 0))
         end
     end
-    return boost,multiplier
+    return boost,multiplier,potential_boost
 end
 
 function calculate_max_ki_portions(unit)

@@ -5,7 +5,7 @@ local ki=dfhack.script_environment('dragonball/ki')
 local transformation=dfhack.script_environment('dragonball/transformation')
 
 for k,v in ipairs(df.global.world.units.active) do
-    if df.creature_raw.find(unit.race).creature_id=='SAIYAN' then unit=v end
+    if df.creature_raw.find(v.race).creature_id=='SAIYAN' then unit=v end
 end
 
 while ki.get_max_ki(unit.id)<1000000000 do
@@ -22,12 +22,22 @@ while ki.get_max_ki(unit.id)<1000000000 do
     unit.body.physical_attrs.STRENGTH.value=unit.body.physical_attrs.STRENGTH.value+10
 end
 
-for transformation_table in pairs(transformation.transformations) do
+transformation.transformations={}
+
+transformation.load_transformation_file('dragonball/transformations/super_saiyan')
+transformation.load_transformation_file('dragonball/transformations/other')
+
+for k,transformation_table in pairs(transformation.transformations) do
     local name=transformation_table.identifier
+    print('testing '..name)
     transformation.add_transformation(unit.id,name)
-    for k,v in ipairs(transformation_table) do
+    for k,v in pairs(transformation_table) do
         if type(v)=='function' then
+            print('testing function '..name..'.'..k)
             v(unit,unit,{attack_velocity=100,attack_accuracy=100})
+        else
+            print(k..' was not function, not tested, value is '..tostring(v))
         end
     end
+    print('test succeded, no issues')
 end
