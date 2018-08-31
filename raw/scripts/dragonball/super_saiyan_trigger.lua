@@ -1,6 +1,6 @@
 local utils=require('utils')
-local function getPowerLevel(unit)
-    return dfhack.script_environment("dragonball/ki").get_max_ki_pre_boost(unit.id)
+local function getPowerLevel(unit_id)
+    return dfhack.script_environment("dragonball/ki").get_max_ki_pre_boost(unit_id)
 end
 
 local transformation=dfhack.script_environment('dragonball/transformation')
@@ -36,7 +36,7 @@ local args = utils.processArgs({...}, validArgs)
 function runSuperSaiyanChecksExtremeEmotion(unit_id)
     local unit = df.unit.find(unit_id)
     if df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
-    local powerLevel=getPowerLevel(unit)
+    local powerLevel=getPowerLevel(unit_id)
     local S_cells=get_S_cells(unit)
     local god_training=get_god_training(unit)
     if god_training.ints[2]>200 then --each 1 is 10 ticks, 2000 ticks (20 seconds) seems fine, since it's a very exhausting transformation
@@ -94,7 +94,7 @@ end
 function runSuperSaiyanChecks(unit_id)
     local unit=df.unit.find(unit_id)
     if not unit or df.creature_raw.find(unit.race).creature_id~='SAIYAN' then return false end
-    local powerLevel=getPowerLevel(unit)
+    local powerLevel=getPowerLevel(unit_id)
     local S_cells=get_S_cells(unit)
     if transformation.get_transformation(unit_id,"Super Saiyan God") then
         local god_training=get_god_training(unit)
