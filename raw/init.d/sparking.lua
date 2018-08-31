@@ -1,105 +1,5 @@
 local ki=dfhack.script_environment('dragonball/ki')
 
-local function heal_and_revive_unit(unit) --literally just full-heal copied into a function
-    if unit then
-        if unit.flags1.dead then
-            --print("Resurrecting...")
-            unit.flags2.slaughter = false
-            unit.flags3.scuttle = false
-        end
-        unit.flags1.dead = false
-        unit.flags2.killed = false
-        unit.flags3.ghostly = false
-        for _,corpse in ipairs(df.global.world.items.other.CORPSE) do
-            if corpse.unit_id==unit.id then
-                corpse.flags.garbage_collect=true
-                corpse.flags.forbid=true
-                corpse.flags.hidden=true
-            end
-        end
-            --unit.unk_100 = 3
-        --print("Erasing wounds...")
-        while #unit.body.wounds > 0 do
-            unit.body.wounds:erase(#unit.body.wounds-1)
-        end
-        unit.body.wound_next_id=1
-
-        --print("Refilling blood...")
-        unit.body.blood_count=unit.body.blood_max
-
-        --print("Resetting grasp/stand status...")
-        unit.status2.limbs_stand_count=unit.status2.limbs_stand_max
-        unit.status2.limbs_grasp_count=unit.status2.limbs_grasp_max
-
-        --print("Resetting status flags...")
-        unit.flags2.has_breaks=false
-        unit.flags2.gutted=false
-        unit.flags2.circulatory_spray=false
-        unit.flags2.vision_good=true
-        unit.flags2.vision_damaged=false
-        unit.flags2.vision_missing=false
-        unit.flags2.breathing_good=true
-        unit.flags2.breathing_problem=false
-
-        unit.flags2.calculated_nerves=false
-        unit.flags2.calculated_bodyparts=false
-        unit.flags2.calculated_insulation=false
-        unit.flags3.compute_health=true
-
-        --print("Resetting counters...")
-        unit.counters.winded=0
-        unit.counters.stunned=0
-        unit.counters.unconscious=0
-        unit.counters.webbed=0
-        unit.counters.pain=0
-        unit.counters.nausea=0
-        unit.counters.dizziness=0
-
-        unit.counters2.paralysis=0
-        unit.counters2.fever=0
-        unit.counters2.exhaustion=0
-        unit.counters2.hunger_timer=0
-        unit.counters2.thirst_timer=0
-        unit.counters2.sleepiness_timer=0
-        unit.counters2.vomit_timeout=0
-
-        --print("Resetting body part status...")
-        local v=unit.body.components
-        for i=0,#v.nonsolid_remaining - 1,1 do
-            v.nonsolid_remaining[i] = 100    -- percent remaining of fluid layers (Urist Da Vinci)
-        end
-
-        v=unit.body.components
-        for i=0,#v.layer_wound_area - 1,1 do
-            v.layer_status[i].whole = 0        -- severed, leaking layers (Urist Da Vinci)
-            v.layer_wound_area[i] = 0        -- wound contact areas (Urist Da Vinci)
-            v.layer_cut_fraction[i] = 0        -- 100*surface percentage of cuts/fractures on the body part layer (Urist Da Vinci)
-            v.layer_dent_fraction[i] = 0        -- 100*surface percentage of dents on the body part layer (Urist Da Vinci)
-            v.layer_effect_fraction[i] = 0        -- 100*surface percentage of "effects" on the body part layer (Urist Da Vinci)
-        end
-
-        v=unit.body.components.body_part_status
-        for i=0,#v-1,1 do
-            v[i].on_fire = false
-            v[i].missing = false
-            v[i].organ_loss = false
-            v[i].organ_damage = false
-            v[i].muscle_loss = false
-            v[i].muscle_damage = false
-            v[i].bone_loss = false
-            v[i].bone_damage = false
-            v[i].skin_damage = false
-            v[i].motor_nerve_severed = false
-            v[i].sensory_nerve_severed = false
-        end
-
-        if unit.job.current_job and unit.job.current_job.job_type == df.job_type.Rest then
-            --print("Wake from rest -> clean self...")
-            unit.job.current_job = df.job_type.CleanSelf
-        end
-    end
-end
-
 local function unitHasCreatureClass(unit,class)
     for _,c_class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
         if c_class.value == class then return true end
@@ -459,6 +359,9 @@ function regularUnitChecks(unit)
         dfhack.run_script('dragonball/whis_event')
         has_whis_event_called_this_round=true
     end
+    if dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..unit_id) then
+        dfhack.run_script('full-heal','-unit',unit_id,'-r')
+    end
 end
 
 local function checkEveryUnitRegularlyForEvents()
@@ -509,7 +412,6 @@ local function slowEveryoneElseDown(unit_id,action,kiAmount)
             data.suckblood.timer=math.min(dbRound(data.suckblood.timer*delay),200)        
         end
     }
-    local ki=dfhack.script_environment('dragonball/ki')
     local unit_action_type=df.unit_action_type
     local thisAmount=ki.get_ki_investment(unit_id)
     local thisDelay=kiAmount/thisAmount
@@ -699,7 +601,7 @@ end
 
 eventful.onUnitDeath.immortal_db=function(unit_id)
     if dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..unit_id) then
-        heal_and_revive_unit(df.unit.find(unit_id))
+        dfhack.run_script('full-heal','-unit',unit_id,'-r')
     end
 end
 
@@ -707,12 +609,14 @@ local special_unit_death_classes={}
 
 special_unit_death_classes['HADES']=function(unit_id)
     local rng=dfhack.random.new()
-    if rng:random(5)~=0 then heal_and_revive_unit(df.unit.find(unit_id)) end
+    if rng:random(5)~=0 then dfhack.run_script('full-heal','-unit',unit_id,'-r')
+    end
 end
 
 special_unit_death_classes['KRONOS']=function(unit_id)
     local rng=dfhack.random.new()
-    if rng:random(4)~=0 then heal_and_revive_unit(df.unit.find(unit_id)) end
+    if rng:random(4)~=0 then dfhack.run_script('full-heal','-unit',unit_id,'-r')
+    end
 end
 
 eventful.onUnitDeath.special_unit_death_db=function(unit_id)
@@ -729,15 +633,15 @@ special_unit_attack_castes={}
 special_unit_attack_castes['GERO']=function(attackerId,defenderId,woundId)
     local defender=df.unit.find(defenderId)
     local attacker=df.unit.find(attackerId)
-    defender.counters2.exhaustion=defender.counters2.exhaustion+100
-    attacker.counters2.exhaustion=math.max(attacker.counters2.exhaustion-100,0)
+    defender.counters2.exhaustion=defender.counters2.exhaustion+1000
+    attacker.counters2.exhaustion=math.max(attacker.counters2.exhaustion-1000,0)
 end
 
 special_unit_attack_castes['RAPTOR']=function(attackerId,defenderId,woundId)
     local defender=df.unit.find(defenderId)
     local attacker=df.unit.find(attackerId)
-    defender.counters2.exhaustion=defender.counters2.exhaustion+200
-    attacker.counters2.exhaustion=math.max(attacker.counters2.exhaustion-200,0)
+    defender.counters2.exhaustion=defender.counters2.exhaustion+2000
+    attacker.counters2.exhaustion=math.max(attacker.counters2.exhaustion-2000,0)
 end
 
 eventful.onUnitAttack.special_unit_attack_db=function(attackerId,defenderId,woundId)
@@ -778,8 +682,8 @@ function onStateChange(op)
         putnamEvents.enableEvent(putnamEvents.eventTypes.ON_ACTION)
 		dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
         require('repeat-util').scheduleEvery('DBZ Event Check',10,'ticks',checkEveryUnitRegularlyForEvents)
-        eventful.enableEvent(eventful.eventType.UNIT_ATTACK,5)
-        eventful.enableEvent(eventful.eventType.UNIT_DEATH,5)
+        eventful.enableEvent(eventful.eventType.UNIT_ATTACK,2)
+        eventful.enableEvent(eventful.eventType.UNIT_DEATH,2)
         for k,v in ipairs(df.global.world.units.all) do
             fixStrengthBug(v)
         end
