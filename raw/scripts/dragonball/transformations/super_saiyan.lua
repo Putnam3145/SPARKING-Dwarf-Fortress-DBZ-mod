@@ -137,7 +137,7 @@ end
 
 transformations['Super Saiyan 2'].can_add=function(unit)
     local S_cells=get_S_cells(unit).ints[1]
-    return S_cells>1000000
+    return S_cells>1000000 or (df.global.gamemode==df.game_mode.ADVENTURE and unit==df.global.world.units.active[0])
 end
 
 transformations['Super Saiyan 2'].ki_type=function(unit) 
@@ -187,7 +187,7 @@ end
 
 transformations['Super Saiyan 3'].can_add=function(unit)
     local S_cells=get_S_cells(unit).ints[1]
-    return S_cells>2000000
+    return S_cells>2000000 or (df.global.gamemode==df.game_mode.ADVENTURE and unit==df.global.world.units.active[0])
 end
 
 transformations['Super Saiyan 3'].transform_string=function(unit)
@@ -340,6 +340,10 @@ end
 
 transformations['Beyond Super Saiyan Blue']={}
 
+transformations['Beyond Super Saiyan Blue'].ki_mult=function(unit)
+    return 20
+end
+
 transformations['Beyond Super Saiyan Blue'].ki_type=function(unit) 
     return 1
 end
@@ -370,13 +374,6 @@ end
 transformations['Beyond Super Saiyan Blue'].spar=function(unit)
     return 5
 end
-
-transformations['Beyond Super Saiyan Blue'].overlaps={
-    'Kaioken',
-    'Kaioken x5',
-    'Kaioken x10',
-    'Kaioken x20'
-}
 
 transformations['Beyond Super Saiyan Blue'].transform_string=function(unit)
     return ' transformed beyond Super Saiyan God Super Saiyan!'

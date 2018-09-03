@@ -17,6 +17,17 @@ local function getSubClassValue(unit,class)
     return false
 end
 
+local function getSubClassValues(unit,class)
+    local values={}
+    for _,c_class in ipairs(df.creature_raw.find(unit.race).caste[unit.caste].creature_class) do
+        local class_value=c_class.value
+        if class_value:find('/') then
+            if class_value:sub(0,class_value:find('/')-1) == class then table.insert(values,class_value:sub(1+class_value:find('/.*'))) end
+        end
+    end
+    return #values>0 and values or false
+end
+
 local function getPowerLevel(saiyan)
     return dfhack.script_environment('dragonball/ki').get_max_ki_pre_boost(saiyan.id)
 end
@@ -218,7 +229,7 @@ local function fusion(reaction,unit,input_items,input_reagents,output_items,call
     for k,u in ipairs(df.global.world.units.active) do
         local name=dfhack.TranslateName(dfhack.units.getVisibleName(u))
         if name=="" then name="?" end
-        if (df.global.gamemode==1 and u.race==df.global.world.units.active[0].race) or (df.global.gamemode==0 and dfhack.units.isDwarf(u) and dfhack.units.isCitizen(u)) then table.insert(tbl,{name,nil,u}) end
+        if (df.global.gamemode==df.game_mode.ADVENTURE and u.race==df.global.world.units.active[0].race) or (df.global.gamemode==0 and dfhack.units.isDwarf(u) and dfhack.units.isCitizen(u)) then table.insert(tbl,{name,nil,u}) end
     end
     table.sort(tbl,function(a,b) return getPowerLevel(a[3])>getPowerLevel(b[3]) end)
     script.start(function()
@@ -244,7 +255,7 @@ end
 
 local function fixStrengthBug(unit)
     local strength = unit.body.physical_attrs.STRENGTH
-    strength.max_value=math.min(strength.max_value,1000000)
+    strength.max_value=math.min(strength.max_value,100000)
 end
 
 local projectileFunctionsImpact,projectileFunctionsMove={},{}
@@ -338,7 +349,20 @@ local function doZenkai(unit)
     return true
 end
 
+local function setUpNaturalTransformations(unit)
+    local transformations=getSubClassValues(unit,'NATURAL_TRANSFORMATION')
+    if transformations then
+        for k,v in pairs(transformations) do
+            transformation.add_transformation(unit.id,v)
+        end
+    end
+end
+
 has_whis_event_called_this_round=false
+
+local function isAdventurer(unit)
+    return (df.global.gamemode==df.game_mode.ADVENTURE and unit==df.global.world.units.active[0])
+end
 
 function regularUnitChecks(unit)
     if not unit or not df.unit.find(unit.id) then return false end
@@ -351,11 +375,13 @@ function regularUnitChecks(unit)
         super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(unit.id)
     end
     renameUnitIfApplicable(unit)
+    setUpNaturalTransformations(unit)
     transformation.transformation_ticks(unit.id)
     if not unitInCombat(unit) or unit.counters.unconscious>0 then
         transformation.revert_to_base(unit.id)
     end
-    if dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit) and getPowerLevel(unit)>900000000 and not has_whis_event_called_this_round then --12 years of training, approx.
+    --12 years of training, approx.
+    if ((dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit)) or isAdventurer(unit)) and getPowerLevel(unit)>900000000 and not has_whis_event_called_this_round then
         dfhack.run_script('dragonball/whis_event')
         has_whis_event_called_this_round=true
     end

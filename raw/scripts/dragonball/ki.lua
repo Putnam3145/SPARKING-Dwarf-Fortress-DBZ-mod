@@ -125,18 +125,28 @@ function getKiType(unit,totalKi)
     end
 end
 
-function ki_func(num)
+function ki_func(num,unit)
     --[[
         linear makes it grow faster before 12187, makes the minimum much lower than the 2250 it originally was. This also mimicks the growth shown before the namek arc.
         below and equal to 51882, it grows exponentially, mimicking the growth shown during the namek arc.
         above 51882, it's quadratic, which is rather slow but not slow enough to be unsatisfying.
     ]]
-    if num<12187 then
-        return num
-    elseif num>51882 then
-        return (num^2)/900
+    if unit and df.global.gamemode==df.game_mode.ADVENTURE and unit==df.global.world.units.active[0] then
+        if num<6093 then
+            return num*2
+        elseif num>46904 then
+            return (2^(num/2500))*2250
+        else
+            return ((num^2)/2.2)-23478
+        end
     else
-        return (2^(num/5000))*2250
+        if num<12187 then
+            return num
+        elseif num>51882 then
+            return (num^2)/900
+        else
+            return (2^(num/5000))*2250
+        end
     end
 end
 
@@ -144,7 +154,7 @@ function get_max_ki_pre_boost(unit_id)
     if not unitCanUseKi(unit_id) then return 0 end
     local unit=df.unit.find(unit_id)
     local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
-    return math.floor(ki_func(yuki+shoki+genki)+0.5)
+    return math.floor(ki_func(yuki+shoki+genki)+0.5,unit)
 end
 
 function get_true_base_ki(unit_id)
@@ -171,7 +181,7 @@ function get_ki_investment(unit_id)
         local genkiFraction,yukiFraction,shokiFraction=genki/totalKi,yuki/totalKi,shoki/totalKi
         boostPerc=(genkiPerc*genkiFraction)+(yukiPerc*yukiFraction)+(shokiPerc*shokiFraction)
     end
-    local totalKi=boost*boostPerc+ki_func(genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc+potential_boost*boostPerc)
+    local totalKi=boost*boostPerc+ki_func(genki*genkiPerc+yuki*yukiPerc+shoki*shokiPerc+potential_boost*boostPerc,unit)
     return math.floor(totalKi*multiplier+.5),getKiType(unit,math.floor(totalKi*multiplier+.5))
 end
 
@@ -179,5 +189,5 @@ function get_max_ki(unit_id)
     if not unitCanUseKi(unit_id) then return 0 end
     local unit=df.unit.find(unit_id)
     local boost,yuki,shoki,genki,multiplier,potential_boost=calculate_max_ki_portions(unit)
-    return math.floor((((ki_func(yuki+shoki+genki+potential_boost))+boost)*multiplier)+0.5)
+    return math.floor(((ki_func(yuki+shoki+genki+potential_boost,unit)+boost)*multiplier)+0.5)
 end

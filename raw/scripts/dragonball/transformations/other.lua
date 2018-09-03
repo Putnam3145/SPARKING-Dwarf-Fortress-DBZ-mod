@@ -246,3 +246,79 @@ end
 transformations['Ultra Instinct'].transform_string=function(unit)
     return ' started using Ultra Instinct!'
 end
+
+transformations['Second Form']={}
+
+transformations['Second Form'].potential_boost=function(unit)
+    return 4580 --adding this on top of the normal potential boost gets one million
+end
+
+transformations['Second Form'].cost=function(unit)
+    return 1
+end
+
+transformations['Second Form'].can_add=function(unit)
+    return true
+end
+
+transformations['Second Form'].transform_string=function(unit)
+    return ' transformed into his second form!'
+end
+
+transformations['Third Form']={}
+
+transformations['Third Form'].potential_boost=function(unit)
+    return 10000 --2000000
+end
+
+transformations['Third Form'].cost=function(unit)
+    return 2
+end
+
+transformations['Third Form'].can_add=function(unit)
+    return true
+end
+
+transformations['Third Form'].transform_string=function(unit)
+    return ' transformed into his third form!'
+end
+
+transformations['Final Form']={}
+
+transformations['Final Form'].potential_boost=function(unit)
+    return 290000 --120000000
+end
+
+transformations['Final Form'].cost=function(unit)
+    return 3
+end
+
+transformations['Final Form'].can_add=function(unit)
+    return true
+end
+
+transformations['Final Form'].transform_string=function(unit)
+    return ' transformed into his final form!'
+end
+
+transformations['Golden Form']={}
+
+transformations['Golden Form'].on_tick=function(unit) 
+    unit.counters2.exhaustion=unit.counters2.exhaustion+math.floor(1000000/unit.body.physical_attrs.ENDURANCE.value)
+end
+
+transformations['Golden Form'].potential_boost=function(unit)
+    return 30000000 --a trillion.
+end
+
+transformations['Golden Form'].cost=function(unit)
+    return 4
+end
+
+transformations['Golden Form'].can_add=function(unit)
+    return true
+end
+
+transformations['Golden Form'].transform_string=function(unit)
+    return ' transformed into his Golden form!'
+end

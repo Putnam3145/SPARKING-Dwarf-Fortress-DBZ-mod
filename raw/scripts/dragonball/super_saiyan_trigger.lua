@@ -98,7 +98,7 @@ function runSuperSaiyanChecks(unit_id)
     local S_cells=get_S_cells(unit)
     if transformation.get_transformation(unit_id,"Super Saiyan God") then
         local god_training=get_god_training(unit)
-        if god_training.ints[1]>3000 and S_cells.ints[1]>40000 then
+        if god_training.ints[1]>300000 and S_cells.ints[1]>40000 then
             if not transformation.get_transformation(unit_id,"Beyond Super Saiyan Blue") then
                 dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has learned a way to go beyond Super Saiyan Blue!',11)
             end

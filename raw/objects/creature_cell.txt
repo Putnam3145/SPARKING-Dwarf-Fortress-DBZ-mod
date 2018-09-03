@@ -26,7 +26,7 @@ creature_cell
 		[TISSUE_LAYER:BY_CATEGORY:FINGER:NAIL:FRONT]
 		[TISSUE_LAYER:BY_CATEGORY:TOE:NAIL:FRONT]
         [CREATURE_CLASS:NATURAL_KI]
-        [CREATURE_CLASS:KI_BOOST_203000000] Between SSJ and SSJ2 tier
+        [CREATURE_CLASS:KI_BOOST_203000000] Between SSJ and SSJ2 tier, no potential boost cause "perfect", so won't gain much
 		[NO_EAT]
 		[NO_DRINK]
 		[TRAPAVOID]

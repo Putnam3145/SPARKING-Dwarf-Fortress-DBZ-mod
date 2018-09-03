@@ -74,7 +74,7 @@ creature_boo
 	[FLIER]
 	[NO_THOUGHT_CENTER_FOR_MOVEMENT]
 	[CREATURE_CLASS:NATURAL_KI]
-    [CREATURE_CLASS:KI_BOOST_2900000000]
+    [CREATURE_CLASS:KI_POTENTIAL_BOOST_1500000]
     [APPLY_CREATURE_VARIATION:FLYING_DBZ_GAITS:900:675:450:225:1900:2900]
 	[CREATURE_CLASS:SAIYAN]
 	[BODY_SIZE:0:0:100000]
@@ -166,6 +166,7 @@ creature_boo
 	[NATURAL_SKILL:STANCE_STRIKE:16]
 	[NATURAL_SKILL:DODGING:15]
 	[NATURAL_SKILL:KNOWLEDGE_ACQUISITION:20]
+	[NATURAL_SKILL:DISCIPLINE:20]
 	[CASTE:BOO]
 		[MALE]
 		[CAN_DO_INTERACTION:BOO_REGENERATE]
@@ -187,7 +188,7 @@ creature_boo
 			
 [CREATURE:REGENERATE_CREATURE_DB]
 	[ARENA_RESTRICTED]
-	[DESCRIPTION:He's regenerating!!!]'
+	[DESCRIPTION:He's regenerating!!!]
 	[NAME:regenerating creature:regenerating creatures:regenerating]
 	[CASTE_NAME:regenerating creature:regenerating creatures:regenerating]
 	[CREATURE_TILE:'o'][COLOR:6:0:0]
@@ -208,7 +209,7 @@ creature_boo
 	[CASTE:DEFAULT]
 	
 [CREATURE:CANDY_DB]
-	[DESCRIPTION:It's a piece of candy!]'
+	[DESCRIPTION:It's a piece of candy!]
 	[NAME:candy:candies:candy]
 	[CASTE_NAME:candy:candies:candy]
 	[CREATURE_TILE:249][COLOR:4:0:1]
