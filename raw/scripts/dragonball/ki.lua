@@ -154,7 +154,7 @@ function get_max_ki_pre_boost(unit_id)
     if not unitCanUseKi(unit_id) then return 0 end
     local unit=df.unit.find(unit_id)
     local boost,yuki,shoki,genki,multiplier=calculate_max_ki_portions(unit)
-    return math.floor(ki_func(yuki+shoki+genki)+0.5,unit)
+    return math.floor(ki_func(yuki+shoki+genki,unit)+0.5)
 end
 
 function get_true_base_ki(unit_id)
