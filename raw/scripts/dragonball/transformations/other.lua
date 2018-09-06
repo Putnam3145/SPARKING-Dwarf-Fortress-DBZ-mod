@@ -48,11 +48,9 @@ transformations['Oozaru'].transform_string=function(unit)
 end
 
 local function has_tail(unit)
-    local tail
     for k,v in ipairs(unit.body.body_plan.body_parts) do
-        if v.token=='TAIL' then tail=k break end
+        if v.token=='TAIL' then return not unit.body.components.body_part_status[k].missing end
     end
-    return not unit.body.components.body_part_status[tail].missing
 end
 
 transformations['Oozaru'].can_transform=function(unit)
