@@ -56,21 +56,24 @@ end
 
 function transformations_on_attack(attacker,defender,attack)
     for k,active_transformation in pairs(get_active_transformations(attacker.id)) do
-        local _=active_transformation.on_attack and active_transformation.on_attack(attacker,defender,attack)
+        local transformation_table=transformations[active_transformation.value]
+        local _=transformation_table.on_attack and transformation_table.on_attack(attacker,defender,attack)
     end
     return true
 end
 
 function transformations_on_attacked(attacker,defender,attack)
     for k,active_transformation in pairs(get_active_transformations(defender.id)) do
-        local _=active_transformation.on_attacked and active_transformation.on_attacked(attacker,defender,attack)
+        local transformation_table=transformations[active_transformation.value]
+        local _=transformation_table.on_attacked and transformation_table.on_attacked(attacker,defender,attack)
     end
     return true
 end
 
 function transformation_ticks(unit_id)
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
-        local _=active_transformation.on_tick and active_transformation.on_tick(df.unit.find(unit))
+        local transformation_table=transformations[active_transformation.value]
+        local _=transformation_table.on_tick and transformation_table.on_tick(df.unit.find(unit))
     end
 end
 
