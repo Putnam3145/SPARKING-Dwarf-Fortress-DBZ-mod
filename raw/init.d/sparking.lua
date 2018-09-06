@@ -359,8 +359,8 @@ function regularUnitChecks(unit)
         dfhack.run_script('dragonball/whis_event')
         has_whis_event_called_this_round=true
     end
-    if dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..unit_id) then
-        dfhack.run_script('full-heal','-unit',unit_id,'-r')
+    if dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..unit.id) then
+        dfhack.run_script('full-heal','-unit',unit.id,'-r')
     end
 end
 
