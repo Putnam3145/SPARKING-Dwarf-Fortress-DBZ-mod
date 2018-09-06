@@ -140,11 +140,13 @@ function runSuperSaiyanChecks(unit_id)
             end
         end
     end
-    if df.global.gamemode==df.game_mode.ADVENTURE and unit==df.global.world.units.active[0] and powerLevel>3000000 then
-        if not transformation.get_transformation(unit_id,"Super Saiyan") then
-            transformation.add_transformation(unit_id,"Super Saiyan")
-            transformation.transform(unit_id,"Super Saiyan",true)
-            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a Super Saiyan',11)
+    if df.global.gamemode==df.game_mode.ADVENTURE and unit==df.global.world.units.active[0] then
+        if powerLevel>3000000 or (dfhack.units.getNominalSkill(unit,df.job_skill.MELEE_COMBAT)>=15 and dfhack.units.getNominalSkill(unit,df.job_skill.DISCIPLINE)>=15) then
+            if not transformation.get_transformation(unit_id,"Super Saiyan") then
+                transformation.add_transformation(unit_id,"Super Saiyan")
+                transformation.transform(unit_id,"Super Saiyan",true)
+                dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has figured out how to transform into a Super Saiyan',11)
+            end
         end
     end
     transformation.add_transformation(unit_id,'Oozaru') --lol whoops
