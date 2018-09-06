@@ -73,7 +73,7 @@ end
 function transformation_ticks(unit_id)
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
         local transformation_table=transformations[active_transformation.value]
-        local _=transformation_table.on_tick and transformation_table.on_tick(df.unit.find(unit))
+        local _=transformation_table.on_tick and transformation_table.on_tick(df.unit.find(unit_id))
     end
 end
 
