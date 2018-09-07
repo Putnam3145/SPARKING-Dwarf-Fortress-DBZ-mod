@@ -50,7 +50,7 @@ function runSuperSaiyanChecksExtremeEmotion(unit_id)
         if not transformation.get_transformation('Ultra Instinct "Sign"') then
             transformation.add_transformation(unit_id,'Ultra Instinct "Sign"')
             transformation.transform(unit_id,'Ultra Instinct "Sign"')
-            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' underwent a suddent transformation! Could this be Ultra Instinct?!',11)
+            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' underwent a sudden transformation! Could this be Ultra Instinct?!',11)
         end
     end
     if god_training.ints[1]>1000 and S_cells.ints[1]>40000 then
