@@ -40,14 +40,14 @@ function runSuperSaiyanChecksExtremeEmotion(unit_id)
     local S_cells=get_S_cells(unit)
     local god_training=get_god_training(unit)
     if god_training.ints[2]>200 then --each 1 is 10 ticks, 2000 ticks (20 seconds) seems fine, since it's a very exhausting transformation
-        if not transformation.get_transformation('Ultra Instinct') then
+        if not transformation.get_transformation(unit_id,'Ultra Instinct') then
             transformation.add_transformation(unit_id,'Ultra Instinct')
             transformation.transform(unit_id,'Ultra Instinct')
             dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has done it! Perfected Ultra Instinct!',11)
         end
     end
     if god_training.ints[1]>3000 then
-        if not transformation.get_transformation('Ultra Instinct "Sign"') then
+        if not transformation.get_transformation(unit_id,'Ultra Instinct "Sign"') then
             transformation.add_transformation(unit_id,'Ultra Instinct "Sign"')
             transformation.transform(unit_id,'Ultra Instinct "Sign"')
             dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' underwent a sudden transformation! Could this be Ultra Instinct?!',11)
