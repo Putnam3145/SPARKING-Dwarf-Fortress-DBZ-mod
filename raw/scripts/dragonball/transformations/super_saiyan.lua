@@ -348,6 +348,10 @@ transformations['Beyond Super Saiyan Blue'].ki_type=function(unit)
     return 1
 end
 
+transformations['Beyond Super Saiyan Blue'].potential_boost=function(unit)
+    return transformations['Super Saiyan 2'].potential_boost(unit)
+end
+
 transformations['Beyond Super Saiyan Blue'].on_tick=function(unit)
     local S_cells=get_S_cells(unit)
     local god_training=get_god_training(unit)
@@ -376,5 +380,5 @@ transformations['Beyond Super Saiyan Blue'].spar=function(unit)
 end
 
 transformations['Beyond Super Saiyan Blue'].transform_string=function(unit)
-    return ' transformed beyond Super Saiyan God Super Saiyan!'
+    return ' transformed into Super Saiyan God Super Saiyan, and beyond that!'
 end
