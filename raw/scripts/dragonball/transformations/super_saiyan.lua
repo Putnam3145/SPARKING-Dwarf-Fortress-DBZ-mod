@@ -301,7 +301,7 @@ transformations['Super Saiyan God Super Saiyan 4'].ki_type=function(unit)
     return 1
 end
 
-transformations['Super Saiyan Blue'].potential_boost=function(unit)
+transformations['Super Saiyan God Super Saiyan 4'].potential_boost=function(unit)
     return transformations['Super Saiyan 2'].potential_boost(unit)*2
 end
 
