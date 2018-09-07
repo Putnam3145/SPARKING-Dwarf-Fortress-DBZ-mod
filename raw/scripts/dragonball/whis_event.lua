@@ -55,7 +55,7 @@ local function do_event()
         local god=get_S_cells(unit)
         if god.ints[4]>=1 then return false end
         script.showMessage('Dragon Ball','"Hello, '..unit.name.first_name..". I am Whis, attendant to Lord Beerus the Destroyer. I've been watching you with interest and have decided to offer my teaching to you in god ki. Would you accept?"..'"',COLOR_LIGHTCYAN)
-        local result=script.showYesNoPrompt('Dragon Ball',"Accept Whis's offer?",)
+        local result=script.showYesNoPrompt('Dragon Ball',"Accept Whis's offer?")
         if result then
             god.ints[4]=1
             god:save()
