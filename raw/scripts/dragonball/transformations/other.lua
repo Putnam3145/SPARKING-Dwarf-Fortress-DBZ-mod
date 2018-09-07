@@ -177,6 +177,7 @@ transformations['Ultra Instinct "Sign"'].on_tick=function(unit) --will be done e
     local god_training=get_god_training(unit)
     unit.counters2.exhaustion=unit.counters2.exhaustion+math.floor(1000000/unit.body.physical_attrs.ENDURANCE.value)
     god_training.ints[2]=god_training.ints[2]+1
+    god_training:save()
 end
 
 transformations['Ultra Instinct "Sign"'].cost=function(unit) --how much cost the transformation has, in various ways, for use in AI
