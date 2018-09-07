@@ -14,6 +14,15 @@ reaction_dragonball_adv
 	[NAME:Alt+t for transformations]
 	[ADVENTURE_MODE_ENABLED]
     	
+[REACTION:HOLD_BACK_INSTRUCTIONS]
+	[NAME:Ctrl+z to hold back on attacks]
+	[ADVENTURE_MODE_ENABLED]
+
+[REACTION:FLASHSTEP_INSTRUCTIONS]
+	[NAME:Ctrl+f to teleport to the cursor]
+	[ADVENTURE_MODE_ENABLED]
+
+
 [REACTION:SPECIAL_ATTACK_CAPSULE_ADV]
 	[NAME:+-Special Attacks-+]
 	[ADVENTURE_MODE_ENABLED]

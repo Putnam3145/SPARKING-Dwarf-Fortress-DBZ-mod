@@ -1,52 +1,15 @@
-local ki = dfhack.script_environment('dragonball/ki')
+if df.global.gamemode~=df.game_mode.ADVENTURE then qerror('this script should only be run in adventure mode!') end
 
-local gui=require('gui')
+local persist=dfhack.persistent.save{key='ADV_HOLDING_BACK'}
 
-local widgets=require('gui.widgets')
+persist.ints[1]=math.max(0,persist.ints[1])
 
-local kiViewScreen=defclass(kiViewScreen,gui.FramedScreen)
+persist.ints[1]=math.max(0,math.min(1,1-persist.ints[1]))
 
-function kiViewScreen:onInput(keys)
-    if keys.LEAVESCREEN then
-        self:dismiss()
-    else
-        self:inputToSubviews(keys)
-    end
+if persist.ints[1]==1 then
+    dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{D_DISPLAY=false,A_DISPLAY=true},unit.pos,'You begin holding back.',11)
+else
+    dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{D_DISPLAY=false,A_DISPLAY=true},unit.pos,'You stop holding back.',11)
 end
 
-function kiViewScreen:init(args)
-    local kiText='Ki investment (higher is less, 1 is all at once):'
-    self.kiInvestText='Ki investment currently set to '
-    local adventureID=df.global.world.units.active[0].id
-    self.kiInvestment=tostring(ki.get_ki_investment(adventureID))
-    self.investmentLabel=widgets.Label{
-        frame={t=1},
-        text=self.kiInvestText..self.kiInvestment
-    }
-    self:addviews{
-        widgets.Label{
-            frame={t=0},
-            text=kiText
-        },
-        widgets.EditField{
-            frame={t=0,l=#kiText+1},
-            text=tostring(ki.get_unit_ki_persist_entry(adventureID).ints[3]),
-            on_submit=function(text)
-                if tonumber(text) and tonumber(text)>=1 then
-                    ki.set_ki_investment(adventureID,tonumber(text))
-                    self.kiInvestment=tostring(ki.get_ki_investment(adventureID))
-                    self.investmentLabel:setText(self.kiInvestText..self.kiInvestment)
-                end
-            end
-        },
-        self.investmentLabel,
-        widgets.Label{
-            frame={t=2},
-            text='Current ki amount: ' .. ki.get_ki(adventureID)..'/'..ki.get_max_ki(adventureID)..' ('..100*ki.get_ki(adventureID)/ki.get_max_ki(adventureID)..'%)'
-        }
-    }
-end
-
-local kiScreen=kiViewScreen{frame_title='Ki settings',frame_width=80,frame_height=3}
-
-print('Dummied out until there\'s another use for it.')
+persist:save()

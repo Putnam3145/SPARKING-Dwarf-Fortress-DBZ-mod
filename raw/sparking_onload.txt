@@ -1,6 +1,8 @@
 modtools/interaction-trigger -suppressAttack -onAttackStr "test for super saiyan" -command [ dragonball/super_saiyan_trigger -unit \\ATTACKER_ID ]
 keybinding add Ctrl-T@dungeonmode dragonball/instant_transmission
 keybinding add Alt-T@dungeonmode dragonball/adv_transform
+keybinding add Ctrl-Z@dungeonmode dragonball/adv_ki_adjust
+keybinding add Ctrl-F@dungeonmode flashstep
 modtools/reaction-trigger -reactionName WISH_DB -command [ dragonball/wish -unit \\WORKER_ID ]
 modtools/reaction-trigger -reactionName WISH_DB_ADV -command [ dragonball/wish -adventure ]
 modtools/reaction-trigger -reactionName MAGIC_MATERIALIZATION_NAMEK -command [ dragonball/magic_materialization -unit \\WORKER_ID ]
