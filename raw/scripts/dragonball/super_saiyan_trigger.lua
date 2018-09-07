@@ -60,7 +60,7 @@ function runSuperSaiyanChecksExtremeEmotion(unit_id)
             dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has broken through to a new level of Super Saiyan Blue!',11)
         end
     end
-    if S_cells.ints[2]>1000 and S_cells.ints[3]~=1  then
+    if S_cells.ints[2]>100000 and S_cells.ints[3]~=1  then
         S_cells.ints[3]=1
         S_cells:save()
         dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has undergone a startling transformation! This is Super Saiyan 2, but?!',11)
