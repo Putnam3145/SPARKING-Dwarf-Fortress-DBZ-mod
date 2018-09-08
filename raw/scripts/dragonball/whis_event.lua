@@ -54,7 +54,7 @@ local function do_event()
         local unit=df.global.world.units.active[0]
         local god=get_S_cells(unit)
         if god.ints[4]>=1 then return false end
-        script.showMessage('Dragon Ball','"Hello, '..unit.name.first_name..'.  am Whis, attendant to Lord Beerus the Destroyer."',COLOR_LIGHTCYAN)
+        script.showMessage('Dragon Ball','"Hello, '..unit.name.first_name..'. I am Whis, attendant to Lord Beerus the Destroyer."',COLOR_LIGHTCYAN)
         script.showMessage('Dragon Ball',[["I've been watching you with interest and have decided to offer my teaching to you in god ki."]],COLOR_LIGHTCYAN)
         local result=script.showYesNoPrompt('Dragon Ball','"Would you accept this offer?"')
         if result then
