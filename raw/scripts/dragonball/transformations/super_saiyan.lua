@@ -349,7 +349,7 @@ transformations['Beyond Super Saiyan Blue'].ki_type=function(unit)
 end
 
 transformations['Beyond Super Saiyan Blue'].potential_boost=function(unit)
-    return transformations['Super Saiyan 2'].potential_boost(unit)
+    return transformations['Super Saiyan 2'].potential_boost(unit)*1.4142
 end
 
 transformations['Beyond Super Saiyan Blue'].on_tick=function(unit)
