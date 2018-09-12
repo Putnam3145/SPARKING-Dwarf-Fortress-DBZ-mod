@@ -335,11 +335,11 @@ local function doZenkai(unit)
     local totalBoost=zenkai_persist.ints[1]/3
     for ki_type,ki_table in pairs(ki.ki_attrs) do
         local boostActual=ki_table.coefficient*totalBoost
-        for _,attribute_name in ki_table.phys do
+        for _,attribute_name in pairs(ki_table.phys) do
             local attribute=unit.body.physical_attrs[attribute_name]
             attribute.value=math.min(attribute.max_value,dbRound(attribute.value+boostActual))
         end
-        for _,attribute_name in ki_table.ment do
+        for _,attribute_name in pairs(ki_table.ment) do
             local attribute=unit.status.current_soul.mental_attrs[attribute_name]
             attribute.value=math.min(attribute.max_value,dbRound(attribute.value+boostActual))
         end
