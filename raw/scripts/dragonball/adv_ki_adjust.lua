@@ -7,9 +7,9 @@ persist.ints[1]=math.max(0,persist.ints[1])
 persist.ints[1]=math.max(0,math.min(1,1-persist.ints[1]))
 
 if persist.ints[1]==1 then
-    dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{D_DISPLAY=false,A_DISPLAY=true},unit.pos,'You begin holding back.',11)
+    dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{D_DISPLAY=false,A_DISPLAY=true},df.global.world.units.active[0].pos,'You begin holding back.',11)
 else
-    dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{D_DISPLAY=false,A_DISPLAY=true},unit.pos,'You stop holding back.',11)
+    dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{D_DISPLAY=false,A_DISPLAY=true},df.global.world.units.active[0].pos,'You stop holding back.',11)
 end
 
 persist:save()
