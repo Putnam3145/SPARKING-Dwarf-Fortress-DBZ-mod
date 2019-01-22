@@ -227,7 +227,7 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
                 local transformInvestment=canOverlap and kiInvestment or baseKi
                 local actualPotentialBoost=0
                 if transformation.potential_boost then
-                    actualPotentialBoost=ki.kiFunc(trueBase+transformation.potential_boost(unit))-ki.kiFunc(trueBase)
+                    actualPotentialBoost=ki.ki_func(trueBase+transformation.potential_boost(unit))-ki.ki_func(trueBase)
                 end
                 transformInvestment=transformInvestment+actualPotentialBoost
                 transformInvestment=transformInvestment+(transformation.ki_boost and transformation.ki_boost(unit) or 0)
