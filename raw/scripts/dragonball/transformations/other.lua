@@ -19,7 +19,7 @@ transformations['Oozaru'].ki_mult=function(unit)
 end
 
 transformations['Oozaru'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
-    local is_golden=get_transformation(unit.id,'Super Saiyan').ints[1]==1
+    local is_golden=get_transformation(unit.id,'Super Saiyan') and get_transformation(unit.id,'Super Saiyan').ints[1]==1
     if df.global.world.world_data.moon_phase%27~=0 then
         local transformation_funcs=dfhack.script_environment('dragonball/transformation')
         transformation_funcs.transform(unit.id,'Oozaru',false)
