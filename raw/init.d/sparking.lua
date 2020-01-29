@@ -519,7 +519,7 @@ local syndrome_function={}
 syndrome_function['void banisher']=function(unit_id)
     local ki=dfhack.script_environment('dragonball/ki')
     local unit=df.unit.find(unit_id)
-    forceSuperSaiyan(unit)
+    transformation.transform_ai(unit_id,ki.get_ki_investment(unit_id),500000000,1)
     if ki.get_ki_investment(unit_id)<500000000 then
         unit.animal.vanish_countdown=2
     end

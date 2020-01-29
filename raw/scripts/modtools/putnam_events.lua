@@ -125,11 +125,29 @@ eventTypes={
     ON_EMOTION={name='onEmotion',func=checkEmotions}
 }
 
+local events={}
+
 function enableEvent(event,ticks)
     ticks=ticks or 1
-    require('repeat-util').scheduleUnlessAlreadyScheduled(event.name,ticks,'ticks',event.func)
+    events[event]=ticks
+    require('repeat-util').scheduleEvery(event.name,ticks,'ticks',event.func)
 end
 
 function disableEvent(event)
+    events[event]=false
     require('repeat-util').cancel(event.name)
+end
+
+dfhack.onStateChange.putnamEvents=function(op)
+    if op==SC_MAP_LOADED or op==SC_WORLD_LOADED then
+        things_to_do_every_action={}
+        actions_to_be_ignored_forever={}
+        for k,v in pairs(events) do
+            if v then
+                enableEvent(k,v)
+            else
+                disableEvent(k)
+            end
+        end
+    end
 end
