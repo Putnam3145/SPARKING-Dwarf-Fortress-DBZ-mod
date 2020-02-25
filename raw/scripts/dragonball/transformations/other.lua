@@ -47,6 +47,8 @@ transformations['Oozaru'].transform_string=function(unit)
     return ' transformed into the mighty Oozaru!'
 end
 
+transformations['Oozaru'].forced = true
+
 local function has_tail(unit)
     for k,v in ipairs(unit.body.body_plan.body_parts) do
         if v.token=='TAIL' then return not unit.body.components.body_part_status[k].missing end
@@ -74,7 +76,7 @@ transformations['Wrath State'].on_tick=function(unit) --will be done every 10 Dw
 end
 
 transformations['Wrath State'].cost=function(unit) --how much cost the transformation has, in various ways, for use in AI
-    return 20
+    return -100 -- Negative cost so it's always used if possible
 end
 
 transformations['Wrath State'].get_name=function(unit)
@@ -92,6 +94,8 @@ end
 transformations['Wrath State'].can_transform=function(unit)
     return unit.counters.soldier_mood == 1
 end
+
+transformations['Wrath State'].forced = true
 
 transformations['Kaioken']={}
 

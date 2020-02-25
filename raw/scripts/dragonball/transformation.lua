@@ -111,29 +111,37 @@ function add_transformation(unit_id,transformation)
     return false
 end
 
+function check_overlaps(unit_id,transformation,force_untransform)
+    local unit_transformations=get_active_transformations(unit_id)
+    for k,active_transformation in pairs(unit_transformations) do
+        if active_transformation~=persist then
+            local can_overlap=false
+            local transformation_info=transformations[active_transformation.value]
+            if transformation_info.overlaps then
+                for k,overlap in pairs(transformation_info.overlaps) do
+                    if overlap==transformation then
+                        can_overlap=true
+                    end
+                end
+            end
+            if not can_overlap then
+                if force_untransform then
+                    transform(unit_id,active_transformation.value,false)
+                end
+                return false
+            end
+        end
+    end
+    return true
+end
+
 function transform(unit_id,transformation,transforming)
     local persist=get_transformation(unit_id,transformation)
     if not persist then return false end
     local unit=df.unit.find(unit_id)
     local isAdventurer=df.global.gamemode == df.game_mode.ADVENTURE and unit == df.global.world.units.active[0]
     if transforming then
-        local unit_transformations=get_active_transformations(unit_id)
-        for k,active_transformation in pairs(unit_transformations) do
-            if active_transformation~=persist then
-                local can_overlap=false
-                local transformation_info=transformations[active_transformation.value]
-                if transformation_info.overlaps then
-                    for k,overlap in pairs(transformation_info.overlaps) do
-                        if overlap==transformation then
-                            can_overlap=true
-                        end
-                    end
-                end
-                if not can_overlap then
-                    transform(unit_id,active_transformation.value,false)
-                end
-            end
-        end
+        check_overlaps(unit_id,transformation,true)
         if (not transformations[transformation].can_transform) or transformations[transformation].can_transform(unit) then
             persist.ints[1]=1
             local _=transformations[transformation].on_transform and transformations[transformation].on_transform(unit)
@@ -165,8 +173,6 @@ function revert_to_base(unit_id)
 end
 
 function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,sparring)
-    if kiInvestment>enemyKiInvestment or (df.global.gamemode==df.game_mode.ADVENTURE and unit_id==df.global.world.units.active[0].id) then return false end
-    --can stay in base if enemy is weaker than us; adventurers are exempt
     local unitTransformation=get_inactive_transformations(unit_id)
     if not unitTransformation then return false end
     local activeTransformations=get_active_transformations(unit_id)
@@ -201,6 +207,15 @@ function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,
             transform(unit_id,bestSpar.identifier,true)
         end
     else
+        for k,transformation in ipairs(transformationInformation) do
+            if transformations[transformation.identifier].forced and
+               check_overlaps(unit_id,transformation.identifier,false) and
+               transformations[transformation.identifier].can_transform(unit) then
+                transform(unit_id,transformation.identifier,true)
+            end
+        end
+        if kiInvestment>enemyKiInvestment or (df.global.gamemode==df.game_mode.ADVENTURE and unit_id==df.global.world.units.active[0].id) then return false end
+        --can stay in base if enemy is weaker than us; adventurers are exempt
         table.sort(transformationInformation,function(a,b) return a.cost(unit)<b.cost(unit) end)
         local mostPowerful={identifier='bepis'}
         local mostPowerfulNumber=-1000000
