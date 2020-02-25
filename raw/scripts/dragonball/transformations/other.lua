@@ -59,6 +59,40 @@ end
 
 transformations['Oozaru'].overlaps={'Super Saiyan'}
 
+transformations['Wrath State']={}
+
+transformations['Wrath State'].ki_mult=function(unit)
+    return 10
+end
+
+transformations['Wrath State'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
+    unit.counters2.exhaustion=unit.counters2.exhaustion+math.floor(200000/unit.body.physical_attrs.ENDURANCE.value)
+    if(unit.counters.soldier_mood ~= 1) then
+        local transformation_funcs=dfhack.script_environment('dragonball/transformation')
+        transformation_funcs.transform(unit.id,'Wrath State',false)
+    end
+end
+
+transformations['Wrath State'].cost=function(unit) --how much cost the transformation has, in various ways, for use in AI
+    return 20
+end
+
+transformations['Wrath State'].get_name=function(unit)
+    return "Wrath State"
+end
+
+transformations['Wrath State'].can_add=function(unit)
+    return true
+end
+
+transformations['Wrath State'].transform_string=function(unit)
+    return ' has entered a wrath state!'
+end
+
+transformations['Wrath State'].can_transform=function(unit)
+    return unit.counters.soldier_mood == 1
+end
+
 transformations['Kaioken']={}
 
 transformations['Kaioken'].ki_mult=function(unit)
@@ -170,7 +204,7 @@ transformations['Ultra Instinct "Sign"'].ki_mult=function(unit)
 end
 
 transformations['Ultra Instinct "Sign"'].ki_type=function(unit) 
-    return 'God' 
+    return 1
 end
 
 transformations['Ultra Instinct "Sign"'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
@@ -211,7 +245,7 @@ transformations['Ultra Instinct'].ki_mult=function(unit)
 end
 
 transformations['Ultra Instinct'].ki_type=function(unit) 
-    return 'God' 
+    return 1
 end
 
 transformations['Ultra Instinct'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
@@ -243,7 +277,7 @@ transformations['Ultra Instinct'].on_attack=function(attacker,defender,attack)
 end
 
 transformations['Ultra Instinct'].transform_string=function(unit)
-    return ' started using Ultra Instinct!'
+    return ' started using Autonomous Ultra Instinct!'
 end
 
 transformations['Second Form']={}

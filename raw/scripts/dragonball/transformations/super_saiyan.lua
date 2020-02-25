@@ -17,6 +17,7 @@ function get_S_cells(unit)
     --ints[2] is experience with Super Saiyan 2
     --ints[3] is super saiyan anger event
     --ints[4] is trained by angel
+    --ints[5] is legendary super saiyan (assigned at birth)
     return persist:save()
 end
 
@@ -32,7 +33,7 @@ end
 transformations['Super Saiyan']={}
 
 transformations['Super Saiyan'].potential_boost=function(unit)
-    return 314980+get_S_cells(unit).ints[1]*0.7 --magic number is exactly amount required to make it 50x at 3,000,000 BP, 7 just looks nice
+    return 364265+get_S_cells(unit).ints[1]*0.7 --364265 is x50 at 3,000,000 battle power, 0.7 "looks nice" (thanks past me)
 end
 
 transformations['Super Saiyan'].on_tick=function(unit) --will be done every 10 Dwarf Fortress ticks.
@@ -76,19 +77,18 @@ end
 transformations['Legendary Super Saiyan']={}
 
 transformations['Legendary Super Saiyan'].potential_boost=function(unit)
-    local persist=get_transformation(unit.id,'Legendary Super Saiyan')
-    return 400000+persist.ints[2]
+    return 420000+get_S_cells(unit).ints[1]*2
 end
 
 transformations['Legendary Super Saiyan'].on_tick=function(unit)
-    local persist=get_transformation(unit.id,'Legendary Super Saiyan')
-    unit.counters2.exhaustion=unit.counters2.exhaustion-10
-    persist.ints[2]=persist.ints[2]+10
+    local persist=get_S_cells(unit)
+    unit.counters2.exhaustion=unit.counters2.exhaustion+20
+    persist.ints[1]=persist.ints[1]+100+unit.counters2.exhaustion
     persist:save()
 end
 
 transformations['Legendary Super Saiyan'].cost=function(unit)
-    return 0
+    return 2
 end
 
 transformations['Legendary Super Saiyan'].benefit=function(unit)
@@ -96,8 +96,8 @@ transformations['Legendary Super Saiyan'].benefit=function(unit)
 end
 
 transformations['Legendary Super Saiyan'].on_attacked=function(attacker,defender,attack)
-    local persist=get_transformation(defender.id,'Legendary Super Saiyan')
-    persist.ints[2]=persist.ints[2]+attack.attack_velocity
+    local persist=get_S_cells(unit)
+    persist.ints[1]=persist.ints[1]+attack.attack_velocity
     persist:save()
 end
 
@@ -106,7 +106,7 @@ transformations['Legendary Super Saiyan'].get_name=function(unit)
 end
 
 transformations['Legendary Super Saiyan'].can_add=function(unit)
-    return true
+    return get_S_cells(unit).ints[5] == 1
 end
 
 transformations['Legendary Super Saiyan'].transform_string=function(unit)
@@ -116,6 +116,49 @@ end
 transformations['Legendary Super Saiyan'].spar=function(unit)
     return 3
 end
+
+transformations['Legendary Super Saiyan 2']={}
+
+transformations['Legendary Super Saiyan 2'].potential_boost=function(unit)
+    return transformations['Legendary Super Saiyan'].potential_boost(unit)*1.4142
+end
+
+transformations['Legendary Super Saiyan 2'].on_tick=function(unit)
+    local persist=get_S_cells(unit)
+    persist.ints[1]=persist.ints[1]+200+math.floor(unit.counters2.exhaustion/5)
+end
+
+transformations['Legendary Super Saiyan 2'].cost=function(unit)
+    return 0
+end
+
+transformations['Legendary Super Saiyan 2'].benefit=function(unit)
+    return 3
+end
+
+transformations['Legendary Super Saiyan 2'].on_attacked=function(attacker,defender,attack)
+    local persist=get_S_cells(unit)
+    persist.ints[1]=persist.ints[1]+attack.attack_velocity
+    persist:save()
+end
+
+transformations['Legendary Super Saiyan 2'].get_name=function(unit)
+    return 'True Legendary Super Saiyan'
+end
+
+transformations['Legendary Super Saiyan 2'].can_add=function(unit)
+    local S_cells=get_S_cells(unit)
+    return S_cells.ints[5] == 1 and (S_cells.ints[1]>1000000 or (df.global.gamemode==df.game_mode.ADVENTURE and unit==df.global.world.units.active[0]))
+end
+
+transformations['Legendary Super Saiyan 2'].transform_string=function(unit)
+    return ' transformed into the true Legendary Super Saiyan!'
+end
+
+transformations['Legendary Super Saiyan 2'].spar=function(unit)
+    return 4
+end
+
 
 transformations['Super Saiyan 2']={}
 
@@ -223,7 +266,7 @@ end
 transformations['Super Saiyan God']={}
 
 transformations['Super Saiyan God'].ki_type=function(unit) 
-    return 'God' 
+    return 1
 end
 
 transformations['Super Saiyan God'].on_tick=function(unit)

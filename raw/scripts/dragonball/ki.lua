@@ -127,16 +127,16 @@ end
 
 function ki_func(num)
     --[[
-        linear makes it grow faster before 12187, makes the minimum much lower than the 2250 it originally was. This also mimicks the growth shown before the namek arc.
-        below and equal to 51882, it grows exponentially, mimicking the growth shown during the namek arc.
-        above 51882, it's quadratic, which is rather slow but not slow enough to be unsatisfying.
+        linear makes it grow faster before 20000, makes the minimum much lower than the 2250 it originally was. This also mimicks the growth shown before the namek arc.
+        below and equal to 60000, it grows exponentially, mimicking the growth shown during the namek arc.
+        above 60000, it's quadratic, which is rather slow but not slow enough to be unsatisfying.
     ]]
-    if num<12187 then
+    if num<20000 then
         return num
-    elseif num>51882 then
-        return (num^2)/900
+    elseif num>60000 then
+        return (num^2)/1200
     else
-        return (2^(num/5000))*2250
+        return 2^(num/5533.4)*1633
     end
 end
 
