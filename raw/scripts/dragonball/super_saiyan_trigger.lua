@@ -94,6 +94,8 @@ function runSuperSaiyanChecksExtremeEmotion(unit_id)
     else
         if powerLevel>100000 then
             if not transformation.get_transformation(unit_id,"Wrath State") then
+                unit.counters.soldier_mood = 1
+                unit.counters.soldier_mood_countdown = 1000
                 transformation.add_transformation(unit_id,"Wrath State")
                 transformation.transform(unit_id,"Wrath State",true)
                 dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=true,RECENTER=true,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=true},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has undergone a strange transformation! The power of an Oozaru, but?!',11)
