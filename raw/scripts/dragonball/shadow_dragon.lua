@@ -155,6 +155,7 @@ shadow_dragon_action[8]=function()
     shadow_dragon_persist.ints[2]=2
     shadow_dragon_persist:save()
     require('repeat-util').cancel('shadow dragons')
+    dfhack.script_environment('dragonball/ki').setWorldKiMode('super')
 end
 
 shadow_dragon_action[9]=function()
