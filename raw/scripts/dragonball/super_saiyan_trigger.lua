@@ -68,7 +68,7 @@ function runSuperSaiyanChecksExtremeEmotion(unit_id)
             dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has broken through to a new level of Super Saiyan Blue!',11)
         end
     end
-    if S_cells.ints[1] == 0 then
+    if S_cells.ints[5] == 0 then
         if powerLevel>3000000 then
             if not transformation.get_transformation(unit_id,"Super Saiyan") then
                 transformation.add_transformation(unit_id,"Super Saiyan")
