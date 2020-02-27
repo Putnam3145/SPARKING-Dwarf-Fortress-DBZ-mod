@@ -402,16 +402,16 @@ local currentrun = {}
 
 local function checkEveryUnitRegularlyForEvents()
     if #currentrun == 0 then
-        firecount = firecount + 1
         has_whis_event_called_this_round=false
         for k,v in ipairs(df.global.world.units.active) do
             table.insert(currentrun,v)
         end
     end
     local start_time = os.clock()
+    local time_not_to_overrun = max(0.005,1/df.global.enabler.calculated_fps)
     for k,v in ipairs(currentrun) do
         regularUnitChecks(v)
-        if os.clock() - start_time > 0.005 then return end
+        if (os.clock() - start_time) > time_not_to_overrun then return end
     end
 end
 
