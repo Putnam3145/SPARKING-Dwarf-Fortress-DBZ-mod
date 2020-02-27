@@ -313,7 +313,7 @@ entity_namek
 			[PUNISHMENT_EXEMPTION]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[EXPORTED_IN_LEGENDS]
@@ -344,7 +344,7 @@ entity_namek
 			[PUNISHMENT_EXEMPTION]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[ACCOUNT_EXEMPT]
@@ -430,7 +430,7 @@ entity_namek
 			[PRECEDENCE:60]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[COLOR:5:0:0]
@@ -553,7 +553,7 @@ entity_namek
 			[CONQUERED_SITE]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[EXPORTED_IN_LEGENDS]

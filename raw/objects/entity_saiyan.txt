@@ -313,7 +313,6 @@ entity_saiyan
 			[PUNISHMENT_EXEMPTION]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[EXPORTED_IN_LEGENDS]
@@ -345,7 +344,7 @@ entity_saiyan
 			[PUNISHMENT_EXEMPTION]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[ACCOUNT_EXEMPT]
@@ -369,7 +368,7 @@ entity_saiyan
 			[MENIAL_WORK_EXEMPTION]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[ACCOUNT_EXEMPT]
@@ -488,7 +487,7 @@ entity_saiyan
 			[PRECEDENCE:60]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[COLOR:5:0:0]
@@ -614,7 +613,7 @@ entity_saiyan
 			[PUNISHMENT_EXEMPTION]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[COLOR:5:0:0]
@@ -651,7 +650,7 @@ entity_saiyan
 			[PUNISHMENT_EXEMPTION]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[COLOR:5:0:0]
@@ -688,7 +687,7 @@ entity_saiyan
 			[PUNISHMENT_EXEMPTION]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[COLOR:5:0:0]
@@ -787,7 +786,7 @@ entity_saiyan
 			[CONQUERED_SITE]
 			[FLASHES]
 			[BRAG_ON_KILL]
-			[CHAT_WORTHY]
+			
 			[DO_NOT_CULL]
 			[KILL_QUEST]
 			[EXPORTED_IN_LEGENDS]
