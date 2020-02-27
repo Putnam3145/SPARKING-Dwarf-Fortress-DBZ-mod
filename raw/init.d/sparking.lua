@@ -25,6 +25,14 @@ local function getSubClassValues(unit,class)
             if class_value:sub(0,class_value:find('/')-1) == class then table.insert(values,class_value:sub(1+class_value:find('/.*'))) end
         end
     end
+    for _,syndrome in ipairs(unit.syndromes.active) do
+        for __,s_class in ipairs(df.syndrome.find(syndrome.type).syn_class) do
+            local class_value=s_class.value
+            if class_value:find('/') then
+                if class_value:sub(0,class_value:find('/')-1) == class then table.insert(values,class_value:sub(1+class_value:find('/.*'))) end
+            end
+        end
+    end
     return #values>0 and values or false
 end
 
@@ -349,7 +357,7 @@ local function doZenkai(unit)
     return true
 end
 
-local function setUpNaturalTransformations(unit)
+local function setupNaturalTransformations(unit)
     local transformations=getSubClassValues(unit,'NATURAL_TRANSFORMATION')
     if transformations then
         for k,v in pairs(transformations) do
@@ -375,7 +383,7 @@ function regularUnitChecks(unit)
         super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(unit.id)
     end
     renameUnitIfApplicable(unit)
-    setUpNaturalTransformations(unit)
+    setupNaturalTransformations(unit)
     transformation.transformation_ticks(unit.id)
     if not unitInCombat(unit) or unit.counters.unconscious>0 then
         transformation.revert_to_base(unit.id)
@@ -390,10 +398,20 @@ function regularUnitChecks(unit)
     end
 end
 
+local currentrun = {}
+
 local function checkEveryUnitRegularlyForEvents()
-    has_whis_event_called_this_round=false
-    for k,v in ipairs(df.global.world.units.active) do
-        dfhack.timeout((k%9)+1,'ticks',function() regularUnitChecks(v) end)
+    if #currentrun == 0 then
+        firecount = firecount + 1
+        has_whis_event_called_this_round=false
+        for k,v in ipairs(df.global.world.units.active) do
+            table.insert(currentrun,v)
+        end
+    end
+    local start_time = os.clock()
+    for k,v in ipairs(currentrun) do
+        regularUnitChecks(v)
+        if os.clock() - start_time > 0.005 then return end
     end
 end
 
@@ -707,7 +725,7 @@ function onStateChange(op)
         local putnamEvents=dfhack.script_environment('modtools/putnam_events')
         putnamEvents.enableEvent(putnamEvents.eventTypes.ON_ACTION)
 		dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
-        require('repeat-util').scheduleEvery('DBZ Event Check',10,'ticks',checkEveryUnitRegularlyForEvents)
+        require('repeat-util').scheduleEvery('DBZ Event Check',1,'ticks',checkEveryUnitRegularlyForEvents)
         eventful.enableEvent(eventful.eventType.UNIT_ATTACK,2)
         eventful.enableEvent(eventful.eventType.UNIT_DEATH,2)
         for k,v in ipairs(df.global.world.units.all) do

@@ -1,5 +1,12 @@
 --@ module = true
 
+--[[
+    transformation persist info:
+    1. ints[1]: currently transformed
+    2. ints[2]: last tick that ticks was ran
+    the rest can be used for whatever, but start from 7
+]]
+
 transformations={}
 
 function load_transformation_file(file_name)
@@ -50,7 +57,7 @@ function transformation_tick(unit_id)
     local unit=df.unit.find(unit_id)
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
         local transformation_table=transformations[active_transformation.value]
-        local _=transformation_table.on_tick and transformation_table.on_tick(unit)
+        local _=transformation_table.on_tick and transformation_table.on_tick(unit,(df.global.cur_year_tick - active_transformations.ints[2])%403200)
     end
 end
 
