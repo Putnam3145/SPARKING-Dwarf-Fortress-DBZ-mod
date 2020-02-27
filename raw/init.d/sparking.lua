@@ -681,7 +681,7 @@ has_whis_event_called_this_round=false
 
 function regularUnitChecks(unit)
     if not unit or not df.unit.find(unit.id) then return false end
-    transformation.transformation_ticks(unit.id,df.global.cur_year_tick)
+    transformation.transformation_tick(unit.id)
     if not unitInCombat(unit) or unit.counters.unconscious>0 then
         transformation.revert_to_base(unit.id)
     end

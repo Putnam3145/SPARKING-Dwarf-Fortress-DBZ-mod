@@ -57,7 +57,8 @@ function transformation_tick(unit_id)
     local unit=df.unit.find(unit_id)
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
         local transformation_table=transformations[active_transformation.value]
-        local _=transformation_table.on_tick and transformation_table.on_tick(unit,(df.global.cur_year_tick - active_transformations.ints[2])%403200)
+        local _=transformation_table.on_tick and transformation_table.on_tick(unit,(df.global.cur_year_tick - active_transformation.ints[2])%403200)
+        active_transformation.ints[2] = df.global.cur_year_tick
     end
 end
 
@@ -75,13 +76,6 @@ function transformations_on_attacked(attacker,defender,attack)
         local _=transformation_table.on_attacked and transformation_table.on_attacked(attacker,defender,attack)
     end
     return true
-end
-
-function transformation_ticks(unit_id,t)
-    for k,active_transformation in pairs(get_active_transformations(unit_id)) do
-        local transformation_table=transformations[active_transformation.value]
-        local _=transformation_table.on_tick and transformation_table.on_tick(df.unit.find(unit_id),t)
-    end
 end
 
 function get_ki_type(unit_id)
