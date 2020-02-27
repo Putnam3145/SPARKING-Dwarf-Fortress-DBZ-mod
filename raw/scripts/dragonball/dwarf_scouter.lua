@@ -305,6 +305,43 @@ function UnitListScouter:init(args)
     end
 end
 
+local FollowScouter = defclass(FollowScouter,require('gui.dwarfmode').DwarfOverlay)
+
+function FollowScouter:onResize(w,h)
+    self.yPlacement = h-2
+end
+
+function FollowScouter:onRender()
+    if (df.global.ui.follow_unit == -1) or self._native.parent._type ~= df.viewscreen_dwarfmodest then self:dismiss() return end
+    self._native.parent:render()
+    local unit = df.unit.find(df.global.ui.follow_unit)
+    if not unit then self:dismiss() return end
+    self.xPlacement = #dfhack.TranslateName(dfhack.units.getVisibleName(unit))+#dfhack.units.getProfessionName(unit)+13
+    local pen = dfhack.screen.readTile(self.xPlacement,self.yPlacement)
+    repeat
+        self.xPlacement = self.xPlacement+2
+        pen = dfhack.screen.readTile(self.xPlacement,self.yPlacement)
+    until pen.ch < 65 or pen.ch > 122
+    self.xPlacement = self.xPlacement + 1
+    local powerLevels = {getPowerLevel(unit)}
+    local pRatio = powerLevels[1]/powerLevels[2]
+    local plevelcolor=pRatio<0.1 and COLOR_LIGHTRED or pRatio<0.35 and COLOR_RED or pRatio<0.6 and COLOR_WHITE or pRatio<0.85 and COLOR_GREEN or pRatio<1 and COLOR_LIGHTGREEN or COLOR_LIGHTCYAN
+    dfhack.screen.paintString({fg=plevelcolor,bg=COLOR_BLACK},self.xPlacement,self.yPlacement,powerLevels[1])
+    dfhack.screen.paintString({fg=COLOR_LIGHTCYAN,bg=COLOR_BLACK},self.xPlacement+#tostring(powerLevels[1]),self.yPlacement,'/'..powerLevels[2])
+end
+
+function FollowScouter:onInput(keys)
+    self:inputToSubviews(keys)
+    self:sendInputToParent(keys)
+    if keys.LEAVESCREEN then
+        self:dismiss()
+    end
+end
+
+function FollowScouter:onIdle()
+    self._native.parent:logic()
+end
+
 local viewscreenActions={}
 
 viewscreenActions[df.viewscreen_layer_militaryst]=function() --yeah that works
@@ -329,9 +366,23 @@ viewscreenActions[df.viewscreen_unitlistst]=function()
     extraUnitListScreen:show()
 end
 
+viewscreenActions[df.viewscreen_dwarfmodest]=function()
+    if df.global.ui.follow_unit ~= -1 then
+        local scouter = FollowScouter()
+        scouter:show()
+    end
+end
+
+local function tryFollowScouter()
+    if(df.global.ui.follow_unit == -1 or dfhack.gui.getCurViewscreen()._type ~= df.viewscreen_dwarfmodest) then return end
+    local scouter = FollowScouter()
+    scouter:show()
+end
+
 dfhack.onStateChange.dwarf_scouter=function(code)
     if code==SC_VIEWSCREEN_CHANGED then
         local viewfunc=viewscreenActions[dfhack.gui.getCurViewscreen()._type]
         if viewfunc then viewfunc() end
     end
+    require('repeat-util').scheduleEvery("Dwarf Scouter",2,'frames',tryFollowScouter)
 end
