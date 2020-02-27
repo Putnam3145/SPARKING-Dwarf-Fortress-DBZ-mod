@@ -256,7 +256,8 @@ transformations['Super Saiyan 4'].cost=function(unit)
 end
 
 transformations['Super Saiyan 4'].can_add=function(unit)
-    return true
+    local S_cells=get_S_cells(unit).ints[1]
+    return S_cells>1500000 or (df.global.gamemode==df.game_mode.ADVENTURE and unit==df.global.world.units.active[0])
 end
 
 transformations['Super Saiyan 4'].transform_string=function(unit)
