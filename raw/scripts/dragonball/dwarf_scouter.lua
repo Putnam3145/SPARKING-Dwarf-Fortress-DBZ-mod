@@ -318,11 +318,13 @@ function FollowScouter:onRender()
     if not unit then self:dismiss() return end
     self.xPlacement = #dfhack.TranslateName(dfhack.units.getVisibleName(unit))+#dfhack.units.getProfessionName(unit)+13
     local pen = dfhack.screen.readTile(self.xPlacement,self.yPlacement)
-    repeat
-        self.xPlacement = self.xPlacement+2
+    local areWeDoneYet = 0
+    while areWeDoneYet < 3 do
+        self.xPlacement = self.xPlacement+1
         pen = dfhack.screen.readTile(self.xPlacement,self.yPlacement)
-    until pen.ch < 65 or pen.ch > 122
-    self.xPlacement = self.xPlacement + 1
+        if pen.ch >= 65 and pen.ch <= 122 then areWeDoneYet = 0 end
+        areWeDoneYet = areWeDoneYet+1
+    end
     local powerLevels = {getPowerLevel(unit)}
     local pRatio = powerLevels[1]/powerLevels[2]
     local plevelcolor=pRatio<0.1 and COLOR_LIGHTRED or pRatio<0.35 and COLOR_RED or pRatio<0.6 and COLOR_WHITE or pRatio<0.85 and COLOR_GREEN or pRatio<1 and COLOR_LIGHTGREEN or COLOR_LIGHTCYAN
