@@ -366,54 +366,8 @@ local function setupNaturalTransformations(unit)
     end
 end
 
-has_whis_event_called_this_round=false
-
 local function isAdventurer(unit)
     return (df.global.gamemode==df.game_mode.ADVENTURE and unit==df.global.world.units.active[0])
-end
-local super_saiyan_trigger=dfhack.script_environment('dragonball/super_saiyan_trigger')
-function regularUnitChecks(unit)
-    if not unit or not df.unit.find(unit.id) then return false end
-    transformation.transformation_ticks(unit.id)
-    if not unitInCombat(unit) or unit.counters.unconscious>0 then
-        transformation.revert_to_base(unit.id)
-    end
-end
-
-function lowerPriorityChecks(unit)
-    if not unit or not df.unit.find(unit.id) then return false end
-    super_saiyan_trigger.runSuperSaiyanChecks(unit.id)
-    if unitUndergoingSSJEmotion(unit) then
-        super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(unit.id)
-    end
-    if unitHasCreatureClass(unit,'ZENKAI') and not unitInDeadlyCombat(unit) then
-        doZenkai(unit)
-    end
-    renameUnitIfApplicable(unit)
-    setupNaturalTransformations(unit)
-    --12 years of training, approx.
-    if ((dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit)) or isAdventurer(unit)) and getPowerLevel(unit)>900000000 and not has_whis_event_called_this_round then
-        dfhack.run_script('dragonball/whis_event')
-        has_whis_event_called_this_round=true
-    end
-    if dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..unit.id) then
-        dfhack.run_script('full-heal','-unit',unit.id,'-r')
-    end    
-end
-
-local function checkEveryUnitRegularlyForEvents(start_time,time_not_to_overrun)
-    for k,v in ipairs(df.global.world.units.active) do
-        regularUnitChecks(v)
-        if (os.clock() - start_time) > time_not_to_overrun then start_time,time_not_to_overrun = coroutine.yield() end
-    end
-end
-
-local function lowerPriorityEvents(start_time,time_not_to_overrun)
-    has_whis_event_called_this_round=false
-    for k,v in ipairs(df.global.world.units.active) do
-        lowerPriorityChecks(v)
-        if (os.clock() - start_time) > time_not_to_overrun then start_time,time_not_to_overrun = coroutine.yield() end
-    end
 end
 
 local function slowEveryoneElseDown(unit_id,action,kiAmount)
@@ -721,46 +675,37 @@ eventful.onUnitAttack.zenkai=function(attackerId,defenderId,woundId)
     zenkai_persist:save()
 end
 
-local coroutines_for_funcs = {}
+local super_saiyan_trigger=dfhack.script_environment('dragonball/super_saiyan_trigger')
 
-local function_priorities = {}
+has_whis_event_called_this_round=false
 
-function run_schedule()
-    local co = coroutine
-    local time_not_to_overrun = math.max(0.001,0.5/df.global.enabler.fps)
-    for f,c in pairs(coroutines_for_funcs) do
-        local actual_time = math.max(time_not_to_overrun,0.05/function_priorities[f])
-        if(co.status(c) == "dead") then
-            coroutines_for_funcs[f] = co.create(f)
-            c = coroutines_for_funcs[f]
-        end
-        co.resume(c,os.clock(),time_not_to_overrun)
+function regularUnitChecks(unit)
+    if not unit or not df.unit.find(unit.id) then return false end
+    transformation.transformation_ticks(unit.id,df.global.cur_year_tick)
+    if not unitInCombat(unit) or unit.counters.unconscious>0 then
+        transformation.revert_to_base(unit.id)
     end
 end
 
-function finish_schedule()
-    if(df.global.pause_state) then
-        for f,c in pairs(coroutines_for_funcs) do
-            local was_alive = false
-            while(coroutine.status(c) ~= "dead") do
-                was_alive = true
-                coroutine.resume(c,os.clock(),1000)
-            end
-            if was_alive then
-                coroutines_for_funcs[f] = coroutine.create(f)
-            end
-        end
+function lowerPriorityChecks(unit)
+    if not unit or not df.unit.find(unit.id) then return false end
+    super_saiyan_trigger.runSuperSaiyanChecks(unit.id)
+    if unitUndergoingSSJEmotion(unit) then
+        super_saiyan_trigger.runSuperSaiyanChecksExtremeEmotion(unit.id)
     end
-end
-
-function add_to_schedule(f,priority) -- 1 to 50, lower = higher
-    coroutines_for_funcs[f] = coroutine.create(f)
-    function_priorities[f] = priority
-end
-
-function start_scheduler()
-    require('repeat-util').scheduleEvery('Scheduler',1,'ticks',run_schedule)
-    require('repeat-util').scheduleEvery('Scheduler Finisher',math.ceil(df.global.enabler.gfps/4),'frames',finish_schedule)
+    if unitHasCreatureClass(unit,'ZENKAI') and not unitInDeadlyCombat(unit) then
+        doZenkai(unit)
+    end
+    renameUnitIfApplicable(unit)
+    setupNaturalTransformations(unit)
+    --12 years of training, approx.
+    if ((dfhack.units.isDwarf(unit) and dfhack.units.isCitizen(unit)) or isAdventurer(unit)) and getPowerLevel(unit)>900000000 and not has_whis_event_called_this_round then
+        dfhack.run_script('dragonball/whis_event')
+        has_whis_event_called_this_round=true
+    end
+    if dfhack.persistent.get('DRAGONBALL_IMMORTAL/'..unit.id) then
+        dfhack.run_script('full-heal','-unit',unit.id,'-r')
+    end    
 end
 
 function onStateChange(op)
@@ -768,9 +713,10 @@ function onStateChange(op)
         local putnamEvents=dfhack.script_environment('modtools/putnam_events')
         putnamEvents.enableEvent(putnamEvents.eventTypes.ON_ACTION)
         dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
-        add_to_schedule(checkEveryUnitRegularlyForEvents,1)
-        add_to_schedule(lowerPriorityEvents,50)
-        start_scheduler()
+        local putnamScheduler = dfhack.script_environment('modtools/putnam_scheduler')
+        putnamScheduler.add_to_schedule(df.global.world.units.all,regularUnitChecks,1)
+        putnamScheduler.add_to_schedule(df.global.world.units.all,lowerPriorityChecks,50)
+        putnamScheduler.start_scheduler()
         eventful.enableEvent(eventful.eventType.UNIT_ATTACK,2)
         eventful.enableEvent(eventful.eventType.UNIT_DEATH,2)
         for k,v in ipairs(df.global.world.units.all) do

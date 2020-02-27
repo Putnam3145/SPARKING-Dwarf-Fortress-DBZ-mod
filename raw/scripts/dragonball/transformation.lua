@@ -77,10 +77,10 @@ function transformations_on_attacked(attacker,defender,attack)
     return true
 end
 
-function transformation_ticks(unit_id)
+function transformation_ticks(unit_id,t)
     for k,active_transformation in pairs(get_active_transformations(unit_id)) do
         local transformation_table=transformations[active_transformation.value]
-        local _=transformation_table.on_tick and transformation_table.on_tick(df.unit.find(unit_id))
+        local _=transformation_table.on_tick and transformation_table.on_tick(df.unit.find(unit_id),t)
     end
 end
 
