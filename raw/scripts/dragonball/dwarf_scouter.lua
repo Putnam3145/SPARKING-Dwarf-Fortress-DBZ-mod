@@ -334,6 +334,7 @@ function FollowScouter:onInput(keys)
     self:inputToSubviews(keys)
     self:sendInputToParent(keys)
     if keys.LEAVESCREEN then
+        df.global.ui.follow_unit = -1
         self:dismiss()
     end
 end
