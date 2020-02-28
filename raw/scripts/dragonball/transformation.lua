@@ -145,6 +145,7 @@ function transform(unit_id,transformation,transforming)
         check_overlaps(unit_id,transformation,true)
         if (not transformations[transformation].can_transform) or transformations[transformation].can_transform(unit) then
             persist.ints[1]=1
+            persist.ints[2]=df.global.cur_year_tick
             local _=transformations[transformation].on_transform and transformations[transformation].on_transform(unit)
             dfhack.gui.showAutoAnnouncement(df.announcement_type.INTERACTION_ACTOR,
             unit.pos,
