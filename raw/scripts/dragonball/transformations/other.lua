@@ -53,6 +53,7 @@ local function has_tail(unit)
     for k,v in ipairs(unit.body.body_plan.body_parts) do
         if v.token=='TAIL' then return not unit.body.components.body_part_status[k].missing end
     end
+    return false
 end
 
 transformations['Oozaru'].can_transform=function(unit)
@@ -345,7 +346,7 @@ transformations['Golden Form'].on_tick=function(unit,tick_count)
 end
 
 transformations['Golden Form'].potential_boost=function(unit)
-    return 30000000 --a trillion.
+    return 30000000 --a trillion (just about)
 end
 
 transformations['Golden Form'].cost=function(unit)

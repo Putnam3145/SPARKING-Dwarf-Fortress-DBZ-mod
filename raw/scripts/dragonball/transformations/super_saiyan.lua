@@ -364,7 +364,7 @@ transformations['Super Saiyan God Super Saiyan 4'].cost=function(unit)
 end
 
 transformations['Super Saiyan God Super Saiyan 4'].benefit=function(unit)
-    return 1000
+    return 2000
 end
 
 transformations['Super Saiyan God Super Saiyan 4'].can_add=function(unit)
@@ -412,7 +412,7 @@ transformations['Beyond Super Saiyan Blue'].cost=function(unit)
 end
 
 transformations['Beyond Super Saiyan Blue'].benefit=function(unit)
-    return 1000
+    return 1500
 end
 
 transformations['Beyond Super Saiyan Blue'].can_add=function(unit)
