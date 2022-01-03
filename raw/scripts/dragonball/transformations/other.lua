@@ -285,6 +285,67 @@ transformations['Ultra Instinct'].transform_string=function(unit)
     return ' started using Autonomous Ultra Instinct!'
 end
 
+transformations['Ultra Ego']={}
+
+transformations['Ultra Ego'].ki_mult=function(unit)
+    return 5000
+end
+
+transformations['Ultra Ego'].ki_boost=function(unit)
+    local ego = 0
+    for _,v in ipairs(unit.status.current_soul.personality.emotions) do
+        ego = ego + v.strength / math.abs(df.emotion_type.attrs[v.type].divider)
+    end
+    local god_training=get_god_training(unit)
+    ego = ego + god_training.ints[3]
+    return ego
+end
+
+transformations['Ultra Ego'].on_untransform=function(unit)
+    local god_training = get_god_training(defender)
+    god_training.ints[3] = 0
+    god_training:save()
+end
+
+transformations['Ultra Ego'].on_tick=function(unit, tick_count)
+    local god_training = get_god_training(unit)
+    god_training.ints[3] = god_training.ints[3] + unit.counters2.pain
+    god_training:save()
+    unit.counters2.pain = 0
+end
+
+transformations['Ultra Ego'].ki_type=function(unit) 
+    return 1
+end
+
+transformations['Ultra Ego'].cost=function(unit)
+    return 10 -- it's scary, but that's about it
+end
+
+transformations['Ultra Ego'].benefit=function(unit)
+    return 1/0 --IEEE 754 floating point standard sets this at infinity, which makes it always better than any alternative
+end
+
+transformations['Ultra Ego'].get_name=function(unit)
+    return 'Ultra Ego'
+end
+
+transformations['Ultra Ego'].can_add=function(unit)
+    return true
+end
+
+transformations['Ultra Ego'].on_attacked=function(attacker,defender,attack)
+    attack.attack_accuracy=1000000
+    local god_training = get_god_training(defender)
+    god_training.ints[3] = god_training.ints[3] + 5
+    god_training:save()
+end
+
+transformations['Ultra Ego'].transform_string=function(unit)
+    return ' started using Ultra Ego!'
+end
+
+
 transformations['Second Form']={}
 
 transformations['Second Form'].potential_boost=function(unit)

@@ -330,7 +330,7 @@ local function unitInCombat(unit)
     for k,v in pairs(unit.reports.last_year_tick) do
         if math.abs(v-df.global.cur_year_tick)%403100<100 then
             return true
-        end 
+        end
     end
     return false
 end
@@ -428,6 +428,7 @@ end
 dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=function(unit_id,action)
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
     local kiInvestment,kiType=ki.get_ki_investment(unit_id)
+    local sparring = action.flags[14]
     if kiInvestment>0 then
         if action.type==df.unit_action_type.Attack then
             local attack=action.data.attack
@@ -436,8 +437,8 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
             local unit=df.unit.find(unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
             local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
-            transformation.transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,sparring)
-            transformation.transform_ai(enemy.id,enemyKiInvestment,enemyKiType,kiInvestment,kiType,sparring)
+            transformation.transform_ai(unit_id,kiInvestment,enemyKiInvestment, sparring)
+            transformation.transform_ai(enemy.id,enemyKiInvestment,kiInvestment, sparring)
             transformation.transformations_on_attack(unit,enemy,attack)
             transformation.transformations_on_attacked(unit,enemy,attack)
 			enemyKiInvestment=math.max(enemyKiInvestment,1)
@@ -471,8 +472,8 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
             local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
             local unit=df.unit.find(unit_id)
             local enemy=df.unit.find(attack.target_unit_id)
-            transformation.transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType)
-            transformation.transform_ai(enemy.id,enemyKiInvestment,enemyKiType,kiInvestment,kiType)
+            transformation.transform_ai(unit_id,kiInvestment,enemyKiInvestment, sparring)
+            transformation.transform_ai(enemy.id,enemyKiInvestment,kiInvestment, sparring)
             transformation.transformations_on_attack(unit,enemy,attack)
             transformation.transformations_on_attacked(unit,enemy,attack)
             attack.attack_velocity=math.max(attack.attack_velocity-enemyKiInvestment,0)
@@ -501,12 +502,8 @@ end
 syndrome_function['void summoner']=function(unit_id)
     local ki=dfhack.script_environment('dragonball/ki')
     local unit=df.unit.find(unit_id)
-    forceSuperSaiyan(unit)
+    transformation.transform_ai(unit_id,ki.get_ki_investment(unit_id),24000000000,1)
     unit.body.blood_count=math.max(0,math.min(unit.body.blood_count,unit.body.blood_count*(ki.get_ki_investment(unit_id)/24000000000)))
-end
-
-syndrome_function['namek regenerate']=function(unit_id)
-    dfhack.run_script('full-heal','-unit',unit_id)
 end
 
 syndrome_function['cell absorbed']=function(unit_id)
@@ -590,12 +587,18 @@ syndrome_function['hypocrisy shot']=function(unit_id)
         local conflict=conflicts[df.value_type[value.type]]
         if conflict then
             for _,vv in conflict do
-                local trait=(personality.values[vv[1]]-50)*vv[2]
+                local trait=(personality.traits[vv[1]]-50)*vv[2]
                 damageTotal=damageTotal+math.abs(trait-value.strength)
             end
         end
     end
     unit.body.blood_count=math.floor(unit.body.blood_count/damageTotal) --until I can better inflict wounds through DFHack...
+end
+
+eventful.onSyndrome.dragonball=function(unit_id,syndrome_id)
+    local syndrome=df.syndrome.find(syndrome_id)
+    local func=syndrome_function[syndrome.syn_name]
+    if func then func(unit_id) end
 end
 
 eventful.onUnitDeath.immortal_db=function(unit_id)
@@ -714,11 +717,12 @@ function onStateChange(op)
         putnamEvents.enableEvent(putnamEvents.eventTypes.ON_ACTION)
         dfhack.run_command('script',SAVE_PATH..'/raw/sparking_onload.txt')
         local putnamScheduler = dfhack.script_environment('modtools/putnam_scheduler')
-        putnamScheduler.add_to_schedule(df.global.world.units.all,regularUnitChecks,1)
-        putnamScheduler.add_to_schedule(df.global.world.units.all,lowerPriorityChecks,50)
+        putnamScheduler.add_to_schedule(df.global.world.units.all,regularUnitChecks,100)
+        putnamScheduler.add_to_schedule(df.global.world.units.all,lowerPriorityChecks,1)
         putnamScheduler.start_scheduler()
         eventful.enableEvent(eventful.eventType.UNIT_ATTACK,2)
         eventful.enableEvent(eventful.eventType.UNIT_DEATH,2)
+        eventful.enableEvent(eventful.eventType.SYNDROME,2)
         for k,v in ipairs(df.global.world.units.all) do
             fixStrengthBug(v)
         end

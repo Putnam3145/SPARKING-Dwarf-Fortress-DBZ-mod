@@ -61,7 +61,7 @@ local function do_event()
             god.ints[4]=1
             god:save()
         elseif result==false then --pressing escape gets you nil
-            god.ints[4]=2
+            god.ints[4]=3
             god:save()
             script.showMessage('Dragon Ball','"Shame."')
         end

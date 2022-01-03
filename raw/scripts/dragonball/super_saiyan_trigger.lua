@@ -55,10 +55,16 @@ function runSuperSaiyanChecksExtremeEmotion(unit_id)
         end
     end
     if god_training.ints[1]>3000 then
-        if not transformation.get_transformation(unit_id,'Ultra Instinct "Sign"') then
+        local thoughtlessness = unit.status.current_soul.personality.traits.THOUGHTLESSNESS
+        local immoderation = unit.status.current_soul.personality.traits.IMMODERATION
+        if thoughtlessness > immoderation and thoughtlessness > 60 and not transformation.get_transformation(unit_id,'Ultra Instinct "Sign"') then
             transformation.add_transformation(unit_id,'Ultra Instinct "Sign"')
             transformation.transform(unit_id,'Ultra Instinct "Sign"',true)
             dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' underwent a sudden transformation! Could this be Ultra Instinct?!',11)
+        elseif immoderation >= thoughtlessness and immoderation > 60 and not transformation.get_transformation(unit_id,'Ultra Ego') then
+            transformation.add_transformation(unit_id,'Ultra Ego')
+            transformation.transform(unit_id,'Ultra Ego',true)
+            dfhack.gui.makeAnnouncement(df.announcement_type.MARTIAL_TRANCE,{PAUSE=false,RECENTER=false,D_DISPLAY=true,A_DISPLAY=true,DO_MEGA=false},unit.pos,dfhack.TranslateName(dfhack.units.getVisibleName(unit))..' has tapped into Ultra Ego!',11)
         end
     end
     if god_training.ints[1]>1000 and S_cells.ints[1]>40000 then

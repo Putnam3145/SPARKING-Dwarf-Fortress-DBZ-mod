@@ -174,7 +174,7 @@ function revert_to_base(unit_id)
     end
 end
 
-function transform_ai(unit_id,kiInvestment,kiType,enemyKiInvestment,enemyKiType,sparring)
+function transform_ai(unit_id,kiInvestment,enemyKiInvestment,sparring)
     local unitTransformation=get_inactive_transformations(unit_id)
     if not unitTransformation then return false end
     local activeTransformations=get_active_transformations(unit_id)
