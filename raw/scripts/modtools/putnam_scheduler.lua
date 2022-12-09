@@ -11,21 +11,6 @@
 
 local scheduledFuncs = {}
 
-local function genCoroutineFunc(f)
-    return function(run,time_not_to_overrun)
-        while #run>0 do
-            local status,err = pcall(f,table.remove(run))
-            if not status then
-                print(err)
-            end
-            if os.clock() > time_not_to_overrun then
-                run, time_not_to_overrun = coroutine.yield(run)
-            end
-        end
-        return run
-    end
-end
-
 local scheduleParent = {
     run = function(this, time_not_to_overrun)
         if(not this.cor or coroutine.status(this.cor) == "dead") then
@@ -37,10 +22,21 @@ local scheduleParent = {
     end,
     startRun = function(this)
         this.current_run = {}
-        for k,v in ipairs(this.tbl) do
+        for _,v in ipairs(this.tbl) do
             table.insert(this.current_run,v)
         end
-        this.cor = coroutine.create(genCoroutineFunc(this.current_run))
+        this.cor = coroutine.create(function(run,time_not_to_overrun)
+            while #run>0 do
+                local status,err = pcall(this.func,table.remove(run))
+                if not status then
+                    print("scheduler error: "..err, this.func, status, run)
+                end
+                if os.clock() > time_not_to_overrun then
+                    run, time_not_to_overrun = coroutine.yield(run)
+                end
+            end
+            return run
+        end)
     end
 }
 
@@ -112,7 +108,7 @@ function add_to_schedule(tbl,f,priority) -- higher = more priority, used to be o
         priority = priority,
         tbl = tbl,
         overrun = 0,
-        last_run_tick = df.global.world.cur_year_tick
+        last_run_tick = df.global.cur_year_tick
     }
     setmetatable(item,{__index = scheduleParent})
     table.insert(scheduledFuncs, item)

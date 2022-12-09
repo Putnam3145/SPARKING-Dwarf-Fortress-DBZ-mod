@@ -427,21 +427,19 @@ end
 
 dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=function(unit_id,action)
     if not unit_id or not action then print('Something weird happened! ',unit_id,action) return false end
-    local kiInvestment,kiType=ki.get_ki_investment(unit_id)
-    local sparring = action.flags[14]
-    if kiInvestment>0 then
-        if action.type==df.unit_action_type.Attack then
-            local attack=action.data.attack
-            --flags[11] is "is it a tap"; flags[14] is "is it sparring [for reports]"
-            local holding_back=attack.flags[11] or (isAdventurer(unit) and dfhack.persistent.save{key='ADV_HOLDING_BACK'}.ints[1]==1)
-            local unit=df.unit.find(unit_id)
-            local enemy=df.unit.find(attack.target_unit_id)
-            local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
-            transformation.transform_ai(unit_id,kiInvestment,enemyKiInvestment, sparring)
-            transformation.transform_ai(enemy.id,enemyKiInvestment,kiInvestment, sparring)
-            transformation.transformations_on_attack(unit,enemy,attack)
-            transformation.transformations_on_attacked(unit,enemy,attack)
-			enemyKiInvestment=math.max(enemyKiInvestment,1)
+    if action.type == df.unit_action_type.Attack then
+        local unit = df.unit.find(unit)
+        local enemy=df.unit.find(attack.target_unit_id)
+        local attack=action.data.attack
+        local enemyKiInvestment,enemyKiType=ki.get_ki_investment(attack.target_unit_id)
+        local kiInvestment,kiType=ki.get_ki_investment(unit_id)
+        local sparring = action.data.attack.flags.spar_report
+        transformation.transform_ai(unit_id,kiInvestment,enemyKiInvestment, sparring)
+        transformation.transform_ai(enemy.id,enemyKiInvestment,kiInvestment, sparring)
+        transformation.transformations_on_attack(unit,enemy,attack)
+        transformation.transformations_on_attacked(unit,enemy,attack)
+        if kiInvestment>0 then
+            enemyKiInvestment=math.max(enemyKiInvestment,1)
             local kiRatio=kiInvestment/enemyKiInvestment
             local worldKiMode=ki.getWorldKiMode()
             if worldKiMode=='bttl' then
@@ -455,35 +453,20 @@ dfhack.script_environment('modtools/putnam_events').onUnitAction.ki_actions=func
                     end
                 end
             end
-            if holding_back then kiRatio=math.min(kiRatio,1) end
+            if attack.flags.lightly_tap or (isAdventurer(unit) and dfhack.persistent.save{key='ADV_HOLDING_BACK'}.ints[1]==1) then 
+                kiRatio=math.min(kiRatio,1) 
+            end
             attack.attack_velocity=math.min(math.floor(attack.attack_velocity*math.sqrt(kiRatio)+.5),2000000000)
             attack.attack_accuracy=math.min(math.floor(attack.attack_accuracy*math.sqrt(kiRatio)+.5),2000000000)
-            local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
-            if caste_id=='GLACIUS' and kiInvestment<35000000 then
-                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510 --approximately absolute zero
-                attack.attack_velocity=0
-            elseif caste_id=='CRYSTALLOS' and kiType<4 then
-                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9001 --over 9000, but also about -281 kelvins
-            end
-        end
-    else
-        if action.type==df.unit_action_type.Attack then
-            local attack=action.data.attack
-            local enemyKiInvestment=ki.get_ki_investment(attack.target_unit_id)
-            local unit=df.unit.find(unit_id)
-            local enemy=df.unit.find(attack.target_unit_id)
-            transformation.transform_ai(unit_id,kiInvestment,enemyKiInvestment, sparring)
-            transformation.transform_ai(enemy.id,enemyKiInvestment,kiInvestment, sparring)
-            transformation.transformations_on_attack(unit,enemy,attack)
-            transformation.transformations_on_attacked(unit,enemy,attack)
+        else
             attack.attack_velocity=math.max(attack.attack_velocity-enemyKiInvestment,0)
-            local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
-            if caste_id=='GLACIUS' then
-                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510
-                attack.attack_velocity=0
-            elseif caste_id=='CRYSTALLOS' then
-                unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9001
-            end
+        end
+        local caste_id=df.creature_raw.find(enemy.race).caste[enemy.caste].caste_id
+        if caste_id=='GLACIUS' and kiInvestment<35000000 then
+            unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9510 --approximately absolute zero
+            attack.attack_velocity=0
+        elseif caste_id=='CRYSTALLOS' and kiType<4 then
+            unit.status2.body_part_temperature[attack.attack_body_part_id].whole=9001 --over 9000, but also about -281 kelvins
         end
     end
 end
